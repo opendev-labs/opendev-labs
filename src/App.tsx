@@ -53,6 +53,7 @@ const LazyAuthPage = lazyWithRetry(() => import('./features/void/components/page
 const LazyVerifyEmailPage = lazyWithRetry(() => import('./features/void/components/pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const OpenStudioApp = lazyWithRetry(() => import('./features/studio/App'));
 const PreviewPage = lazyWithRetry(() => import('./pages/PreviewPage'));
+const IDEPage = lazyWithRetry(() => import('./features/void/components/pages/IDEPage').then(m => ({ default: m.IDEPage })));
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -77,7 +78,13 @@ const AppRoutes = () => {
         } />
         <Route path="studio/*" element={<Navigate to="/open-studio" replace />} />
         <Route path="sub0/*" element={<Navigate to="/open-studio" replace />} />
-        <Route path="void-ide/*" element={<Navigate to="/open-studio" replace />} />
+        <Route path="void-ide/*" element={
+          <ProtectedRoute>
+            <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Materializing Canvas...</div>}>
+              <IDEPage />
+            </Suspense>
+          </ProtectedRoute>
+        } />
         <Route path="auth" element={
           <Suspense fallback={<div className="min-h-screen bg-black" />}>
             <LazyAuthPage />
