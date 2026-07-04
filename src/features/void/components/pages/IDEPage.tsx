@@ -172,7 +172,7 @@ export const IDEPage: React.FC = () => {
           userId: user?.uid || 'anonymous',
           email: user?.email || 'anonymous',
           createdAt: new Date().toISOString(),
-          type: 'v0-generation'
+          type: 'studio-generation'
         });
         addLog('✨ Blueprint archived successfully in Firestore.');
       } catch (dbErr: any) {
@@ -248,7 +248,7 @@ export const IDEPage: React.FC = () => {
           <Button 
             variant="ghost" 
             size="sm"
-            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium flex items-center gap-1.5 px-3 rounded-md"
+            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium flex items-center gap-1.5 px-3 rounded-md focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             <InfoIcon /> What's This?
           </Button>
@@ -256,15 +256,15 @@ export const IDEPage: React.FC = () => {
             href="https://github.com/opendev-labs/opendev-labs"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium flex items-center gap-1.5 px-3 rounded-md transition-colors"
+            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-medium flex items-center gap-1.5 px-3 rounded-md transition-colors focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
-            <GithubIcon /> vercel/v0-sdk
+            <GithubIcon /> opendev-labs/open-studio
           </a>
           <a
             href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fopendev-labs%2Fopendev-labs"
             target="_blank"
             rel="noopener noreferrer"
-            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-semibold flex items-center gap-1.5 px-3 rounded-md transition-colors"
+            className="h-8 border border-[#27272a] bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white text-xs font-semibold flex items-center gap-1.5 px-3 rounded-md transition-colors focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           >
             <VercelIcon /> Deploy with Vercel
           </a>
