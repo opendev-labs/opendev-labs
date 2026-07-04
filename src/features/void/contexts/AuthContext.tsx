@@ -193,10 +193,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGitHub = useCallback(async () => {
     try {
       const result = await lama.auth.loginWithGithub();
-      const credential = GithubAuthProvider.credentialFromResult(result as any);
-      if (credential?.accessToken) {
-        setToken(credential.accessToken);
-        localStorage.setItem('opendev_gh_token', credential.accessToken);
+      if (lama.isSimulation && lama.isSimulation()) {
+        const userData: User = {
+          uid: result.user.uid,
+          name: result.user.displayName || 'Mock User',
+          email: result.user.email || 'mock@opendev-labs.com',
+          avatar: result.user.photoURL,
+          providers: ['github.com']
+        };
+        setUser(userData);
+      } else {
+        const credential = GithubAuthProvider.credentialFromResult(result as any);
+        if (credential?.accessToken) {
+          setToken(credential.accessToken);
+          localStorage.setItem('opendev_gh_token', credential.accessToken);
+        }
       }
     } catch (error) {
       console.error("GitHub Login Error:", error);
@@ -220,8 +231,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const loginWithGoogle = useCallback(async () => {
     try {
-      await lama.auth.loginWithGoogle();
-      // safeNavigate('/');
+      const result = await lama.auth.loginWithGoogle();
+      if (lama.isSimulation && lama.isSimulation()) {
+        const userData: User = {
+          uid: result.user.uid,
+          name: result.user.displayName || 'Mock User',
+          email: result.user.email || 'mock@opendev-labs.com',
+          avatar: result.user.photoURL,
+          providers: ['google.com']
+        };
+        setUser(userData);
+      }
     } catch (error) {
       console.error("Google Login Error:", error);
       throw error;
