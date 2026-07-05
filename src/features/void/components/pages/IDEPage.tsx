@@ -3,6 +3,21 @@ import { useAuth } from '../../hooks/useAuth';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+// Puter.js is loaded via CDN in index.html — gives free AI access (GPT-4o, Claude, etc.)
+// Usage is billed to the user's own Puter account. Zero cost to developer.
+declare const puter: any;
+
+const waitForPuter = (): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (typeof puter !== 'undefined') { resolve(); return; }
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (typeof puter !== 'undefined') { clearInterval(interval); resolve(); }
+      else if (attempts > 50) { clearInterval(interval); reject(new Error('Puter.js failed to load. Please refresh.')); }
+    }, 100);
+  });
+
 // shadcn UI Components
 import { Button } from '../../../../components/ui/shadcn/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../components/ui/shadcn/dialog';
@@ -94,82 +109,70 @@ export const IDEPage: React.FC = () => {
     setPrompt('');
     setIsGenerating(true);
     setErrorState(false);
+    setGeneratedCode('');
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
       role: 'user',
       content: userPrompt
     };
-    
+
     setChatHistory(prev => [...prev, userMsg]);
     setLogs([]);
     setActiveTab('preview');
 
-    addLog('🚀 Initializing connection to open-studio gateway...');
-    addLog('🔗 Handshaking with Vercel backend serverless function...');
+    addLog('🚀 Initializing Puter AI gateway...');
+    addLog('⚡ Using free AI via Puter.js (GPT-4o) — no API key required.');
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gemini-2.0-flash',
-          systemInstruction: 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.',
-          contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
-        })
+      await waitForPuter();
+      addLog('✅ Puter.js ready. Streaming design tokens...');
+
+      const systemPrompt = 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.';
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ];
+
+      // Stream from Puter AI (GPT-4o by default, free via user Puter account)
+      const response = await puter.ai.chat(messages, {
+        model: 'gpt-4o',
+        stream: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate: ${response.statusText}`);
-      }
-
-      addLog('📡 Connection established. Streaming quantum design tokens...');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
       let streamedContent = '';
 
-      if (reader) {
-        while (!done) {
-          const { value, done: readerDone } = await reader.read();
-          done = readerDone;
-          if (value) {
-            const chunk = decoder.decode(value, { stream: !done });
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6));
-                  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                  streamedContent += text;
-                  setGeneratedCode(prev => prev + text);
-                } catch (e) {
-                  const cleaned = line.slice(6);
-                  streamedContent += cleaned;
-                  setGeneratedCode(prev => prev + cleaned);
-                }
-              } else if (line.trim()) {
-                streamedContent += line;
-                setGeneratedCode(prev => prev + line);
-              }
-            }
+      if (response && response[Symbol.asyncIterator]) {
+        // Streaming path
+        for await (const chunk of response) {
+          const text = chunk?.text ?? chunk?.delta?.text ?? chunk?.choices?.[0]?.delta?.content ?? '';
+          if (text) {
+            streamedContent += text;
+            setGeneratedCode(streamedContent);
           }
         }
+      } else {
+        // Non-streaming fallback
+        streamedContent = typeof response === 'string'
+          ? response
+          : response?.message?.content?.[0]?.text ?? response?.text ?? '';
+        setGeneratedCode(streamedContent);
       }
 
+      // Strip markdown fences if the model added them
       let cleanedCode = streamedContent.trim();
       if (cleanedCode.startsWith('```html')) {
         cleanedCode = cleanedCode.replace(/^```html\n/, '').replace(/\n```$/, '');
       } else if (cleanedCode.startsWith('```')) {
         cleanedCode = cleanedCode.replace(/^```\n/, '').replace(/\n```$/, '');
       }
-      
+
       setGeneratedCode(cleanedCode);
       addLog('✅ Code generation complete. Compiling CSS styles...');
 
-      // Save to Firestore matching Vishwa Leader patterns
-      addLog('💾 Saving blueprint in Firestore database (default)...');
+      // Save to Firestore
+      addLog('💾 Saving blueprint in Firestore database...');
       try {
         await addDoc(collection(db, 'projects'), {
           prompt: userPrompt,
@@ -186,7 +189,7 @@ export const IDEPage: React.FC = () => {
       }
 
       addLog('🎉 Compilation successful. Virtual preview materialized.');
-      
+
       const assistantMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
@@ -199,7 +202,7 @@ export const IDEPage: React.FC = () => {
       const errorMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'error',
-        content: `Sorry, there was an error processing your message. Please try again.`
+        content: `AI error: ${err.message || 'Unknown error'}. Please try again.`
       };
       setChatHistory(prev => [...prev, errorMsg]);
     } finally {
@@ -387,13 +390,35 @@ export const IDEPage: React.FC = () => {
           {/* Scrollable messages container */}
           <div className="flex-1 overflow-y-auto space-y-6 pr-1 custom-scrollbar">
             {chatHistory.length === 0 ? (
-              <div className="h-full flex flex-col justify-center items-center text-center p-6 space-y-4">
-                <span className="text-sm font-bold tracking-[0.2em] text-[#a1a1aa] uppercase select-none">
-                  Sovereign Chat Node
-                </span>
-                <p className="text-xs text-[#71717a] font-medium leading-relaxed max-w-[280px]">
-                  Submit a prompt below to materialize dynamic web layouts using the open-studio matrix.
-                </p>
+              <div className="h-full flex flex-col justify-center items-center text-center p-6 space-y-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full mb-4">
+                    <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-violet-400">Free AI via Puter ✦</span>
+                  </div>
+                  <span className="block text-sm font-bold tracking-[0.2em] text-[#a1a1aa] uppercase select-none">
+                    Open Studio
+                  </span>
+                  <p className="text-xs text-[#71717a] font-medium leading-relaxed max-w-[280px] mt-2">
+                    Describe a UI and I'll generate it instantly. Powered by GPT-4o for free.
+                  </p>
+                </div>
+                <div className="w-full space-y-2">
+                  {[
+                    'Create a beautiful login page',
+                    'Build a glassmorphic dashboard',
+                    'Design a dark landing page with animations',
+                    'Make a portfolio with Three.js effects',
+                  ].map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => { setPrompt(suggestion); }}
+                      className="w-full text-left px-3 py-2 rounded-lg bg-[#18181b] border border-[#27272a] text-xs text-zinc-400 hover:text-white hover:border-zinc-600 transition-all flex items-center gap-2"
+                    >
+                      <span className="text-violet-500 opacity-60">✦</span> {suggestion}
+                    </button>
+                  ))}
+                </div>
               </div>
             ) : (
               chatHistory.map((msg) => (
