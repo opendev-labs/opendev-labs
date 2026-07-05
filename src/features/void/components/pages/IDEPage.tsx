@@ -3,21 +3,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
-// Puter.js is loaded via CDN in index.html — gives free AI access (GPT-4o, Claude, etc.)
-// Usage is billed to the user's own Puter account. Zero cost to developer.
-declare const puter: any;
-
-const waitForPuter = (): Promise<void> =>
-  new Promise((resolve, reject) => {
-    if (typeof puter !== 'undefined') { resolve(); return; }
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (typeof puter !== 'undefined') { clearInterval(interval); resolve(); }
-      else if (attempts > 50) { clearInterval(interval); reject(new Error('Puter.js failed to load. Please refresh.')); }
-    }, 100);
-  });
-
 // shadcn UI Components
 import { Button } from '../../../../components/ui/shadcn/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../components/ui/shadcn/dialog';
@@ -62,7 +47,7 @@ interface ChatMessage {
 }
 
 export const IDEPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
   const [prompt, setPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
@@ -72,6 +57,7 @@ export const IDEPage: React.FC = () => {
   const [publishDescription, setPublishDescription] = useState('');
   const [isPublishing, setIsPublishing] = useState(false);
   const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'code' | 'logs'>('preview');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -101,9 +87,56 @@ export const IDEPage: React.FC = () => {
     }
   };
 
+  const handleUpgrade = async () => {
+    try {
+      const res = await fetch('/api/razorpay', { method: 'POST' });
+      const order = await res.json();
+      
+      if (order.error) {
+        alert("Failed to initialize payment: " + order.error);
+        return;
+      }
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_mock_key', 
+        amount: order.amount,
+        currency: order.currency,
+        name: "OpenDev Labs",
+        description: "Unlimited AI Generations",
+        order_id: order.id,
+        handler: async function (response: any) {
+          addLog("Payment successful! Upgrading to premium...");
+          if (updateProfile) {
+            await updateProfile({ subscriptionStatus: 'premium' });
+          }
+          setShowPaywall(false);
+          alert("Success! You now have unlimited generations.");
+        },
+        prefill: {
+          name: user?.name || "Developer",
+          email: user?.email || "",
+        },
+        theme: {
+          color: "#f97316"
+        }
+      };
+      
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
+    } catch (e: any) {
+      console.error(e);
+      alert("Error starting checkout: " + e.message);
+    }
+  };
+
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt.trim() || isGenerating) return;
+
+    if (profile?.subscriptionStatus !== 'premium' && (profile?.promptCount || 0) >= 6) {
+      setShowPaywall(true);
+      return;
+    }
 
     const userPrompt = prompt.trim();
     setPrompt('');
@@ -121,46 +154,59 @@ export const IDEPage: React.FC = () => {
     setLogs([]);
     setActiveTab('preview');
 
-    addLog('🚀 Initializing Puter AI gateway...');
-    addLog('⚡ Using free AI via Puter.js (GPT-4o) — no API key required.');
+    addLog('🚀 Initializing connection to open-studio gateway...');
+    addLog('🔗 Handshaking with Vercel backend serverless function...');
 
     try {
-      await waitForPuter();
-      addLog('✅ Puter.js ready. Streaming design tokens...');
-
-      const systemPrompt = 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.';
-
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ];
-
-      // Stream from Puter AI (GPT-4o by default, free via user Puter account)
-      const response = await puter.ai.chat(messages, {
-        model: 'gpt-4o',
-        stream: true,
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'gemini-2.0-flash',
+          systemInstruction: 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.',
+          contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
+        })
       });
 
-      let streamedContent = '';
-
-      if (response && response[Symbol.asyncIterator]) {
-        // Streaming path
-        for await (const chunk of response) {
-          const text = chunk?.text ?? chunk?.delta?.text ?? chunk?.choices?.[0]?.delta?.content ?? '';
-          if (text) {
-            streamedContent += text;
-            setGeneratedCode(streamedContent);
-          }
-        }
-      } else {
-        // Non-streaming fallback
-        streamedContent = typeof response === 'string'
-          ? response
-          : response?.message?.content?.[0]?.text ?? response?.text ?? '';
-        setGeneratedCode(streamedContent);
+      if (!response.ok) {
+        throw new Error(`Failed to generate: ${response.statusText}`);
       }
 
-      // Strip markdown fences if the model added them
+      addLog('📡 Connection established. Streaming quantum design tokens...');
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let done = false;
+      let streamedContent = '';
+
+      if (reader) {
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          if (value) {
+            const chunk = decoder.decode(value, { stream: !done });
+            const lines = chunk.split('\n');
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                try {
+                  const data = JSON.parse(line.slice(6));
+                  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                  streamedContent += text;
+                  setGeneratedCode(prev => prev + text);
+                } catch (e) {
+                  const cleaned = line.slice(6);
+                  streamedContent += cleaned;
+                  setGeneratedCode(prev => prev + cleaned);
+                }
+              } else if (line.trim()) {
+                streamedContent += line;
+                setGeneratedCode(prev => prev + line);
+              }
+            }
+          }
+        }
+      }
+
       let cleanedCode = streamedContent.trim();
       if (cleanedCode.startsWith('```html')) {
         cleanedCode = cleanedCode.replace(/^```html\n/, '').replace(/\n```$/, '');
@@ -170,6 +216,10 @@ export const IDEPage: React.FC = () => {
 
       setGeneratedCode(cleanedCode);
       addLog('✅ Code generation complete. Compiling CSS styles...');
+      
+      if (profile?.subscriptionStatus !== 'premium' && updateProfile) {
+        await updateProfile({ promptCount: (profile?.promptCount || 0) + 1 });
+      }
 
       // Save to Firestore
       addLog('💾 Saving blueprint in Firestore database...');
@@ -394,13 +444,13 @@ export const IDEPage: React.FC = () => {
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full mb-4">
                     <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-violet-400">Free AI via Puter ✦</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-violet-400">Free AI (Gemini) ✦</span>
                   </div>
                   <span className="block text-sm font-bold tracking-[0.2em] text-[#a1a1aa] uppercase select-none">
                     Open Studio
                   </span>
                   <p className="text-xs text-[#71717a] font-medium leading-relaxed max-w-[280px] mt-2">
-                    Describe a UI and I'll generate it instantly. Powered by GPT-4o for free.
+                    Describe a UI and I'll generate it instantly. Powered by Gemini 2.0 Flash.
                   </p>
                 </div>
                 <div className="w-full space-y-2">
@@ -577,6 +627,43 @@ export const IDEPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Paywall Dialog */}
+      <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
+        <DialogContent className="bg-zinc-950 border-[#1f1f23] rounded-2xl max-w-sm p-6 shadow-2xl text-center text-white">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/20 mb-4">
+            <svg className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-white mb-2">Upgrade to Premium</DialogTitle>
+          </DialogHeader>
+          <div className="text-sm text-zinc-400 space-y-4">
+            <p>
+              You've used your 6 free generations! Upgrade to OpenDev Labs Premium to unlock unlimited AI generations.
+            </p>
+            <div className="text-2xl font-bold text-white py-2">
+              $9 <span className="text-sm font-normal text-zinc-500">/ month</span>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-col gap-3">
+            <Button
+              onClick={handleUpgrade}
+              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold h-11 rounded-xl"
+            >
+              Pay with Razorpay
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => setShowPaywall(false)}
+              className="text-zinc-500 hover:text-white"
+            >
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
