@@ -5,6 +5,7 @@ import { collection, addDoc } from 'firebase/firestore';
 
 // shadcn UI Components
 import { Button } from '../../../../components/ui/shadcn/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../components/ui/shadcn/dialog';
 
 // SVGs and Icons
 const ArrowUpIcon = () => (
@@ -52,6 +53,10 @@ export const IDEPage: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [generatedCode, setGeneratedCode] = useState('');
   const [logs, setLogs] = useState<string[]>([]);
+  const [publishName, setPublishName] = useState('');
+  const [publishDescription, setPublishDescription] = useState('');
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isPublishDialogOpen, setIsPublishDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'preview' | 'code' | 'logs'>('preview');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -202,6 +207,55 @@ export const IDEPage: React.FC = () => {
     }
   };
 
+  const handlePublishToCommunity = async () => {
+    if (!generatedCode || !user) return;
+    setIsPublishing(true);
+    addLog('🚀 Publishing sandbox to opendev-labs community...');
+    try {
+      const projName = publishName.trim() || 'Untitled Blueprint';
+      const projDesc = publishDescription.trim() || `Materialized layout using open-studio: "${chatHistory[0]?.content || 'Prompt'}"`;
+      
+      const projObj = {
+        title: projName,
+        description: projDesc,
+        code: generatedCode,
+        platform: 'open-studio',
+        createdAt: new Date().toISOString()
+      };
+
+      const postObj = {
+        id: 'post_project_' + Math.random().toString(36).substr(2, 9),
+        uid: user.uid,
+        author: {
+          name: user.name,
+          handle: user.email.split('@')[0],
+          headline: 'Developer',
+          avatarUrl: user.avatar || null,
+          isAgent: false
+        },
+        content: `I just published a new project layout, **${projName}**, built in **open-studio**! Click **Play Sandbox** to run it live! 🚀🎨\n\n_${projDesc}_`,
+        likes: 0,
+        comments: 0,
+        shares: 0,
+        timestamp: new Date().toISOString(),
+        tags: ["Project", "open-studio"],
+        attachedProject: projObj
+      };
+
+      await addDoc(collection(db, 'open_hub_posts'), postObj);
+      addLog('✨ Sandbox published successfully to community feed!');
+      setIsPublishDialogOpen(false);
+      setPublishName('');
+      setPublishDescription('');
+      alert("Project published successfully to opendev-labs.com!");
+    } catch (e: any) {
+      console.error("Failed to publish project:", e);
+      addLog(`❌ Failed to publish sandbox: ${e.message}`);
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   const [hasError, setErrorState] = useState(false);
 
   // Inject code into iframe
@@ -242,7 +296,7 @@ export const IDEPage: React.FC = () => {
       {/* 1. Header Bar */}
       <header className="h-14 border-b border-[#1f1f23] bg-[#09090b] flex items-center justify-between px-4 shrink-0 relative z-30">
         <div className="flex items-center gap-3">
-          <span className="font-extrabold tracking-tighter text-sm uppercase tracking-[0.15em] text-white">opendev-labs</span>
+          <span className="font-extrabold tracking-tighter text-sm tracking-[0.15em] text-white lowercase">opendev-labs</span>
         </div>
         <div className="flex items-center gap-2">
           <Button 
@@ -268,9 +322,56 @@ export const IDEPage: React.FC = () => {
           >
             <VercelIcon /> Deploy with Vercel
           </a>
+          <Dialog open={isPublishDialogOpen} onOpenChange={setIsPublishDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                disabled={!generatedCode}
+                className="h-8 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 px-3 rounded-md shadow-md shadow-orange-500/10 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Publish to opendev-labs
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="bg-zinc-950 border-[#1f1f23] rounded-2xl max-w-sm p-6 shadow-2xl text-white">
+              <DialogHeader className="border-b border-[#1f1f23] pb-3 mb-4">
+                <DialogTitle className="text-sm font-bold uppercase tracking-widest text-white">Publish Project Sandbox</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Project Name</label>
+                  <input 
+                    value={publishName}
+                    onChange={e => setPublishName(e.target.value)}
+                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                    placeholder="e.g. My Portfolio, Particle Field"
+                  />
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5 block">Short Description</label>
+                  <textarea 
+                    value={publishDescription}
+                    onChange={e => setPublishDescription(e.target.value)}
+                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50 min-h-[80px]"
+                    placeholder="e.g. A gorgeous Three.js particle field with physics simulation..."
+                  />
+                </div>
+                <div className="pt-2 flex justify-end">
+                  <Button 
+                    onClick={handlePublishToCommunity}
+                    disabled={isPublishing || !publishName}
+                    className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-8 hover:bg-orange-500 hover:text-white transition-all h-9 disabled:opacity-50"
+                  >
+                    {isPublishing ? 'Publishing...' : 'Broadcast'}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
           <div className="h-8 w-8 rounded-full bg-[#18181b] border border-[#27272a] flex items-center justify-center overflow-hidden shrink-0 ml-1">
-            {user?.photoURL ? (
-              <img src={user.photoURL} alt="profile" className="w-full h-full object-cover" />
+            {user?.avatar ? (
+              <img src={user.avatar} alt="profile" className="w-full h-full object-cover" />
             ) : (
               <span className="text-xs text-zinc-500 font-bold uppercase">{user?.email?.[0] || 'U'}</span>
             )}

@@ -27,7 +27,8 @@ const firebaseConfig = {
 // Initialize Firebase only if it hasn't been initialized yet
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app, "default");
+const dbId = getEnv("DATABASE_ID") || "opendev-labs-data";
+const db = getFirestore(app, dbId);
 const storage = getStorage(app);
 
 // Initialize Analytics only in the browser

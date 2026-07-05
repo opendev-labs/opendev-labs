@@ -60,6 +60,7 @@ export interface LamaDBConfig {
         messagingSenderId: string;
         appId: string;
         measurementId?: string;
+        databaseId?: string;
     };
     simulationMode?: boolean;
 }
@@ -617,7 +618,7 @@ export class LamaDBClient {
         // Initialize services (stateless - no hidden dependencies)
         this.auth = new LamaAuthService(this.app, this.simulationMode);
         this.store = new LamaStoreService(
-            this.app ? getFirestore(this.app) : null,
+            this.app ? getFirestore(this.app, config.firebase.databaseId || 'opendev-labs-data') : null,
             this.simulationMode
         );
     }

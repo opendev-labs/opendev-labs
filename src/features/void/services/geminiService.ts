@@ -105,3 +105,34 @@ export async function getAIAssistance(logs: LogEntry[]): Promise<string> {
         return "Neural analysis failed. Manual diagnostics recommended.";
     }
 }
+
+export async function generateAgentResponse(systemInstruction: string, userMessage: string, history: any[] = []): Promise<string> {
+    const effectiveApiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_FIREBASE_API_KEY;
+    if (!effectiveApiKey) {
+        return "Offline. Please configure VITE_GEMINI_API_KEY in .env.local.";
+    }
+    const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
+    
+    // Convert history messages to Gemini format
+    const formattedHistory = history.map(h => ({
+        role: h.senderId === 'user' ? 'user' : 'model',
+        parts: [{ text: h.content }]
+    }));
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-1.5-flash",
+            contents: [
+                ...formattedHistory,
+                { role: 'user', parts: [{ text: userMessage }] }
+            ],
+            config: {
+                systemInstruction: systemInstruction
+            }
+        });
+        return response.text?.trim() || "I am thinking...";
+    } catch (e) {
+        console.error("AI response failed:", e);
+        return "Sorry, I am currently offline. Please try again.";
+    }
+}

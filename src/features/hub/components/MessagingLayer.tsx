@@ -3,11 +3,13 @@ import { LamaDB } from '../../../lib/lamaDB';
 import { useAuth } from '../../void/hooks/useAuth';
 import { Card } from '../../../components/ui/Card';
 import { Button } from '../../../components/ui/shadcn/button';
-import { Send, User as UserIcon, Zap, MessageSquare, Terminal } from 'lucide-react';
+import { Send, User as UserIcon, Zap, MessageSquare, Terminal, Plus, Cpu } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AgentDM } from './AgentDM';
 import { HeartbeatAgent, DirectMessage } from '../types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../components/ui/shadcn/dialog';
+import { AgentService } from '../../../services/agentService';
 
 export const MessagingLayer: React.FC = () => {
     const { user, profile } = useAuth();
@@ -16,6 +18,14 @@ export const MessagingLayer: React.FC = () => {
     const [activeConversation, setActiveConversation] = useState('global_mesh');
     const [selectedAgent, setSelectedAgent] = useState<HeartbeatAgent | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
+
+    const [customAgents, setCustomAgents] = useState<HeartbeatAgent[]>([]);
+    const [isAddAgentOpen, setIsAddAgentOpen] = useState(false);
+    const [newAgentName, setNewAgentName] = useState('');
+    const [newAgentRole, setNewAgentRole] = useState('');
+    const [newAgentPersonality, setNewAgentPersonality] = useState('');
+    const [newAgentAvatarSeed, setNewAgentAvatarSeed] = useState('');
+    const [isCreatingAgent, setIsCreatingAgent] = useState(false);
 
     // Mock Agents for demonstration
     const mockAgents: HeartbeatAgent[] = [
@@ -26,16 +36,18 @@ export const MessagingLayer: React.FC = () => {
             lastHeartbeat: new Date().toISOString(),
             wakeTime: '06:00',
             sleepTime: '22:00',
-            timezone: 'UTC'
+            timezone: 'UTC',
+            personality: 'You are TARS_MOD_01, a highly efficient, direct and slightly sarcastic AI companion. Keep answers helpful but dry.'
         },
         {
             id: 'lama-70b',
             name: 'Lama_Oracle',
-            status: 'thinking',
+            status: 'awake',
             lastHeartbeat: new Date().toISOString(),
             wakeTime: '00:00',
             sleepTime: '23:59',
-            timezone: 'PST'
+            timezone: 'PST',
+            personality: 'You are Lama_Oracle, a wise, philosophical, and extremely supportive AI companion. Speak with developer warmth.'
         }
     ];
 
@@ -56,6 +68,32 @@ export const MessagingLayer: React.FC = () => {
 
         return () => unsubscribe();
     }, [user, activeConversation]);
+
+    // Fetch custom agents
+    useEffect(() => {
+        if (!user) return;
+        
+        const userContext = { uid: 'global', email: 'global' };
+        
+        const unsubscribeCustom = LamaDB.store.collection('custom_agents', userContext).subscribe((data) => {
+            if (Array.isArray(data)) {
+                setCustomAgents(data.map(agent => ({
+                    id: agent.id || agent.id_db || Math.random().toString(),
+                    name: agent.name || 'AI Friend',
+                    avatarUrl: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.name}`,
+                    status: agent.status || 'awake',
+                    lastHeartbeat: new Date().toISOString(),
+                    wakeTime: '00:00',
+                    sleepTime: '23:59',
+                    timezone: 'Local',
+                    personality: agent.personality || '',
+                    isCustom: true
+                })));
+            }
+        });
+
+        return () => unsubscribeCustom();
+    }, [user]);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -80,6 +118,60 @@ export const MessagingLayer: React.FC = () => {
         await LamaDB.store.collection(`mesh_messages_${activeConversation}`, userContext).add(msgObj);
     };
 
+    const handleCreateAgent = async () => {
+        if (!newAgentName.trim() || !newAgentPersonality.trim() || !user) return;
+        setIsCreatingAgent(true);
+        try {
+            const userContext = { uid: 'global', email: 'global' };
+            const seed = newAgentAvatarSeed.trim() || newAgentName.trim();
+            const newAgentObj = {
+                id: 'custom_agent_' + Math.random().toString(36).substr(2, 9),
+                uid: user.uid,
+                name: newAgentName,
+                avatarUrl: `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`,
+                status: 'awake',
+                lastHeartbeat: new Date().toISOString(),
+                wakeTime: '00:00',
+                sleepTime: '23:59',
+                timezone: 'Local',
+                personality: `You are ${newAgentName}, a developer AI friend specializing as a ${newAgentRole || 'Software assistant'}. Custom instructions: ${newAgentPersonality}. Answer direct questions concisely, be friendly, and output code formatting.`,
+                isCustom: true
+            };
+            
+            await LamaDB.store.collection('custom_agents', userContext).add(newAgentObj);
+            
+            // Also create a post on OpenHub feed announcing this new AI friend!
+            const postObj = {
+                id: 'agent_announce_' + Math.random().toString(36).substr(2, 9),
+                uid: user.uid,
+                author: {
+                    name: user.name,
+                    handle: profile?.username || 'user',
+                    headline: profile?.headline || 'Developer',
+                    avatarUrl: profile?.avatarUrl || null,
+                    isAgent: false
+                },
+                content: `I just created my new AI Developer Friend, **${newAgentName}** (${newAgentRole || 'AI assistant'})! Say hello to them in DMs! 🚀`,
+                likes: 1,
+                comments: 0,
+                shares: 0,
+                timestamp: new Date().toISOString(),
+                tags: ["AI", "NewAgent"]
+            };
+            await LamaDB.store.collection('open_hub_posts', userContext).add(postObj);
+
+            setNewAgentName('');
+            setNewAgentRole('');
+            setNewAgentPersonality('');
+            setNewAgentAvatarSeed('');
+            setIsAddAgentOpen(false);
+        } catch (e) {
+            console.error("Failed to create custom agent:", e);
+        } finally {
+            setIsCreatingAgent(false);
+        }
+    };
+
     return (
         <Card className="bg-zinc-950 border-zinc-900 rounded-3xl overflow-hidden flex flex-row h-[700px] shadow-2xl">
             {/* AGENT SELECTOR SIDEBAR */}
@@ -101,9 +193,71 @@ export const MessagingLayer: React.FC = () => {
                     </button>
 
                     <div className="h-px bg-zinc-900 my-4" />
-                    <h3 className="hidden sm:block px-3 mb-4 text-[9px] font-bold text-zinc-700 uppercase tracking-widest">Sovereign Agents</h3>
+                    
+                    <div className="flex items-center justify-between px-3 mb-4">
+                        <h3 className="hidden sm:block text-[9px] font-bold text-zinc-700 uppercase tracking-widest">AI Friends</h3>
+                        <Dialog open={isAddAgentOpen} onOpenChange={setIsAddAgentOpen}>
+                            <DialogTrigger asChild>
+                                <button className="p-1 hover:bg-white/5 rounded text-zinc-500 hover:text-white transition-all">
+                                    <Plus size={14} />
+                                </button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-950 border-zinc-900 rounded-3xl max-w-md p-0 overflow-hidden shadow-2xl">
+                                <DialogHeader className="p-6 border-b border-zinc-900">
+                                    <DialogTitle className="text-sm font-bold uppercase tracking-widest text-white">Create AI Friend</DialogTitle>
+                                </DialogHeader>
+                                <div className="p-6 space-y-4">
+                                    <div>
+                                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 block">Name</label>
+                                        <input 
+                                            value={newAgentName}
+                                            onChange={e => setNewAgentName(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            placeholder="e.g. Ada, DevMate"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 block">Role / Specialty</label>
+                                        <input 
+                                            value={newAgentRole}
+                                            onChange={e => setNewAgentRole(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            placeholder="e.g. Senior Coder, UI Expert"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 block">Personality & Custom Instructions</label>
+                                        <textarea 
+                                            value={newAgentPersonality}
+                                            onChange={e => setNewAgentPersonality(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50 min-h-[100px]"
+                                            placeholder="e.g. You are very supportive and enthusiastic. Explain code concepts simply."
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 block">Avatar Seed (Optional)</label>
+                                        <input 
+                                            value={newAgentAvatarSeed}
+                                            onChange={e => setNewAgentAvatarSeed(e.target.value)}
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            placeholder="Leave blank to use name seed"
+                                        />
+                                    </div>
+                                    <div className="pt-4 flex justify-end">
+                                        <Button 
+                                            onClick={handleCreateAgent}
+                                            disabled={isCreatingAgent || !newAgentName || !newAgentPersonality}
+                                            className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-10 hover:bg-orange-500 hover:text-white transition-all h-10 shadow-lg disabled:opacity-50"
+                                        >
+                                            {isCreatingAgent ? 'Initializing...' : 'Create Agent'}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
 
-                    {mockAgents.map(agent => (
+                    {[...mockAgents, ...customAgents].map(agent => (
                         <button 
                             key={agent.id}
                             onClick={() => setSelectedAgent(agent)}
@@ -113,7 +267,13 @@ export const MessagingLayer: React.FC = () => {
                             )}
                         >
                             <div className="relative">
-                                <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-bold">AI</div>
+                                <div className="w-8 h-8 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] font-bold">
+                                    {agent.avatarUrl ? (
+                                        <img src={agent.avatarUrl} alt={agent.name} className="w-full h-full object-cover" />
+                                    ) : (
+                                        'AI'
+                                    )}
+                                </div>
                                 <div className={cn(
                                     "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#050505]",
                                     agent.status === 'awake' ? "bg-emerald-500" : "bg-zinc-700"
@@ -132,7 +292,7 @@ export const MessagingLayer: React.FC = () => {
                         agent={selectedAgent}
                         messages={messages.filter(m => m.receiverId === selectedAgent.id || m.senderId === selectedAgent.id)}
                         currentUserId={user?.uid || ''}
-                        onSendMessage={(val) => {
+                        onSendMessage={async (val) => {
                             const userContext = { uid: 'global', email: 'global' };
                             const msgObj: DirectMessage = {
                                 id: Math.random().toString(),
@@ -142,7 +302,11 @@ export const MessagingLayer: React.FC = () => {
                                 timestamp: new Date().toISOString(),
                                 status: 'sent'
                             };
-                            LamaDB.store.collection(`mesh_messages_${activeConversation}`, userContext).add(msgObj);
+                            await LamaDB.store.collection(`mesh_messages_${activeConversation}`, userContext).add(msgObj);
+                            
+                            // Trigger AI response asynchronously
+                            const prevMessages = messages.filter(m => m.receiverId === selectedAgent.id || m.senderId === selectedAgent.id);
+                            AgentService.respondToDM(selectedAgent, val, activeConversation, user, prevMessages);
                         }}
                         onWakeAgent={() => {}}
                     />

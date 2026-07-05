@@ -12,7 +12,8 @@ const config: LamaDBConfig = {
         storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || import.meta.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || '',
         messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || import.meta.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
         appId: import.meta.env.VITE_FIREBASE_APP_ID || import.meta.env.NEXT_PUBLIC_FIREBASE_APP_ID || '',
-        measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || import.meta.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+        measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || import.meta.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
+        databaseId: import.meta.env.VITE_FIREBASE_DATABASE_ID || import.meta.env.NEXT_PUBLIC_FIREBASE_DATABASE_ID || 'opendev-labs-data'
     },
     simulationMode: !(import.meta.env.VITE_FIREBASE_API_KEY || import.meta.env.NEXT_PUBLIC_FIREBASE_API_KEY) ||
         (import.meta.env.VITE_FIREBASE_API_KEY?.length < 20 && import.meta.env.NEXT_PUBLIC_FIREBASE_API_KEY?.length < 20)

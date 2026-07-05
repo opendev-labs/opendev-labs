@@ -120,7 +120,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 following: [],
                 followers: [],
                 likedPosts: [],
-                projects: []
+                projects: [],
+                promptCount: 0,
+                subscriptionStatus: 'free'
               };
 
               // Clean undefined values before saving to LamaDB

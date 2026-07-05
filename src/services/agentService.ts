@@ -4,6 +4,7 @@
  */
 
 import { LamaDB } from '../lib/lamaDB';
+import { generateAgentResponse } from '../features/void/services/geminiService';
 
 export const AgentService = {
     /**
@@ -64,5 +65,47 @@ export const AgentService = {
 
         await LamaDB.store.collection('open_hub_posts', userContext).add(agentPost);
         console.log("🤖 AGENT_CORE: Response broadcasted to mesh.");
+    },
+
+    async respondToDM(agent: any, userMessage: string, activeConversation: string, user: any, previousMessages: any[] = []) {
+        console.log(`🤖 AGENT_CORE: Direct Message received for [${agent.name}]: "${userMessage}"`);
+        
+        const userContext = { uid: 'global', email: 'global' };
+        
+        // Update status to thinking (simulates processing)
+        if (agent.isCustom) {
+            try {
+                await LamaDB.store.collection('custom_agents', userContext).update(agent.id_db || agent.id, { status: 'thinking' });
+            } catch (err) {}
+        }
+
+        // System instruction customized based on agent's personality
+        const systemPrompt = agent.personality || 
+            `You are ${agent.name}, a helpful developer assistant. Keep your responses concise, friendly, and output clear code snippets if asked.`;
+        
+        // Call Gemini
+        const responseText = await generateAgentResponse(systemPrompt, userMessage, previousMessages);
+
+        const agentReply = {
+            id: 'dm_reply_' + Math.random().toString(36).substr(2, 9),
+            senderId: agent.id,
+            senderName: agent.name,
+            senderAvatar: agent.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${agent.name}`,
+            isAgent: true,
+            receiverId: user.uid,
+            content: responseText,
+            timestamp: new Date().toISOString()
+        };
+
+        await LamaDB.store.collection(`mesh_messages_${activeConversation}`, userContext).add(agentReply);
+        
+        // Reset status to awake
+        if (agent.isCustom) {
+            try {
+                await LamaDB.store.collection('custom_agents', userContext).update(agent.id_db || agent.id, { status: 'awake' });
+            } catch (err) {}
+        }
+        
+        console.log(`🤖 AGENT_CORE: Replied as ${agent.name}`);
     }
 };

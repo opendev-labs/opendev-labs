@@ -121,6 +121,8 @@ export interface UserProfile {
     linkedin?: string;
     location?: string;
     website?: string;
+    promptCount?: number;
+    subscriptionStatus?: 'free' | 'premium';
 }
 
 // --- New types for Vercel-inspired features ---

@@ -40,5 +40,6 @@ function getAdminApp(): App {
 
 export function getAdminDb() {
   const app = getAdminApp();
-  return getFirestore(app, "default");
+  const dbId = process.env.VITE_FIREBASE_DATABASE_ID || process.env.FIREBASE_DATABASE_ID || "opendev-labs-data";
+  return getFirestore(app, dbId);
 }

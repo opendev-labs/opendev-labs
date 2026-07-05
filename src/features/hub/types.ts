@@ -7,6 +7,8 @@ export interface HeartbeatAgent {
   wakeTime: string;  
   sleepTime: string; 
   timezone: string;
+  personality?: string;
+  isCustom?: boolean;
 }
 
 export interface DirectMessage {
