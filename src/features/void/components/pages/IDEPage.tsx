@@ -3,6 +3,21 @@ import { useAuth } from '../../hooks/useAuth';
 import { db } from '../../../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
+// Puter.js is loaded via CDN in index.html — gives free AI access (GPT-4o, Claude, etc.)
+// Usage is billed to the user's own Puter account. Zero cost to developer.
+declare const puter: any;
+
+const waitForPuter = (): Promise<void> =>
+  new Promise((resolve, reject) => {
+    if (typeof puter !== 'undefined') { resolve(); return; }
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (typeof puter !== 'undefined') { clearInterval(interval); resolve(); }
+      else if (attempts > 50) { clearInterval(interval); reject(new Error('Puter.js failed to load. Please refresh.')); }
+    }, 100);
+  });
+
 // shadcn UI Components
 import { Button } from '../../../../components/ui/shadcn/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../../components/ui/shadcn/dialog';
@@ -154,60 +169,46 @@ export const IDEPage: React.FC = () => {
     setLogs([]);
     setActiveTab('preview');
 
-    addLog('🚀 Initializing connection to open-studio gateway...');
-    addLog('🔗 Handshaking with Vercel backend serverless function...');
+    addLog('🚀 Initializing Puter AI gateway...');
+    addLog('⚡ Using free AI via Puter.js (GPT-4o) — no API key required.');
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'gemini-2.0-flash',
-          systemInstruction: 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.',
-          contents: [{ role: 'user', parts: [{ text: userPrompt }] }]
-        })
+      await waitForPuter();
+      addLog('✅ Puter.js ready. Streaming design tokens...');
+
+      const systemPrompt = 'You are opendev-labs AI page materialization engine. Return clean, high-fidelity responsive HTML templates utilizing Tailwind CSS. Do not use markdown blocks or backticks. Return only valid HTML content. Do not describe the code, return ONLY the raw HTML source code.';
+
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ];
+
+      // Stream from Puter AI (GPT-4o by default, free via user Puter account)
+      const response = await puter.ai.chat(messages, {
+        model: 'gpt-4o',
+        stream: true,
       });
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate: ${response.statusText}`);
-      }
-
-      addLog('📡 Connection established. Streaming quantum design tokens...');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
       let streamedContent = '';
 
-      if (reader) {
-        while (!done) {
-          const { value, done: readerDone } = await reader.read();
-          done = readerDone;
-          if (value) {
-            const chunk = decoder.decode(value, { stream: !done });
-            const lines = chunk.split('\n');
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                try {
-                  const data = JSON.parse(line.slice(6));
-                  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-                  streamedContent += text;
-                  setGeneratedCode(prev => prev + text);
-                } catch (e) {
-                  const cleaned = line.slice(6);
-                  streamedContent += cleaned;
-                  setGeneratedCode(prev => prev + cleaned);
-                }
-              } else if (line.trim()) {
-                streamedContent += line;
-                setGeneratedCode(prev => prev + line);
-              }
-            }
+      if (response && response[Symbol.asyncIterator]) {
+        // Streaming path
+        for await (const chunk of response) {
+          const text = chunk?.text ?? chunk?.delta?.text ?? chunk?.choices?.[0]?.delta?.content ?? '';
+          if (text) {
+            streamedContent += text;
+            setGeneratedCode(streamedContent);
           }
         }
+      } else {
+        // Non-streaming fallback
+        streamedContent = typeof response === 'string'
+          ? response
+          : response?.message?.content?.[0]?.text ?? response?.text ?? '';
+        setGeneratedCode(streamedContent);
       }
 
-      let cleanedCode = streamedContent.trim();
+      // Strip markdown fences if the model added them
       if (cleanedCode.startsWith('```html')) {
         cleanedCode = cleanedCode.replace(/^```html\n/, '').replace(/\n```$/, '');
       } else if (cleanedCode.startsWith('```')) {
@@ -444,13 +445,13 @@ export const IDEPage: React.FC = () => {
                 <div>
                   <div className="inline-flex items-center gap-2 px-3 py-1 bg-violet-500/10 border border-violet-500/20 rounded-full mb-4">
                     <div className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse" />
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-violet-400">Free AI (Gemini) ✦</span>
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-violet-400">Free AI via Puter ✦</span>
                   </div>
                   <span className="block text-sm font-bold tracking-[0.2em] text-[#a1a1aa] uppercase select-none">
                     Open Studio
                   </span>
                   <p className="text-xs text-[#71717a] font-medium leading-relaxed max-w-[280px] mt-2">
-                    Describe a UI and I'll generate it instantly. Powered by Gemini 2.0 Flash.
+                    Describe a UI and I'll generate it instantly. Powered by GPT-4o for free.
                   </p>
                 </div>
                 <div className="w-full space-y-2">
