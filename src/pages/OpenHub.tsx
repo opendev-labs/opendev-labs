@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Terminal, Database, Cpu, Zap, Box, Code, Activity, Users, Shield, ShieldCheck, Github, MessageSquare, Heart, Share2, MoreHorizontal, User as UserIcon, Briefcase, Globe, TrendingUp, Sparkles, Plus, Award, Image as ImageIcon, MapPin, Calendar, Check, AlertCircle, Search, Filter, ArrowRight, Crown, Lock, Unlock, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card } from '../components/ui/Card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '../features/void/hooks/useAuth';
 import { LamaDB } from '../lib/lamaDB';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 import { ProjectCard } from '../features/hub/components/ProjectCard';
 import { HubService, ProjectMetadata } from '../services/hubService';
@@ -119,19 +121,19 @@ export default function OpenHub() {
     if (isLoading) return null;
 
     return (
-        <div className="h-screen w-screen bg-[#09090b] text-[#fafafa] flex flex-col overflow-hidden font-sans select-none pt-14">
+        <div className="h-[calc(100vh-3.5rem)] w-full bg-background text-foreground flex flex-col overflow-hidden font-sans select-none">
             <div className="flex-1 flex flex-row min-h-0 w-full overflow-hidden">
                 
                 {/* 1. Left Sidebar Panel */}
-                <div className="w-[260px] h-full flex flex-col shrink-0 bg-[#09090b] border-r border-[#1f1f23] select-none">
-                    <div className="p-4 border-b border-[#1f1f23] flex items-center justify-between">
+                <div className="w-[260px] h-full flex flex-col shrink-0 bg-card border-r border-border select-none">
+                    <div className="p-4 border-b border-border flex items-center justify-between">
                         <div className="flex items-center gap-2.5 truncate">
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-800 shrink-0">
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-border shrink-0">
                                 <img src={profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="profile" className="w-full h-full object-cover" />
                             </div>
                             <div className="truncate">
-                                <h4 className="text-xs font-bold text-white leading-tight truncate">{user?.name}</h4>
-                                <p className="text-[10px] text-zinc-500 font-mono truncate">{profile?.username ? `@${profile.username}` : 'user'}</p>
+                                <h4 className="text-xs font-bold leading-tight truncate">{user?.name}</h4>
+                                <p className="text-[10px] text-muted-foreground font-mono truncate">{profile?.username ? `@${profile.username}` : 'user'}</p>
                             </div>
                         </div>
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-2" />
@@ -139,90 +141,85 @@ export default function OpenHub() {
 
                     <div className="flex-1 overflow-y-auto p-3 space-y-6">
                         <div>
-                            <h5 className="px-3 mb-2 text-[10px] font-bold text-zinc-500 uppercase tracking-widest leading-none">Console</h5>
+                            <h5 className="px-3 mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Console</h5>
                             <div className="space-y-1">
-                                <button
-                                    onClick={() => { setActiveFeed('all'); }}
-                                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFeed === 'all' 
-                                        ? 'bg-zinc-800/80 text-white font-semibold' 
-                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-                                    }`}
+                                <Button
+                                    variant={activeFeed === 'all' ? 'secondary' : 'ghost'}
+                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
+                                    onClick={() => setActiveFeed('all')}
                                 >
-                                    <Globe size={14} className={activeFeed === 'all' ? 'text-red-500' : 'text-zinc-500'} />
-                                    <span>Global Feed</span>
-                                </button>
-                                <button
-                                    onClick={() => { setActiveFeed('trending'); }}
-                                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFeed === 'trending' 
-                                        ? 'bg-zinc-800/80 text-white font-semibold' 
-                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-                                    }`}
+                                    <Globe size={14} className={activeFeed === 'all' ? 'text-primary' : 'text-muted-foreground'} />
+                                    Global Feed
+                                </Button>
+                                <Button
+                                    variant={activeFeed === 'trending' ? 'secondary' : 'ghost'}
+                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
+                                    onClick={() => setActiveFeed('trending')}
                                 >
-                                    <TrendingUp size={14} className={activeFeed === 'trending' ? 'text-red-500' : 'text-zinc-500'} />
-                                    <span>Trending Posts</span>
-                                </button>
-                                <button
-                                    onClick={() => { setActiveFeed('projects'); }}
-                                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                                        activeFeed === 'projects' 
-                                        ? 'bg-zinc-800/80 text-white font-semibold' 
-                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
-                                    }`}
+                                    <TrendingUp size={14} className={activeFeed === 'trending' ? 'text-primary' : 'text-muted-foreground'} />
+                                    Trending Posts
+                                </Button>
+                                <Button
+                                    variant={activeFeed === 'projects' ? 'secondary' : 'ghost'}
+                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
+                                    onClick={() => setActiveFeed('projects')}
                                 >
-                                    <Box size={14} className={activeFeed === 'projects' ? 'text-red-500' : 'text-zinc-500'} />
-                                    <span>Layout Blueprints</span>
-                                </button>
-                                <div className="h-px w-full bg-zinc-900 my-2" />
-                                <Link
-                                    to="/void"
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-zinc-400 hover:text-white hover:bg-zinc-900/50"
+                                    <Box size={14} className={activeFeed === 'projects' ? 'text-primary' : 'text-muted-foreground'} />
+                                    Layout Blueprints
+                                </Button>
+                                <Separator className="my-2" />
+                                <Button
+                                    variant="ghost"
+                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium text-muted-foreground hover:text-foreground"
+                                    asChild
                                 >
-                                    <Activity size={14} className="text-zinc-500" />
-                                    <span>My Deployments (Void)</span>
-                                </Link>
+                                    <Link to="/void">
+                                        <Activity size={14} />
+                                        My Deployments (Void)
+                                    </Link>
+                                </Button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* 2. Middle Feed Panel */}
-                <div className="flex-1 h-full flex flex-col min-w-0 bg-[#09090b]">
-                    <div className="h-14 border-b border-[#1f1f23] px-6 flex items-center justify-between shrink-0 bg-[#09090b]/40">
+                <div className="flex-1 h-full flex flex-col min-w-0 bg-background">
+                    <div className="h-14 border-b border-border px-6 flex items-center justify-between shrink-0 bg-card/40">
                         <div className="flex items-center gap-2">
-                            <span className="text-zinc-500 font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
-                            <span className="text-xs font-bold text-white uppercase tracking-wider">
+                            <span className="text-muted-foreground font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">
                                 mesh console // {activeFeed} feed
                             </span>
                         </div>
                         
                         <div className="relative w-48">
-                            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
-                            <input 
+                            <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                            <Input 
                                 value={searchQuery}
                                 onChange={e => setSearchQuery(e.target.value)}
                                 placeholder="Filter feed..."
-                                className="w-full bg-zinc-950 border border-zinc-900 rounded-md py-1 pl-7 pr-3 text-[10px] text-white focus:outline-none focus:border-red-500/50 placeholder:text-zinc-600"
+                                className="w-full h-8 pl-7 pr-3 text-xs bg-background"
                             />
                         </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 min-h-0 relative bg-zinc-950/20">
+                    <div className="flex-1 overflow-y-auto p-6 min-h-0 relative bg-muted/20">
                         <div className="max-w-2xl mx-auto space-y-6">
-                            <Card className="bg-zinc-950 border border-[#1f1f23] p-4 rounded-xl relative shadow-md">
-                                <textarea 
+                            <Card className="p-4 shadow-sm">
+                                <Textarea 
                                     value={newPostContent}
                                     onChange={e => setNewPostContent(e.target.value)}
-                                    className="w-full bg-transparent text-xs text-white placeholder:text-zinc-600 focus:outline-none min-h-[60px] resize-none font-medium"
+                                    className="w-full bg-transparent border-none text-xs placeholder:text-muted-foreground focus-visible:ring-0 min-h-[60px] resize-none font-medium px-0"
                                     placeholder={`What's on your mind, ${user?.name?.split(' ')[0]}? Use #tags...`}
                                 />
-                                <div className="flex justify-between items-center pt-3 border-t border-[#1f1f23] mt-2">
-                                    <span className="text-[8px] font-mono text-zinc-600 uppercase tracking-widest">Handshake Ready</span>
+                                <div className="flex justify-between items-center pt-3 border-t border-border mt-2">
+                                    <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest">Handshake Ready</span>
                                     <Button 
                                         onClick={handleCreatePost}
                                         disabled={isPosting || !newPostContent.trim()}
-                                        className="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider h-8 rounded px-5 disabled:opacity-50"
+                                        size="sm"
+                                        className="h-8 text-[10px] font-bold uppercase tracking-wider"
                                     >
                                         {isPosting ? 'Posting...' : 'Broadcast'}
                                     </Button>
@@ -238,7 +235,7 @@ export default function OpenHub() {
                                     if (activeFeed === 'projects') return p.attachedProject && matchesSearch;
                                     return p.tags?.some((t: string) => t.toLowerCase() === activeFeed.toLowerCase()) && matchesSearch;
                                 }).length === 0 ? (
-                                    <div className="py-20 text-center opacity-30 italic text-xs font-bold uppercase tracking-widest">
+                                    <div className="py-20 text-center opacity-50 italic text-xs font-bold uppercase tracking-widest">
                                         Silence on the feed. Start broadcasting.
                                     </div>
                                 ) : (
@@ -250,61 +247,63 @@ export default function OpenHub() {
                                         if (activeFeed === 'projects') return p.attachedProject && matchesSearch;
                                         return p.tags?.some((t: string) => t.toLowerCase() === activeFeed.toLowerCase()) && matchesSearch;
                                     }).map(post => (
-                                        <Card key={post.id || post.id_db} className="bg-zinc-950/40 border border-[#1f1f23] p-5 rounded-xl space-y-4 hover:border-zinc-800 transition-colors shadow-sm">
+                                        <Card key={post.id || post.id_db} className="p-5 space-y-4 shadow-sm hover:border-accent transition-colors">
                                             <div className="flex items-center justify-between">
                                                 <Link to={`/user/${post.author.handle}`} className="flex items-center gap-3 group/author">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-850 group-hover/author:border-zinc-700 transition-colors">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-border group-hover/author:border-accent transition-colors">
                                                         <img src={post.author.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.name}`} alt="Author" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-1">
-                                                            <h5 className="font-bold text-xs text-white leading-tight group-hover/author:text-red-400 transition-colors">{post.author.name}</h5>
+                                                            <h5 className="font-bold text-xs leading-tight group-hover/author:text-primary transition-colors">{post.author.name}</h5>
                                                             {post.author.isAgent && (
-                                                                <span className="text-[6px] bg-purple-500/10 border border-purple-500/20 text-purple-400 font-extrabold px-1 rounded-sm uppercase tracking-tighter">AI</span>
+                                                                <Badge variant="secondary" className="text-[8px] h-4 px-1 py-0 font-extrabold uppercase tracking-tighter">AI</Badge>
                                                             )}
                                                         </div>
-                                                        <p className="text-[9px] text-zinc-500 font-mono">@{post.author.handle || 'user'}</p>
+                                                        <p className="text-[9px] text-muted-foreground font-mono">@{post.author.handle || 'user'}</p>
                                                     </div>
                                                 </Link>
                                                 <div className="flex items-center gap-3">
-                                                    <span className="text-[8px] text-zinc-600 font-mono">{new Date(post.timestamp).toLocaleDateString()}</span>
+                                                    <span className="text-[8px] text-muted-foreground font-mono">{new Date(post.timestamp).toLocaleDateString()}</span>
                                                     {user?.uid === post.uid && (
-                                                        <button 
+                                                        <Button 
+                                                            variant="ghost"
+                                                            size="icon"
                                                             onClick={() => handleDeletePost(post.id || post.id_db)}
-                                                            className="text-zinc-600 hover:text-red-500 transition-colors p-1"
+                                                            className="h-6 w-6 text-muted-foreground hover:text-destructive"
                                                             title="Delete post"
                                                         >
-                                                            <Trash2 size={14} />
-                                                        </button>
+                                                            <Trash2 size={12} />
+                                                        </Button>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            <p className="text-xs text-zinc-300 leading-relaxed font-medium whitespace-pre-wrap">{post.content}</p>
+                                            <p className="text-xs leading-relaxed font-medium whitespace-pre-wrap">{post.content}</p>
 
                                             {post.attachedProject && (
-                                                <div 
+                                                <Card 
                                                     onClick={() => {
                                                         if (post.attachedProject.code) {
                                                             setPreviewProject(post.attachedProject);
                                                         }
                                                     }}
-                                                    className="bg-zinc-950 border border-zinc-900 rounded-xl p-4 group cursor-pointer hover:border-red-500/20 hover:bg-red-500/[0.01] transition-all flex items-center justify-between"
+                                                    className="p-4 group cursor-pointer hover:border-primary/20 hover:bg-primary/5 transition-all flex items-center justify-between shadow-none"
                                                 >
                                                     <div className="flex items-center gap-3 min-w-0">
-                                                        <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 group-hover:border-red-500/20 transition-colors">
-                                                            <Code size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
+                                                        <div className="w-10 h-10 rounded-lg bg-background border border-border flex items-center justify-center shrink-0 group-hover:border-primary/20 transition-colors">
+                                                            <Code size={18} className="text-muted-foreground group-hover:text-primary transition-colors" />
                                                         </div>
                                                         <div className="min-w-0">
-                                                            <h6 className="font-bold text-xs text-white truncate">{post.attachedProject.title}</h6>
-                                                            <p className="text-[9px] text-zinc-500 truncate max-w-xs">{post.attachedProject.description}</p>
+                                                            <h6 className="font-bold text-xs truncate">{post.attachedProject.title}</h6>
+                                                            <p className="text-[9px] text-muted-foreground truncate max-w-xs">{post.attachedProject.description}</p>
                                                             {post.attachedProject.code && (
-                                                                <span className="text-[7px] text-red-500 font-bold uppercase tracking-widest block mt-1 animate-pulse">▶ Play Live Sandbox</span>
+                                                                <span className="text-[7px] text-primary font-bold uppercase tracking-widest block mt-1 animate-pulse">▶ Play Live Sandbox</span>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <ArrowRight size={14} className="text-zinc-700 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all shrink-0" />
-                                                </div>
+                                                    <ArrowRight size={14} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all shrink-0" />
+                                                </Card>
                                             )}
                                         </Card>
                                     ))
@@ -315,32 +314,34 @@ export default function OpenHub() {
                 </div>
 
                 {/* 3. Right Dashboard Panel */}
-                <div className="w-[420px] h-full flex flex-col shrink-0 bg-[#09090b] border-l border-[#1f1f23] select-none">
-                    <div className="h-14 border-b border-[#1f1f23] px-6 flex items-center justify-between shrink-0 bg-[#09090b]/40">
+                <div className="w-[420px] h-full flex flex-col shrink-0 bg-card border-l border-border select-none">
+                    <div className="h-14 border-b border-border px-6 flex items-center justify-between shrink-0 bg-card/40">
                         <div className="flex items-center gap-2">
-                            <span className="text-zinc-500 font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
-                            <span className="text-xs font-bold text-white uppercase tracking-wider">
+                            <span className="text-muted-foreground font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
+                            <span className="text-xs font-bold uppercase tracking-wider">
                                 {previewProject ? 'live playground' : 'workspace info'}
                             </span>
                         </div>
                         {previewProject && (
-                            <button 
+                            <Button 
+                                variant="outline"
+                                size="sm"
                                 onClick={() => setPreviewProject(null)}
-                                className="text-[9px] bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 px-2 py-0.5 rounded text-zinc-400 transition-colors uppercase font-bold tracking-widest cursor-pointer"
+                                className="h-6 text-[9px] uppercase font-bold tracking-widest cursor-pointer"
                             >
                                 Close
-                            </button>
+                            </Button>
                         )}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-zinc-950/10">
+                    <div className="flex-1 overflow-y-auto p-6 min-h-0 bg-muted/10">
                         {previewProject ? (
                             <div className="h-full flex flex-col space-y-4">
-                                <div className="grow bg-zinc-950 border border-zinc-900 rounded-xl overflow-hidden relative shadow-inner">
+                                <div className="grow bg-background border border-border rounded-xl overflow-hidden relative shadow-inner">
                                     <iframe 
                                         srcDoc={`
                                             <!DOCTYPE html>
-                                            <html lang="en">
+                                            <html lang="en" class="dark">
                                             <head>
                                                 <meta charset="utf-8">
                                                 <meta name="viewport" content="width=device-width, initial-scale=1.5">
@@ -357,34 +358,35 @@ export default function OpenHub() {
                                             </body>
                                             </html>
                                         `}
-                                        className="w-full h-full border-none bg-black"
+                                        className="w-full h-full border-none bg-background"
                                         title="Project Live Preview"
                                         sandbox="allow-scripts"
                                     />
                                 </div>
-                                <div className="p-4 bg-zinc-950 border border-[#1f1f23] rounded-xl shadow-sm">
-                                    <h6 className="text-xs font-bold text-white mb-1.5 uppercase tracking-wide">{previewProject.title}</h6>
-                                    <p className="text-[10px] text-zinc-500 leading-normal font-medium">{previewProject.description}</p>
-                                </div>
+                                <Card className="p-4 shadow-sm">
+                                    <h6 className="text-xs font-bold mb-1.5 uppercase tracking-wide">{previewProject.title}</h6>
+                                    <p className="text-[10px] text-muted-foreground leading-normal font-medium">{previewProject.description}</p>
+                                </Card>
                             </div>
                         ) : (
                             <div className="space-y-6">
                                 {suggestedUsers.length > 0 && (
                                     <div>
-                                        <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Suggested Connections</h5>
+                                        <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Suggested Connections</h5>
                                         <div className="space-y-2">
                                             {suggestedUsers.map(u => (
-                                                <div key={u.id} className="flex items-center justify-between p-2.5 bg-zinc-950/40 border border-[#1f1f23] rounded-xl hover:border-zinc-800 transition-colors">
+                                                <Card key={u.id} className="flex items-center justify-between p-2.5 shadow-sm hover:border-accent transition-colors">
                                                     <div className="flex items-center gap-2 truncate min-w-0">
-                                                        <div className="w-7 h-7 rounded-full overflow-hidden border border-zinc-850 shrink-0">
+                                                        <div className="w-7 h-7 rounded-full overflow-hidden border border-border shrink-0">
                                                             <img src={u.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`} alt={u.name} className="w-full h-full object-cover" />
                                                         </div>
                                                         <div className="truncate min-w-0">
-                                                            <h6 className="text-[11px] font-bold text-white leading-tight truncate">{u.name}</h6>
-                                                            <p className="text-[8px] text-zinc-500 font-mono truncate">@{u.username || 'user'}</p>
+                                                            <h6 className="text-[11px] font-bold leading-tight truncate">{u.name}</h6>
+                                                            <p className="text-[8px] text-muted-foreground font-mono truncate">@{u.username || 'user'}</p>
                                                         </div>
                                                     </div>
                                                     <Button
+                                                        variant={followedUsers.has(u.uid) ? "secondary" : "default"}
                                                         size="sm"
                                                         onClick={() => {
                                                             const updated = new Set(followedUsers);
@@ -393,31 +395,32 @@ export default function OpenHub() {
                                                             setFollowedUsers(updated);
                                                             updateProfile({ following: Array.from(updated) });
                                                         }}
-                                                        className="h-6 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 text-[8px] uppercase tracking-wider font-extrabold px-2.5 shrink-0"
+                                                        className="h-6 text-[8px] uppercase tracking-wider font-extrabold px-2.5 shrink-0"
                                                     >
                                                         {followedUsers.has(u.uid) ? 'Connected' : 'Connect'}
                                                     </Button>
-                                                </div>
+                                                </Card>
                                             ))}
                                         </div>
                                     </div>
                                 )}
 
                                 <div>
-                                    <h5 className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-3">Trending Blueprints</h5>
+                                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Trending Blueprints</h5>
                                     <div className="flex flex-wrap gap-2">
                                         {['react', 'threejs', 'tailwind', 'nextjs', 'dashboard', 'canvas'].map(tag => (
-                                            <button
+                                            <Badge
                                                 key={tag}
+                                                variant={activeFeed === tag ? "default" : "outline"}
                                                 onClick={() => { setActiveFeed(tag); }}
-                                                className={`px-3 py-1 rounded bg-zinc-950 border text-[9px] font-bold uppercase tracking-wider transition-colors ${
+                                                className={`cursor-pointer px-3 py-1 text-[9px] font-bold uppercase tracking-wider transition-colors ${
                                                     activeFeed === tag 
-                                                    ? 'border-red-500/30 text-red-400' 
-                                                    : 'border-zinc-900 text-zinc-500 hover:text-zinc-300 hover:border-zinc-800'
+                                                    ? 'bg-primary text-primary-foreground' 
+                                                    : 'text-muted-foreground hover:text-foreground hover:border-accent'
                                                 }`}
                                             >
                                                 #{tag}
-                                            </button>
+                                            </Badge>
                                         ))}
                                     </div>
                                 </div>
