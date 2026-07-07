@@ -55,6 +55,7 @@ const PreviewPage = lazyWithRetry(() => import('./pages/PreviewPage'));
 const StudioApp = lazyWithRetry(() => import('./features/studio/App'));
 const IDEPage = lazyWithRetry(() => import('./features/void/components/pages/IDEPage').then(m => ({ default: m.IDEPage })));
 const SyncStackAuthPage = lazyWithRetry(() => import('./pages/SyncStackAuth'));
+const NanoPi = lazyWithRetry(() => import('./pages/NanoPi'));
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -102,10 +103,15 @@ const AppRoutes = () => {
             <SyncStackAuthPage />
           </Suspense>
         } />
-
         {/* Main Website (Shared Layout) */}
         <Route element={<Layout />}>
-          <Route index element={<VoidLanding />} />
+          <Route index element={
+            <Suspense fallback={<div className="min-h-[calc(100vh-64px)] w-full bg-background flex items-center justify-center text-muted-foreground animate-pulse">Initializing Neural Link...</div>}>
+              <NanoPi />
+            </Suspense>
+          } />
+          <Route path="nanopi/*" element={<Navigate to="/" replace />} />
+          <Route path="void-landing" element={<VoidLanding />} />
 
           {/* Primary Unified Products */}
           <Route path="open-hub" element={

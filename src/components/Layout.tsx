@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 export default function Layout() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const isFullWidthPage = isHomePage || location.pathname.startsWith('/open-hub') || location.pathname.startsWith('/user');
+  const isFullWidthPage = isHomePage || location.pathname.startsWith('/open-hub') || location.pathname.startsWith('/user') || location.pathname.startsWith('/nanopi');
 
   return (
     <SidebarProvider defaultOpen={!isHomePage}>
