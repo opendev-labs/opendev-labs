@@ -57,14 +57,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
         <div className="hidden lg:block w-72 shrink-0 space-y-8 sticky top-24">
           <div className="border border-zinc-900 bg-black p-6 space-y-8">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold tracking-[0.2em] text-zinc-600 uppercase">Protocol Usage</h3>
-              <span className="text-[9px] font-bold text-white bg-zinc-900 px-2 py-0.5 rounded-none">NODE PRO</span>
+              <h3 className="text-[10px] font-bold tracking-[0.2em] text-zinc-600 uppercase">Usage</h3>
+              <span className="text-[9px] font-bold text-white bg-zinc-900 px-2 py-0.5 rounded-none">PRO</span>
             </div>
 
             <div className="space-y-8">
               <div className="space-y-3">
                 <div className="flex justify-between text-[11px] font-bold">
-                  <span className="text-zinc-500 uppercase tracking-widest">Logic Flow</span>
+                  <span className="text-zinc-500 uppercase tracking-widest">Bandwidth</span>
                   <span className="text-white tracking-tighter">3.7M / 10M</span>
                 </div>
                 <div className="h-[2px] bg-zinc-900 overflow-hidden">
@@ -79,7 +79,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
 
               <div className="space-y-3">
                 <div className="flex justify-between text-[11px] font-bold">
-                  <span className="text-zinc-500 uppercase tracking-widest">Telemetry</span>
+                  <span className="text-zinc-500 uppercase tracking-widest">Storage</span>
                   <span className="text-white tracking-tighter">142.5 GB / 500 GB</span>
                 </div>
                 <div className="h-[2px] bg-zinc-900 overflow-hidden">
@@ -94,18 +94,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
             </div>
 
             <button className="w-full h-11 bg-white text-black text-[10px] font-bold tracking-[0.2em] uppercase transition-all duration-300 hover:bg-zinc-200 rounded-none">
-              Scale Infrastructure
+              Upgrade Plan
             </button>
           </div>
 
           <div className="p-6 border border-zinc-900 bg-zinc-950/50">
             <h4 className="text-[10px] font-bold text-white uppercase tracking-widest mb-3 flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-none bg-white animate-pulse" />
-              Neural Status
+              System Status
             </h4>
-            <p className="text-[13px] text-zinc-500 leading-relaxed font-medium mb-6">Your professional node fleet is synchronized. Cycle reset in <span className="text-white">4 days</span>.</p>
+            <p className="text-[13px] text-zinc-500 leading-relaxed font-medium mb-6">All systems operational. Billing cycle resets in <span className="text-white">4 days</span>.</p>
             <button className="text-[10px] text-white font-bold uppercase tracking-widest hover:underline transition-all flex items-center gap-2 group">
-              Manage Nodes
+              Manage Projects
               <span className="group-hover:translate-x-1 transition-transform">→</span>
             </button>
           </div>
@@ -119,7 +119,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
               <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-600" />
               <input
                 type="text"
-                placeholder="Synchronize with node..."
+                placeholder="Search projects..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="w-full bg-black border border-zinc-900 text-sm font-medium text-white rounded-none pl-14 pr-6 py-4 focus:outline-none focus:border-white transition-all placeholder:text-zinc-700"
@@ -134,14 +134,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
                 className="h-14 bg-white text-black text-[11px] font-bold tracking-[0.2em] px-8 hover:bg-zinc-200 transition-all flex items-center gap-3 whitespace-nowrap"
               >
                 <PlusIcon className="w-4 h-4" />
-                INITIALIZE NODE
+                CREATE PROJECT
               </button>
             </div>
           </div>
 
           {/* Projects Grid */}
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-zinc-900">
-            <h3 className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Synchronized Nodes</h3>
+            <h3 className="text-[10px] font-bold tracking-[0.2em] text-zinc-500 uppercase">Projects</h3>
             <span className="text-[10px] font-bold text-zinc-700 uppercase">{filteredProjects.length} ACTIVE</span>
           </div>
 
@@ -165,8 +165,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ projects, onUpdateProject 
                 <div className="w-16 h-16 bg-black border border-zinc-900 flex items-center justify-center mx-auto mb-8">
                   <SearchIcon className="w-6 h-6 text-zinc-800" />
                 </div>
-                <h4 className="text-xl font-bold text-white tracking-tight mb-2">No nodes found</h4>
-                <p className="text-zinc-500 mb-10 max-w-xs mx-auto text-sm font-medium">Verify your search parameters or initialize a new node cluster.</p>
+                <h4 className="text-xl font-bold text-white tracking-tight mb-2">No projects found</h4>
+                <p className="text-zinc-500 mb-10 max-w-xs mx-auto text-sm font-medium">Verify your search parameters or create a new project.</p>
                 <button
                   onClick={() => setSearch('')}
                   className="text-[10px] font-bold text-white uppercase tracking-widest hover:underline"

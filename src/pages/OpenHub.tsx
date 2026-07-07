@@ -124,64 +124,7 @@ export default function OpenHub() {
         <div className="h-[calc(100vh-3.5rem)] w-full bg-background text-foreground flex flex-col overflow-hidden font-sans select-none">
             <div className="flex-1 flex flex-row min-h-0 w-full overflow-hidden">
                 
-                {/* 1. Left Sidebar Panel */}
-                <div className="w-[260px] h-full flex flex-col shrink-0 bg-card border-r border-border select-none">
-                    <div className="p-4 border-b border-border flex items-center justify-between">
-                        <div className="flex items-center gap-2.5 truncate">
-                            <div className="w-8 h-8 rounded-full overflow-hidden border border-border shrink-0">
-                                <img src={profile?.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="profile" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="truncate">
-                                <h4 className="text-xs font-bold leading-tight truncate">{user?.name}</h4>
-                                <p className="text-[10px] text-muted-foreground font-mono truncate">{profile?.username ? `@${profile.username}` : 'user'}</p>
-                            </div>
-                        </div>
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0 ml-2" />
-                    </div>
 
-                    <div className="flex-1 overflow-y-auto p-3 space-y-6">
-                        <div>
-                            <h5 className="px-3 mb-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest leading-none">Console</h5>
-                            <div className="space-y-1">
-                                <Button
-                                    variant={activeFeed === 'all' ? 'secondary' : 'ghost'}
-                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
-                                    onClick={() => setActiveFeed('all')}
-                                >
-                                    <Globe size={14} className={activeFeed === 'all' ? 'text-primary' : 'text-muted-foreground'} />
-                                    Global Feed
-                                </Button>
-                                <Button
-                                    variant={activeFeed === 'trending' ? 'secondary' : 'ghost'}
-                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
-                                    onClick={() => setActiveFeed('trending')}
-                                >
-                                    <TrendingUp size={14} className={activeFeed === 'trending' ? 'text-primary' : 'text-muted-foreground'} />
-                                    Trending Posts
-                                </Button>
-                                <Button
-                                    variant={activeFeed === 'projects' ? 'secondary' : 'ghost'}
-                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium"
-                                    onClick={() => setActiveFeed('projects')}
-                                >
-                                    <Box size={14} className={activeFeed === 'projects' ? 'text-primary' : 'text-muted-foreground'} />
-                                    Layout Blueprints
-                                </Button>
-                                <Separator className="my-2" />
-                                <Button
-                                    variant="ghost"
-                                    className="w-full justify-start gap-2.5 px-3 py-2 h-auto text-xs font-medium text-muted-foreground hover:text-foreground"
-                                    asChild
-                                >
-                                    <Link to="/void">
-                                        <Activity size={14} />
-                                        My Deployments (Void)
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
                 {/* 2. Middle Feed Panel */}
                 <div className="flex-1 h-full flex flex-col min-w-0 bg-background">
@@ -189,7 +132,7 @@ export default function OpenHub() {
                         <div className="flex items-center gap-2">
                             <span className="text-muted-foreground font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
                             <span className="text-xs font-bold uppercase tracking-wider">
-                                mesh console // {activeFeed} feed
+                                {activeFeed === 'all' ? 'Global Feed' : activeFeed + ' Feed'}
                             </span>
                         </div>
                         
@@ -214,14 +157,14 @@ export default function OpenHub() {
                                     placeholder={`What's on your mind, ${user?.name?.split(' ')[0]}? Use #tags...`}
                                 />
                                 <div className="flex justify-between items-center pt-3 border-t border-border mt-2">
-                                    <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest">Handshake Ready</span>
+                                    <span className="text-[8px] font-mono text-muted-foreground uppercase tracking-widest">Ready to post</span>
                                     <Button 
                                         onClick={handleCreatePost}
                                         disabled={isPosting || !newPostContent.trim()}
                                         size="sm"
                                         className="h-8 text-[10px] font-bold uppercase tracking-wider"
                                     >
-                                        {isPosting ? 'Posting...' : 'Broadcast'}
+                                        {isPosting ? 'Posting...' : 'Post'}
                                     </Button>
                                 </div>
                             </Card>
@@ -236,7 +179,7 @@ export default function OpenHub() {
                                     return p.tags?.some((t: string) => t.toLowerCase() === activeFeed.toLowerCase()) && matchesSearch;
                                 }).length === 0 ? (
                                     <div className="py-20 text-center opacity-50 italic text-xs font-bold uppercase tracking-widest">
-                                        Silence on the feed. Start broadcasting.
+                                        No posts found. Start posting.
                                     </div>
                                 ) : (
                                     posts.filter(p => {
@@ -319,7 +262,7 @@ export default function OpenHub() {
                         <div className="flex items-center gap-2">
                             <span className="text-muted-foreground font-mono text-[10px] uppercase font-bold">&gt;&gt;&gt;</span>
                             <span className="text-xs font-bold uppercase tracking-wider">
-                                {previewProject ? 'live playground' : 'workspace info'}
+                                {previewProject ? 'Preview' : 'Dashboard'}
                             </span>
                         </div>
                         {previewProject && (
@@ -372,7 +315,7 @@ export default function OpenHub() {
                             <div className="space-y-6">
                                 {suggestedUsers.length > 0 && (
                                     <div>
-                                        <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Suggested Connections</h5>
+                                        <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Suggested People</h5>
                                         <div className="space-y-2">
                                             {suggestedUsers.map(u => (
                                                 <Card key={u.id} className="flex items-center justify-between p-2.5 shadow-sm hover:border-accent transition-colors">
@@ -406,7 +349,7 @@ export default function OpenHub() {
                                 )}
 
                                 <div>
-                                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Trending Blueprints</h5>
+                                    <h5 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Trending Tags</h5>
                                     <div className="flex flex-wrap gap-2">
                                         {['react', 'threejs', 'tailwind', 'nextjs', 'dashboard', 'canvas'].map(tag => (
                                             <Badge

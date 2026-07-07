@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Routes, Route, useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Header } from '../../components/Header';
-import { Footer } from '../../components/Footer';
+
 const Dashboard = React.lazy(() => import('./components/Dashboard').then(m => ({ default: m.Dashboard })));
 const ProjectDetailView = React.lazy(() => import('./components/ProjectDetailView').then(m => ({ default: m.ProjectDetailView })));
 const DocsPage = React.lazy(() => import('./components/pages/DocsPage').then(m => ({ default: m.DocsPage })));
@@ -233,8 +232,7 @@ const AppContent: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-black font-sans flex flex-col selection:bg-white selection:text-black">
-            <Header />
+        <div className="min-h-screen bg-background font-sans flex flex-col selection:bg-primary/20 selection:text-foreground">
             <main className="flex-grow relative z-10 flex flex-col container mx-auto px-4 py-8">
                 <Suspense fallback={<GlobalLoader />}>
                     <AnimatePresence mode="wait">
@@ -270,7 +268,6 @@ const AppContent: React.FC = () => {
                     </AnimatePresence>
                 </Suspense>
             </main>
-            <Footer />
             <StatusFooter />
         </div>
     );

@@ -18,46 +18,7 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
 
     const isPuter = selectedModelId === 'puter-gpt-4o';
 
-    if (!hasApiKeys && !isPuter) {
-        return (
-            <div className="flex flex-col h-full w-full bg-[#080808] text-white p-8 items-center justify-center relative overflow-hidden">
-                <div className="absolute inset-x-0 top-0 h-[800px] bg-gradient-to-b from-yellow-500/[0.02] via-transparent to-transparent opacity-50" />
-                
-                <div className="relative z-10 w-full max-w-lg text-center p-12 bg-zinc-900/10 border border-zinc-800/50 rounded-[30px] backdrop-blur-xl">
-                    <div className="w-16 h-16 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-yellow-500/20">
-                        <span className="text-2xl">🔑</span>
-                    </div>
-                    
-                    <h3 className="text-2xl font-bold mb-4 tracking-tight">Materialization Keys Required</h3>
-                    <p className="text-zinc-500 text-sm mb-10 leading-relaxed font-medium">
-                        To begin high-fidelity code generation, initialize your API handshake in the system settings. This ensures secure, sovereign materialization across the mesh.
-                    </p>
-                    
-                    <div className="space-y-4">
-                        <button 
-                            onClick={() => navigate('/settings/profile')}
-                            className="w-full bg-white text-black py-4 rounded-xl font-bold text-[11px] uppercase tracking-[0.2em] hover:bg-zinc-200 transition-all shadow-xl"
-                        >
-                            Configure Handshake →
-                        </button>
-                        
-                        <a 
-                            href="https://aistudio.google.com/app/apikey" 
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block text-[10px] text-zinc-600 font-bold uppercase tracking-widest hover:text-white transition-colors"
-                        >
-                            Get free Gemini API key
-                        </a>
-                    </div>
-                </div>
-                
-                <p className="absolute bottom-12 text-[9px] text-zinc-800 uppercase font-bold tracking-[0.5em]">
-                    OpenStudio Protocol // Gate 101
-                </p>
-            </div>
-        );
-    }
+
 
     return (
         <div className="flex flex-col h-full w-full bg-[#080808] text-white selection:bg-white/10 selection:text-white relative overflow-hidden">
