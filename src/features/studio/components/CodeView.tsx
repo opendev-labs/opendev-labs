@@ -189,10 +189,10 @@ const FileTreeView: React.FC<{
     );
 };
 
-// Sandpack-powered preview (replaces old Babel iframe)
-import { SandpackPreview as SandpackPreviewComponent } from './SandpackPreview';
+// CodeSandbox-powered preview (replaces old Sandpack)
+import { CodeSandboxPreview as PreviewComponent } from './CodeSandboxPreview';
 const PreviewPane: React.FC<{ files: FileNode[] }> = ({ files }) => {
-    return <SandpackPreviewComponent files={files} />;
+    return <PreviewComponent files={files} />;
 };
 
 export function CodeView({ session, setActiveFile, onFileContentChange, generationInfo, onAddFileOrFolder, onDeleteFileOrFolder, onRenameFileOrFolder, activeTab }: CodeViewProps) {
