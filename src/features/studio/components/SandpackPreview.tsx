@@ -20,6 +20,7 @@ const BUILT_IN_MODULES = new Set([
 const EXCLUDED_PACKAGES = new Set([
   'webpack', 'vite', 'esbuild', 'rollup', 'parcel',
   'typescript', 'ts-node', 'nodemon', 'pm2',
+  'tailwindcss', 'postcss', 'autoprefixer',
 ]);
 
 /**

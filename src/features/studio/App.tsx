@@ -598,7 +598,7 @@ function App() {
   }
 
   return (
-    <div className="flex h-full bg-[#000000] text-zinc-400 selection:bg-white/10 selection:text-white overflow-hidden" style={{ zoom: 0.9 }}>
+    <div className="flex h-screen w-screen bg-[#000000] text-zinc-400 selection:bg-white/10 selection:text-white overflow-hidden">
       {/* 🛸 LEFT SIDBAR */}
       <Sidebar
         onNavigate={handleNavigate}
