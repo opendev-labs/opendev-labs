@@ -2,104 +2,83 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/void/hooks/useAuth';
 import { OpenDevLogo } from '../features/void/components/common/Icons';
+import { Github, Twitter, Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export const Header: React.FC = () => {
     const { isAuthenticated, logout } = useAuth();
-    const [scrolled, setScrolled] = useState(false);
     const { pathname } = useLocation();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 20);
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
 
     const isOpenStudioRoute = pathname.startsWith('/open-studio');
     if (isOpenStudioRoute) return null;
 
-    const isFullWidthPage = pathname === '/' || pathname.startsWith('/open-hub');
-
     return (
-        <header className={`fixed top-0 z-50 w-full transition-all duration-300 ${
-            scrolled 
-            ? 'border-b border-zinc-800 bg-[#09090b]/80 backdrop-blur-md shadow-sm' 
-            : 'border-b border-transparent bg-transparent'
-        }`}>
-            <div className={`mx-auto flex h-14 ${isFullWidthPage ? 'max-w-full px-6' : 'max-w-[1100px] px-6'} items-center justify-between`}>
-                <div className="flex items-center gap-8">
-                    <Link to="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="shrink-0 flex items-center justify-center text-red-500 group-hover:text-red-400 transition-colors drop-shadow-[0_0_8px_rgba(239,68,68,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]">
-                            <OpenDevLogo className="h-7 w-7" />
-                        </div>
-                        <span className="text-[14px] font-extrabold text-white tracking-tight lowercase ml-1">
-                            opendev-<span className="text-red-500 font-mono">labs</span>
+        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="container flex h-14 max-w-screen-2xl items-center px-4 md:px-8 mx-auto">
+                <div className="mr-4 hidden md:flex">
+                    <Link to="/" className="mr-6 flex items-center space-x-2">
+                        <OpenDevLogo className="h-5 w-5" />
+                        <span className="hidden font-bold sm:inline-block">
+                            opendev/labs
                         </span>
                     </Link>
-                    
-                    <nav className="hidden md:flex items-center gap-5 text-[12px] font-medium tracking-tight">
+                    <nav className="flex items-center gap-4 text-sm lg:gap-6">
                         <Link 
                             to="/open-studio" 
-                            className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/open-studio') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
-                            }`}
+                            className={`transition-colors hover:text-foreground/80 ${pathname.startsWith('/open-studio') ? 'text-foreground' : 'text-foreground/60'}`}
                         >
                             IDE
-                            {pathname.startsWith('/open-studio') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
-                            )}
                         </Link>
                         <Link 
                             to="/open-hub" 
-                            className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/open-hub') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
-                            }`}
+                            className={`transition-colors hover:text-foreground/80 ${pathname.startsWith('/open-hub') ? 'text-foreground' : 'text-foreground/60'}`}
                         >
                             Hub
-                            {pathname.startsWith('/open-hub') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
-                            )}
                         </Link>
                         <Link 
                             to="/docs" 
-                            className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/docs') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
-                            }`}
+                            className={`transition-colors hover:text-foreground/80 ${pathname.startsWith('/docs') ? 'text-foreground' : 'text-foreground/60'}`}
                         >
                             Docs
-                            {pathname.startsWith('/docs') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
-                            )}
                         </Link>
                     </nav>
                 </div>
-
-                <div className="flex items-center gap-3">
-                    <a 
-                        href="https://github.com/opendev-labs" 
-                        target="_blank" 
-                        rel="noreferrer" 
-                        className="hidden sm:flex items-center gap-1 rounded bg-zinc-900 border border-zinc-800 px-3 py-1.5 text-[11px] text-zinc-400 hover:text-white hover:border-zinc-700 transition-all font-medium"
-                    >
-                        <span>GitHub</span>
-                        <span className="flex h-3.5 items-center rounded-sm bg-zinc-800 px-1 text-[9px] text-zinc-400 font-bold">Star</span>
-                    </a>
-                    
-                    {isAuthenticated ? (
-                        <button 
-                            onClick={logout}
-                            className="rounded bg-zinc-900 border border-zinc-800 px-4 py-1.5 text-[11px] font-semibold text-white hover:bg-zinc-800 hover:border-zinc-700 transition-colors uppercase tracking-wider"
-                        >
-                            Sign Out
-                        </button>
-                    ) : (
-                        <button 
-                            onClick={() => navigate('/auth')}
-                            className="rounded bg-red-600 px-4 py-1.5 text-[11px] font-bold text-white hover:bg-red-500 transition-all uppercase tracking-wider"
-                        >
-                            Sign In
-                        </button>
-                    )}
+                
+                {/* Mobile Menu Trigger */}
+                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 hover:text-accent-foreground h-9 py-2 mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                </button>
+                <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
+                    <div className="w-full flex-1 md:w-auto md:flex-none">
+                        {/* Search could go here */}
+                    </div>
+                    <nav className="flex items-center space-x-1">
+                        <Button variant="ghost" size="icon" asChild className="h-8 w-8 px-0">
+                            <a href="https://github.com/opendev-labs" target="_blank" rel="noreferrer">
+                                <Github className="h-4 w-4" />
+                                <span className="sr-only">GitHub</span>
+                            </a>
+                        </Button>
+                        <Button variant="ghost" size="icon" asChild className="h-8 w-8 px-0 hidden sm:inline-flex">
+                            <a href="https://twitter.com/opendevlabs" target="_blank" rel="noreferrer">
+                                <Twitter className="h-4 w-4 fill-current" />
+                                <span className="sr-only">Twitter</span>
+                            </a>
+                        </Button>
+                        <div className="ml-2">
+                            {isAuthenticated ? (
+                                <Button onClick={logout} variant="secondary" className="h-8 px-3 text-xs">
+                                    Sign Out
+                                </Button>
+                            ) : (
+                                <Button onClick={() => navigate('/auth')} className="h-8 px-3 text-xs">
+                                    Sign In
+                                </Button>
+                            )}
+                        </div>
+                    </nav>
                 </div>
             </div>
         </header>
