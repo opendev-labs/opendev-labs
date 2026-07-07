@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
                     <Link to="/" className="mr-6 flex items-center space-x-2">
                         <OpenDevLogo className="h-5 w-5" />
                         <span className="hidden font-bold sm:inline-block">
-                            opendev/labs
+                            opendev-labs
                         </span>
                     </Link>
                     <nav className="flex items-center gap-4 text-sm lg:gap-6">

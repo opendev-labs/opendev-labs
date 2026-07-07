@@ -140,7 +140,7 @@ export default function VoidLanding() {
                 <div className="container max-w-screen-2xl mx-auto py-8 px-4 md:px-8 flex flex-col md:flex-row items-center justify-between">
                     <div className="flex items-center gap-2 mb-4 md:mb-0">
                         <Terminal className="h-5 w-5" />
-                        <span className="font-bold text-sm">opendev/labs</span>
+                        <span className="font-bold text-sm">opendev-labs</span>
                     </div>
                     <div className="flex items-center gap-6 text-sm text-muted-foreground">
                         <a href="#services" className="hover:text-foreground transition-colors font-medium">Services</a>
