@@ -53,6 +53,7 @@ const LazyAuthPage = lazyWithRetry(() => import('./features/void/components/page
 const LazyVerifyEmailPage = lazyWithRetry(() => import('./features/void/components/pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const PreviewPage = lazyWithRetry(() => import('./pages/PreviewPage'));
 const IDEPage = lazyWithRetry(() => import('./features/void/components/pages/IDEPage').then(m => ({ default: m.IDEPage })));
+const SyncStackAuthPage = lazyWithRetry(() => import('./pages/SyncStackAuth'));
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -93,6 +94,11 @@ const AppRoutes = () => {
         <Route path="verify-email" element={
           <Suspense fallback={<div className="min-h-screen bg-black" />}>
             <LazyVerifyEmailPage />
+          </Suspense>
+        } />
+        <Route path="syncstack-auth" element={
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
+            <SyncStackAuthPage />
           </Suspense>
         } />
 
