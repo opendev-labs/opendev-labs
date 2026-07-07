@@ -52,6 +52,7 @@ const OfficeDashboard = lazyWithRetry(() => import('./pages/OfficeDashboard'));
 const LazyAuthPage = lazyWithRetry(() => import('./features/void/components/pages/AuthPage').then(m => ({ default: m.AuthPage })));
 const LazyVerifyEmailPage = lazyWithRetry(() => import('./features/void/components/pages/VerifyEmailPage').then(m => ({ default: m.VerifyEmailPage })));
 const PreviewPage = lazyWithRetry(() => import('./pages/PreviewPage'));
+const StudioApp = lazyWithRetry(() => import('./features/studio/App'));
 const IDEPage = lazyWithRetry(() => import('./features/void/components/pages/IDEPage').then(m => ({ default: m.IDEPage })));
 const SyncStackAuthPage = lazyWithRetry(() => import('./pages/SyncStackAuth'));
 
@@ -68,7 +69,7 @@ const AppRoutes = () => {
         <Route path="open-studio/*" element={
           <ProtectedRoute>
             <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest">Materializing Neural Mesh...</div>}>
-              <IDEPage />
+              <StudioApp />
             </Suspense>
           </ProtectedRoute>
         } />
@@ -77,7 +78,7 @@ const AppRoutes = () => {
         <Route path="void-ide/*" element={
           <ProtectedRoute>
             <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-zinc-500 font-mono text-[10px] uppercase tracking-widest font-bold">Materializing Canvas...</div>}>
-              <IDEPage />
+              <StudioApp />
             </Suspense>
           </ProtectedRoute>
         } />
