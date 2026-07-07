@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { UserProfile } from "../features/void/types";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { User as UserIcon, Shield, Loader2, Save, ArrowLeft, Globe, Github, Linkedin, Twitter, Briefcase, Award, Image as ImageIcon, Sparkles, MapPin, Link as LinkIcon } from "lucide-react";
+import { ArrowLeft, Globe, Github, Linkedin, Twitter, Image as ImageIcon, MapPin, Loader2, Save } from "lucide-react";
 import { useAuth } from "../features/void/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card } from "../components/ui/Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function ProfileSettings() {
     const { user, profile, updateProfile, isLoading } = useAuth();
@@ -63,185 +63,187 @@ export default function ProfileSettings() {
     if (isLoading) return null;
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-red-500 selection:text-black font-sans pb-20">
-            <main className="max-w-[1000px] mx-auto p-4 md:p-8 space-y-8">
-                <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-10 border-b border-zinc-900">
-                    <div className="space-y-4">
-                        <Link to={`/user/${profile?.username}`} className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em] flex items-center gap-2">
-                            <ArrowLeft size={12} />
+        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+            <div className="flex items-center justify-between space-y-2">
+                <div className="space-y-1">
+                    <Button variant="ghost" className="pl-0 -ml-4 mb-2 text-muted-foreground hover:text-foreground" asChild>
+                        <Link to={`/user/${profile?.username}`}>
+                            <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Profile
                         </Link>
-                        <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">Edit <span className="text-zinc-600">Profile.</span></h1>
-                    </div>
-                    <div className="flex gap-4">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                            <Shield size={14} />
-                            <span>Verified Security</span>
-                        </div>
-                    </div>
-                </header>
+                    </Button>
+                    <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+                    <p className="text-muted-foreground">
+                        Manage your profile identity and public information.
+                    </p>
+                </div>
+            </div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                    <div className="lg:col-span-8 space-y-8">
-                        {/* Visual Identity Section */}
-                        <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
-                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <ImageIcon size={14} className="text-red-500" /> Visual Identity
-                            </h3>
+            <Separator className="my-6" />
 
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Profile Image URL</Label>
-                                    <div className="flex gap-4">
-                                        <div className="w-16 h-16 rounded-2xl bg-zinc-900 overflow-hidden shrink-0 border border-zinc-800">
-                                            <img src={formData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="Preview" className="w-full h-full object-cover" />
-                                        </div>
-                                        <Input
-                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm grow"
-                                            placeholder="https://..."
-                                            value={formData.avatarUrl}
-                                            onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Banner Image URL</Label>
-                                    <div className="h-24 w-full rounded-2xl bg-zinc-900 overflow-hidden border border-zinc-800 mb-2 relative">
-                                        {formData.bannerUrl ? (
-                                            <img src={formData.bannerUrl} alt="Banner Preview" className="w-full h-full object-cover" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center opacity-20"><ImageIcon size={24} /></div>
-                                        )}
+            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row gap-8">
+                <div className="flex-1 space-y-8">
+                    {/* Visual Identity Section */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Visual Identity</CardTitle>
+                            <CardDescription>
+                                Update your avatar and profile banner.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label>Profile Image URL</Label>
+                                <div className="flex items-center gap-4">
+                                    <div className="h-16 w-16 overflow-hidden rounded-full border border-border bg-muted shrink-0">
+                                        <img src={formData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="Avatar" className="h-full w-full object-cover" />
                                     </div>
                                     <Input
-                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
                                         placeholder="https://..."
-                                        value={formData.bannerUrl}
-                                        onChange={(e) => setFormData({ ...formData, bannerUrl: e.target.value })}
+                                        value={formData.avatarUrl}
+                                        onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
+                                        className="max-w-md"
                                     />
                                 </div>
                             </div>
-                        </section>
 
-                        {/* Basic Info Section */}
-                        <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
-                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <Sparkles size={14} className="text-red-500" /> Professional Details
-                            </h3>
-
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Social Handle</Label>
-                                    <Input
-                                        className="bg-zinc-900 border-zinc-800 rounded-xl h-12 text-sm opacity-50 cursor-not-allowed font-mono"
-                                        value={formData.username}
-                                        disabled
-                                    />
-                                    <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest italic pt-1">// Handles are immutable once materialized.</p>
+                            <div className="space-y-2">
+                                <Label>Banner Image URL</Label>
+                                <div className="h-32 w-full overflow-hidden rounded-md border border-border bg-muted relative mb-3">
+                                    {formData.bannerUrl ? (
+                                        <img src={formData.bannerUrl} alt="Banner" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                                            <ImageIcon className="h-8 w-8 opacity-50" />
+                                        </div>
+                                    )}
                                 </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Professional Headline</Label>
-                                    <Input
-                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
-                                        placeholder="Full Stack Engineer @ Meta"
-                                        value={formData.headline}
-                                        onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">About / Biography</Label>
-                                    <Textarea
-                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-2xl min-h-[150px] text-sm leading-relaxed p-4"
-                                        placeholder="Tell your professional story..."
-                                        value={formData.bio}
-                                        onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2">
-                                        <MapPin size={12} /> Location
-                                    </Label>
-                                    <Input
-                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
-                                        placeholder="New York, NY"
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                    />
-                                </div>
+                                <Input
+                                    placeholder="https://..."
+                                    value={formData.bannerUrl}
+                                    onChange={(e) => setFormData({ ...formData, bannerUrl: e.target.value })}
+                                    className="max-w-md"
+                                />
                             </div>
-                        </section>
+                        </CardContent>
+                    </Card>
 
-                        {/* External Links Section */}
-                        <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
-                            <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <LinkIcon size={14} className="text-red-500" /> Digital Presence
-                            </h3>
+                    {/* Professional Details Section */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Professional Details</CardTitle>
+                            <CardDescription>
+                                Information about your role and location.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div className="space-y-2 max-w-md">
+                                <Label>Username</Label>
+                                <Input
+                                    value={formData.username}
+                                    disabled
+                                    className="bg-muted text-muted-foreground"
+                                />
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    This is your public display name. It can be your real name or a pseudonym.
+                                </p>
+                            </div>
 
+                            <div className="space-y-2 max-w-md">
+                                <Label>Headline</Label>
+                                <Input
+                                    placeholder="Full Stack Engineer"
+                                    value={formData.headline}
+                                    onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Bio</Label>
+                                <Textarea
+                                    placeholder="Tell us a little bit about yourself"
+                                    className="min-h-[100px] resize-none"
+                                    value={formData.bio}
+                                    onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                                />
+                                <p className="text-[0.8rem] text-muted-foreground">
+                                    You can <span>@mention</span> other users and organizations.
+                                </p>
+                            </div>
+
+                            <div className="space-y-2 max-w-md">
+                                <Label className="flex items-center gap-2">
+                                    <MapPin className="h-4 w-4" /> Location
+                                </Label>
+                                <Input
+                                    placeholder="San Francisco, CA"
+                                    value={formData.location}
+                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                                />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Digital Presence Section */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Links</CardTitle>
+                            <CardDescription>
+                                Add links to your website, blog, or social media profiles.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Globe size={12} /> Personal Website</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Globe className="h-4 w-4" /> Website</Label>
+                                    <Input value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
                                 </div>
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Github size={12} /> GitHub Profile</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.github} onChange={(e) => setFormData({ ...formData, github: e.target.value })} />
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Github className="h-4 w-4" /> GitHub</Label>
+                                    <Input value={formData.github} onChange={(e) => setFormData({ ...formData, github: e.target.value })} />
                                 </div>
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Linkedin size={12} /> LinkedIn Profile</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.linkedin} onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })} />
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Linkedin className="h-4 w-4" /> LinkedIn</Label>
+                                    <Input value={formData.linkedin} onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })} />
                                 </div>
-                                <div className="space-y-3">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Twitter size={12} /> Twitter / X</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.twitter} onChange={(e) => setFormData({ ...formData, twitter: e.target.value })} />
+                                <div className="space-y-2">
+                                    <Label className="flex items-center gap-2"><Twitter className="h-4 w-4" /> Twitter / X</Label>
+                                    <Input value={formData.twitter} onChange={(e) => setFormData({ ...formData, twitter: e.target.value })} />
                                 </div>
                             </div>
-                        </section>
-                    </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                    <div className="lg:col-span-4">
-                        <div className="sticky top-24 space-y-6">
-                            <Card className="bg-zinc-950 border-zinc-900 p-8 rounded-3xl shadow-xl space-y-8">
-                                <div>
-                                    <h3 className="text-[10px] font-bold text-zinc-700 uppercase tracking-widest mb-6">Management</h3>
-                                    <Button
-                                        type="submit"
-                                        disabled={isSaving}
-                                        className="w-full h-14 bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95"
-                                    >
-                                        {isSaving ? <Loader2 size={16} className="animate-spin" /> : (
-                                            <div className="flex items-center gap-2">
-                                                Update Profile <Save size={16} />
-                                            </div>
-                                        )}
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => navigate(`/user/${profile?.username}`)}
-                                        className="w-full mt-4 text-[10px] font-bold text-zinc-600 uppercase tracking-widest hover:text-zinc-400"
-                                    >
-                                        Discard Changes
-                                    </Button>
-                                </div>
-
-                                <div className="pt-8 border-t border-zinc-900 space-y-4">
-                                    <p className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest leading-loose italic">
-                                        // Updates will be visible across the entire Open-Hub mesh immediately.
-                                    </p>
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
-                </form>
-
-                <footer className="mt-20 pt-10 border-t border-zinc-900 flex justify-between items-center text-[9px] font-bold text-zinc-700 uppercase tracking-[0.4em] opacity-50">
-                    <p>© 2026 OpenDev Labs // Open-Hub</p>
-                </footer>
-            </main>
+                <div className="w-full lg:w-80">
+                    <Card className="sticky top-20">
+                        <CardHeader>
+                            <CardTitle>Save Changes</CardTitle>
+                            <CardDescription>
+                                Your updates will be visible immediately.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <Button
+                                type="submit"
+                                disabled={isSaving}
+                                className="w-full"
+                            >
+                                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Update Profile
+                            </Button>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => navigate(`/user/${profile?.username}`)}
+                                className="w-full"
+                            >
+                                Cancel
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </form>
         </div>
     );
 }
