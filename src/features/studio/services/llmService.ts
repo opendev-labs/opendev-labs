@@ -292,6 +292,53 @@ async function* streamOllamaResponse(fullPrompt: string, history: Message[], mod
 }
 
 
+let globalWebLLMEngine: any = null;
+let currentWebLLMModel: string = "";
+
+async function* streamWebLLMResponse(fullPrompt: string, history: Message[], modelConfig: ModelConfig, onProgress?: (msg: string) => void): AsyncGenerator<{ text: string; }> {
+    const messages = [
+        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC + generateFileTreeContext(history.length > 0 ? (history as any).fileTree || [] : []) },
+        ...toGenericHistory(history),
+        { role: 'user', content: fullPrompt }
+    ];
+
+    if (!globalWebLLMEngine || currentWebLLMModel !== modelConfig.apiIdentifier) {
+        if (onProgress) {
+             onProgress("Initializing WebGPU Engine (This happens once and may take a few minutes for the initial download)...");
+        }
+        try {
+            const { CreateMLCEngine } = await import("@mlc-ai/web-llm");
+            globalWebLLMEngine = await CreateMLCEngine(modelConfig.apiIdentifier, {
+                initProgressCallback: (progress) => {
+                    if (onProgress) {
+                        onProgress(`Downloading Model: ${Math.round(progress.progress * 100)}% - ${progress.text}`);
+                    }
+                }
+            });
+            currentWebLLMModel = modelConfig.apiIdentifier;
+        } catch (e) {
+            console.error("WebLLM Init Error:", e);
+            throw new Error("Failed to initialize WebGPU engine. Your browser or GPU might not support it.");
+        }
+    }
+
+    if (onProgress) {
+        onProgress("Generating response...");
+    }
+
+    const reply = await globalWebLLMEngine.chat.completions.create({
+        messages,
+        stream: true,
+    });
+
+    for await (const chunk of reply) {
+        const text = chunk.choices[0]?.delta?.content || "";
+        if (text) {
+             yield { text };
+        }
+    }
+}
+
 // --- Main Dispatcher ---
 
 export async function* streamChatResponse(
@@ -299,7 +346,8 @@ export async function* streamChatResponse(
     history: Message[],
     fileTree: FileNode[],
     modelId: string,
-    userProfile?: any
+    userProfile?: any,
+    onProgress?: (msg: string) => void
 ): AsyncGenerator<{ text: string; }> {
 
     const modelConfig = SUPPORTED_MODELS.find(m => m.id === modelId);
@@ -338,7 +386,8 @@ export async function* streamChatResponse(
 
     // Google provider: key is managed by the secure Vercel backend — no frontend key needed
     // Puter provider: uses user's puter account, no API key needed
-    const requiresKey = modelConfig.provider !== 'Google' && modelConfig.provider !== 'Puter' && modelConfig.provider !== 'Ollama';
+    // Ollama and WebGPU run locally, no API key needed
+    const requiresKey = modelConfig.provider !== 'Google' && modelConfig.provider !== 'Puter' && modelConfig.provider !== 'Ollama' && modelConfig.provider !== 'WebGPU';
 
     if (requiresKey && !effectiveApiKey) {
         const errJson = JSON.stringify({ conversation: `Materialization handshake failed: API key for ${modelConfig.provider} is not configured. Please initialize your keys in Settings for flawless materialization.`, files: [] });
@@ -383,6 +432,10 @@ export async function* streamChatResponse(
             case 'Anthropic':
                 const notImplementedAnthropic = { conversation: `The Anthropic provider is not yet fully implemented.`, files: [] };
                 yield { text: JSON.stringify(notImplementedAnthropic) };
+                break;
+
+            case 'WebGPU':
+                yield* streamWebLLMResponse(fullPrompt, history, modelConfig, onProgress);
                 break;
 
             default:

@@ -403,7 +403,10 @@ function App() {
       let fullResponse = '';
       let conversationText = '';
 
-      const stream = streamChatResponse(prompt, history, currentFileTree, selectedModelId, profile);
+      const stream = streamChatResponse(prompt, history, currentFileTree, selectedModelId, profile, (progressMsg) => {
+        // Direct UI update for progress messages from WebGPU without accumulating into fullResponse
+        setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages: s.messages.map(m => m.id === openStudioMessageId ? { ...m, content: progressMsg } : m) } : s));
+      });
 
       for await (const chunk of stream) {
         fullResponse += chunk.text;

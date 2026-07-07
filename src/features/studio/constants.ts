@@ -31,6 +31,9 @@ export const SUPPORTED_MODELS: ModelConfig[] = [
     // Ollama (Local)
     { id: 'ollama-nanopi', name: 'NanoPi (Ollama) ⚡', provider: 'Ollama', apiIdentifier: 'opendev-labs/nanopi' },
 
+    // WebGPU (Local Browser)
+    { id: 'webgpu-llama-3-8b', name: 'Llama 3 8B (WebGPU) 🚀', provider: 'WebGPU', apiIdentifier: 'Llama-3-8B-Instruct-q4f32_1-MLC' },
+
     // Existing Models
     { id: 'openai-gpt-4o', name: 'GPT-4o', provider: 'OpenAI', apiIdentifier: 'gpt-4o' },
     { id: 'openai-gpt-4-turbo', name: 'GPT-4 Turbo', provider: 'OpenAI', apiIdentifier: 'gpt-4-turbo' },

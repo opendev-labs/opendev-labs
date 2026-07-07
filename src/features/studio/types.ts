@@ -36,6 +36,6 @@ export interface ChatSession {
 export interface ModelConfig {
   id: string;
   name: string;
-  provider: 'Google' | 'OpenAI' | 'Anthropic' | 'DeepSeek' | 'Meta' | 'BigCode' | 'WizardLM' | 'Mistral AI' | 'OpenChat' | 'Phind' | 'Replit' | 'OpenRouter' | 'Ollama';
+  provider: 'Google' | 'OpenAI' | 'Anthropic' | 'DeepSeek' | 'Meta' | 'BigCode' | 'WizardLM' | 'Mistral AI' | 'OpenChat' | 'Phind' | 'Replit' | 'OpenRouter' | 'Ollama' | 'WebGPU';
   apiIdentifier: string;
 }
