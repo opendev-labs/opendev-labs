@@ -6,30 +6,29 @@ import {
     Cpu,
     Globe
 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 const FeatureCard = ({ title, desc, icon: Icon, large = false }: any) => (
-    <div className={`
-    relative overflow-hidden border border-[#333] bg-black p-8 group
-    ${large ? 'col-span-12 md:col-span-8' : 'col-span-12 md:col-span-4'}
-  `}>
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-        <div className="relative z-10">
-            <div className="mb-6 p-3 bg-[#111] rounded-lg w-fit border border-[#222]">
-                <Icon size={24} className="text-white" />
+    <Card className={`
+        group overflow-hidden transition-all hover:border-primary/50
+        ${large ? 'col-span-12 md:col-span-8' : 'col-span-12 md:col-span-4'}
+    `}>
+        <CardContent className="p-8 h-full flex flex-col">
+            <div className="mb-6 p-3 bg-muted rounded-lg w-fit border border-border group-hover:scale-110 transition-transform">
+                <Icon size={24} className="text-primary" />
             </div>
-            <h3 className="text-xl font-semibold tracking-tight mb-3">{title}</h3>
-            <p className="text-[#888] text-sm leading-relaxed">{desc}</p>
-        </div>
-    </div>
+            <h3 className="text-xl font-semibold tracking-tight mb-3 text-foreground">{title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">{desc}</p>
+        </CardContent>
+    </Card>
 );
 
 export default function Products() {
     return (
-        <section className="max-w-[1400px] mx-auto px-6 border-x border-[#333] grid grid-cols-12 min-h-screen">
-            <div className="col-span-12 py-24 text-center border-b border-[#333]">
-                <h2 className="text-4xl font-bold tracking-tight mb-4">Our Ecosystem</h2>
-                <p className="text-[#666] max-w-xl mx-auto">Develop with your favorite tools. Launch globally, instantly. Keep pushing.</p>
+        <section className="max-w-[1400px] mx-auto px-6 grid grid-cols-12 min-h-screen gap-6 py-24">
+            <div className="col-span-12 py-12 text-center border-b mb-12">
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">Our Ecosystem</h2>
+                <p className="text-muted-foreground max-w-xl mx-auto text-lg">Develop with your favorite tools. Launch globally, instantly. Keep pushing.</p>
             </div>
 
             <FeatureCard

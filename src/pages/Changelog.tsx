@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Cpu, Globe, Zap, Shield, GitBranch, Terminal, ArrowRight } from 'lucide-react';
+import { Sparkles, Cpu, Shield, Terminal, ArrowRight } from 'lucide-react';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface ChangeEntry {
     version: string;
@@ -61,100 +64,100 @@ const changelogData: ChangeEntry[] = [
 ];
 
 const CategoryBadge = ({ type }: { type: ChangeEntry['type'] }) => {
-    const colors = {
-        CORE: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-        AI: "bg-red-500/10 text-red-500 border-red-500/20",
-        NEXUS: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
-        SYSTEM: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
+    const variantMap: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
+        CORE: "default",
+        AI: "destructive",
+        NEXUS: "secondary",
+        SYSTEM: "outline"
     };
 
     return (
-        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border uppercase tracking-widest ${colors[type]}`}>
+        <Badge variant={variantMap[type]}>
             {type}
-        </span>
+        </Badge>
     );
 };
 
 export const Changelog: React.FC = () => {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-red-500/30">
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary/30">
             <Header />
 
-            <main className="container mx-auto max-w-4xl px-6 pt-32 pb-40">
+            <main className="container mx-auto max-w-4xl px-6 pt-24 pb-32">
                 {/* Hero Section */}
-                <header className="mb-24 space-y-6 text-center md:text-left">
+                <header className="mb-20 space-y-4 text-center md:text-left">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-2 text-zinc-500 text-[10px] font-bold uppercase tracking-[0.4em] justify-center md:justify-start"
+                        className="flex items-center gap-2 text-muted-foreground text-sm font-medium justify-center md:justify-start"
                     >
-                        <Terminal size={14} className="text-red-500" /> Registry // Evolution Path
+                        <Terminal size={16} className="text-primary" /> Registry Updates
                     </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-6xl md:text-8xl font-black tracking-tighter lowercase leading-[0.8]"
+                        className="text-5xl md:text-7xl font-bold tracking-tight"
                     >
-                        change<br /><span className="text-zinc-700 italic">log.</span>
+                        Changelog
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="text-zinc-500 text-lg max-w-xl font-medium"
+                        className="text-muted-foreground text-lg max-w-2xl"
                     >
                         Tracking the evolution of the sovereign intelligence ecosystem. Every node modification, every neural shift, registered in perpetuity.
                     </motion.p>
                 </header>
 
                 {/* Timeline */}
-                <div className="relative space-y-24">
+                <div className="relative space-y-16">
                     {/* Vertical Line */}
-                    <div className="absolute left-0 md:left-1/2 top-4 bottom-0 w-[1px] bg-zinc-900 -translate-x-1/2 hidden md:block" />
+                    <div className="absolute left-0 md:left-1/2 top-4 bottom-0 w-[1px] bg-border -translate-x-1/2 hidden md:block" />
 
                     {changelogData.map((entry, index) => (
                         <motion.section
                             key={entry.version}
-                            initial={{ opacity: 0, y: 40 }}
+                            initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: index * 0.1 }}
+                            transition={{ duration: 0.5, delay: index * 0.1 }}
                             className={`relative flex flex-col md:flex-row gap-12 ${index % 2 === 0 ? 'md:flex-row-reverse' : ''}`}
                         >
                             {/* Marker */}
-                            <div className="absolute left-0 md:left-1/2 top-4 -translate-x-1/2 z-10 hidden md:block">
-                                <div className="w-4 h-4 rounded-full bg-black border-2 border-zinc-700 flex items-center justify-center">
-                                    <div className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+                            <div className="absolute left-0 md:left-1/2 top-6 -translate-x-1/2 z-10 hidden md:block">
+                                <div className="w-4 h-4 rounded-full bg-background border-2 border-primary flex items-center justify-center shadow-sm">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                 </div>
                             </div>
 
                             {/* Content Side */}
-                            <div className="md:w-1/2 space-y-6">
-                                <div className="flex items-center gap-4">
-                                    <span className="text-[11px] font-black text-white bg-zinc-900 border border-white/5 px-3 py-1 rounded-full tabular-nums">
+                            <div className="md:w-1/2 space-y-4">
+                                <div className="flex items-center gap-3">
+                                    <Badge variant="outline" className="font-mono bg-muted/50">
                                         {entry.version}
-                                    </span>
-                                    <span className="text-[11px] font-bold text-zinc-600 uppercase tracking-widest">
+                                    </Badge>
+                                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
                                         {entry.date}
                                     </span>
                                     <CategoryBadge type={entry.type} />
                                 </div>
 
-                                <div className="space-y-4">
-                                    <h2 className="text-3xl font-bold tracking-tight text-white group cursor-default">
+                                <div className="space-y-2">
+                                    <h2 className="text-2xl font-bold tracking-tight">
                                         {entry.title}
                                     </h2>
-                                    <p className="text-zinc-500 font-medium leading-relaxed">
+                                    <p className="text-muted-foreground">
                                         {entry.description}
                                     </p>
                                 </div>
 
-                                <ul className="space-y-3">
+                                <ul className="space-y-3 pt-2">
                                     {entry.updates.map((update, idx) => (
-                                        <li key={idx} className="flex items-start gap-3 group">
-                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-red-500 transition-colors shrink-0" />
-                                            <span className="text-[13px] text-zinc-400 font-medium leading-relaxed group-hover:text-zinc-200 transition-colors">
+                                        <li key={idx} className="flex items-start gap-3">
+                                            <div className="mt-2 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                                            <span className="text-sm text-foreground/90 leading-relaxed">
                                                 {update}
                                             </span>
                                         </li>
@@ -164,15 +167,13 @@ export const Changelog: React.FC = () => {
 
                             {/* Decorative Side (Icon/Visual) */}
                             <div className="md:w-1/2 flex items-center justify-center md:px-12">
-                                <div className="w-full aspect-square md:aspect-video rounded-3xl bg-[#0D0D0D] border border-zinc-900 flex flex-col items-center justify-center gap-6 group hover:border-zinc-700 transition-all p-8 text-center">
-                                    <div className="w-20 h-20 rounded-2xl bg-black border border-zinc-900 flex items-center justify-center text-zinc-700 group-hover:text-red-500 group-hover:scale-110 transition-all duration-500">
-                                        <entry.icon size={40} strokeWidth={1.5} />
-                                    </div>
-                                    <div className="space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                        <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Protocol Registry</p>
-                                        <p className="text-[9px] font-bold text-zinc-800 uppercase tracking-tighter">SIG: 0x{Math.random().toString(16).substring(2, 10)}</p>
-                                    </div>
-                                </div>
+                                <Card className="w-full aspect-video flex flex-col items-center justify-center bg-muted/30 border-dashed hover:bg-muted/50 transition-colors group">
+                                    <CardContent className="flex flex-col items-center justify-center p-6 gap-4">
+                                        <div className="p-4 rounded-full bg-background border shadow-sm text-muted-foreground group-hover:text-primary group-hover:scale-110 transition-all duration-300">
+                                            <entry.icon size={32} strokeWidth={1.5} />
+                                        </div>
+                                    </CardContent>
+                                </Card>
                             </div>
                         </motion.section>
                     ))}
@@ -182,20 +183,17 @@ export const Changelog: React.FC = () => {
                 <motion.footer
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    className="mt-40 pt-20 border-t border-zinc-900 text-center space-y-8"
+                    className="mt-32 pt-16 border-t flex flex-col items-center text-center space-y-6"
                 >
                     <div className="space-y-2">
                         <h3 className="text-2xl font-bold tracking-tight">Stay synchronized.</h3>
-                        <p className="text-zinc-500 font-medium">Follow our GitHub for real-time node updates and commit logs.</p>
+                        <p className="text-muted-foreground">Follow our GitHub for real-time node updates and commit logs.</p>
                     </div>
-                    <a
-                        href="https://github.com/opendev-labs"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-3 h-12 px-8 bg-white text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-zinc-200 transition-all group"
-                    >
-                        Explore Repository <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                    </a>
+                    <Button size="lg" asChild className="group">
+                        <a href="https://github.com/opendev-labs" target="_blank" rel="noopener noreferrer">
+                            Explore Repository <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                    </Button>
                 </motion.footer>
             </main>
 

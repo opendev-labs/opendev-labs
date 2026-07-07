@@ -1,7 +1,7 @@
-
-
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { SearchIcon, BookOpenIcon, CubeIcon, CommandLineIcon, PuzzlePieceIcon, ClipboardIcon, CheckIcon, CpuChipIcon } from '../common/Icons';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 // --- Reusable Components ---
 
@@ -18,29 +18,31 @@ const CodeBlock: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     return (
         <div className="relative group my-8">
-            <pre className="bg-zinc-950 border border-zinc-900 rounded-lg p-6 overflow-x-auto text-[13px] leading-relaxed shadow-xl">
-                <code className="font-mono text-zinc-300">{children}</code>
+            <pre className="bg-muted border border-border rounded-lg p-6 overflow-x-auto text-[13px] leading-relaxed">
+                <code className="font-mono text-foreground">{children}</code>
             </pre>
-            <button
+            <Button
+                variant="secondary"
+                size="icon"
                 onClick={handleCopy}
-                className="absolute top-4 right-4 p-2 bg-white text-black rounded hover:bg-zinc-200 transition-all opacity-0 group-hover:opacity-100"
+                className="absolute top-4 right-4 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                 aria-label="Copy code"
             >
                 {copied ? <CheckIcon className="h-4 w-4" /> : <ClipboardIcon className="h-4 w-4" />}
-            </button>
+            </Button>
         </div>
     );
 };
 
 const H2: React.FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => (
-    <h2 id={id} className="text-3xl font-bold text-white mt-20 mb-6 pb-4 border-b border-zinc-900 tracking-tighter scroll-mt-24">
-        <a href={`#${id}`} className="hover:text-zinc-400 transition-colors uppercase text-sm tracking-widest">{children}</a>
+    <h2 id={id} className="text-3xl font-bold mt-20 mb-6 pb-4 border-b border-border tracking-tight scroll-mt-24">
+        <a href={`#${id}`} className="hover:text-muted-foreground transition-colors">{children}</a>
     </h2>
 );
 
 const H3: React.FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => (
-    <h3 id={id} className="text-xl font-bold text-white mt-12 mb-4 tracking-tight scroll-mt-24">
-        <a href={`#${id}`} className="hover:text-zinc-400 transition-colors">{children}</a>
+    <h3 id={id} className="text-xl font-semibold mt-12 mb-4 tracking-tight scroll-mt-24">
+        <a href={`#${id}`} className="hover:text-muted-foreground transition-colors">{children}</a>
     </h3>
 );
 
@@ -93,9 +95,9 @@ const docStructure = [
 ];
 
 const DocsContent = () => (
-    <div className="prose prose-invert prose-p:text-zinc-500 prose-p:font-medium prose-p:leading-relaxed prose-headings:text-white max-w-none">
+    <div className="prose prose-zinc dark:prose-invert max-w-none text-muted-foreground">
         <section id="introduction">
-            <h1 className="text-5xl font-bold tracking-tighter text-white mb-10 leading-[0.9]">Documentation</h1>
+            <h1 className="text-5xl font-bold tracking-tight text-foreground mb-10 leading-tight">Documentation</h1>
             <p>opendev-labs is an advanced serverless platform engineered for high-fidelity web systems and autonomous applications. We prioritize speed, sovereign execution, and modular scaling.</p>
             <p className="mt-6">This technical guide outlines the opendev-labs primitives, from the initial deployment loop to advanced global edge routing and logic execution.</p>
         </section>
@@ -163,9 +165,9 @@ export default function handler(req, res) {
         <CodeBlock>npm install -g @opendev-labs/spoon</CodeBlock>
         <H3 id="common-commands">Core Protocol Commands</H3>
         <ul className="list-disc pl-6 space-y-4">
-            <li><code className="bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">spoon login</code> - Protocol authentication.</li>
-            <li><code className="bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">spoon deploy</code> - Propagate project to edge.</li>
-            <li><code className="bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded">spoon env add</code> - Inject environment variables.</li>
+            <li><code className="bg-muted border border-border px-1.5 py-0.5 rounded text-foreground">spoon login</code> - Protocol authentication.</li>
+            <li><code className="bg-muted border border-border px-1.5 py-0.5 rounded text-foreground">spoon deploy</code> - Propagate project to edge.</li>
+            <li><code className="bg-muted border border-border px-1.5 py-0.5 rounded text-foreground">spoon env add</code> - Inject environment variables.</li>
         </ul>
 
         <H3 id="api">REST Protocol (API)</H3>
@@ -234,22 +236,20 @@ export const DocsPage: React.FC = () => {
         <div className="max-w-[1400px] mx-auto pt-10" onClick={handleAnchorClick}>
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-16 px-6">
                 <aside className="lg:col-span-1 lg:sticky lg:top-32 self-start hidden lg:block">
-                    <div className="relative mb-10">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <SearchIcon className="text-zinc-500 w-4 h-4" />
-                        </div>
-                        <input
+                    <div className="relative mb-8">
+                        <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
                             type="text"
                             placeholder="Search library..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-black border border-zinc-900 h-10 pl-10 pr-4 text-xs font-bold tracking-widest uppercase text-white focus:outline-none focus:ring-1 focus:ring-white transition-all rounded-md placeholder:text-zinc-700"
+                            className="pl-9"
                         />
                     </div>
-                    <nav className="space-y-10">
+                    <nav className="space-y-8">
                         {filteredDocStructure.map((section, index) => (
                             <div key={index}>
-                                <h4 className="flex items-center gap-2 text-[10px] font-bold tracking-[0.3em] text-zinc-600 mb-6 uppercase">
+                                <h4 className="font-semibold text-sm mb-4">
                                     {section.title}
                                 </h4>
                                 <ul className="space-y-3">
@@ -257,9 +257,9 @@ export const DocsPage: React.FC = () => {
                                         <li key={link.id}>
                                             <a
                                                 href={`#${link.id}`}
-                                                className={`block text-xs font-medium transition-all ${activeSection === link.id
-                                                    ? 'text-white translate-x-1'
-                                                    : 'text-zinc-500 hover:text-white'
+                                                className={`block text-sm transition-colors ${activeSection === link.id
+                                                    ? 'text-foreground font-medium'
+                                                    : 'text-muted-foreground hover:text-foreground'
                                                     }`}
                                             >
                                                 {link.title}
@@ -279,4 +279,3 @@ export const DocsPage: React.FC = () => {
         </div>
     );
 };
-
