@@ -72,6 +72,38 @@ const generateFileTreeContext = (fileTree: FileNode[]): string => {
 
 // --- Provider-Specific Clients ---
 
+async function* streamPuterResponse(fullPrompt: string, history: Message[], modelConfig: ModelConfig): AsyncGenerator<{ text: string; }> {
+    const puter = (window as any).puter;
+    if (!puter) {
+        throw new Error("Puter.js is not loaded. Please refresh the page.");
+    }
+
+    const messages = [
+        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC + generateFileTreeContext(history.length > 0 ? (history as any).fileTree || [] : []) },
+        ...toGenericHistory(history),
+        { role: 'user', content: fullPrompt }
+    ];
+
+    const response = await puter.ai.chat(messages, {
+        model: modelConfig.apiIdentifier,
+        stream: true,
+    });
+
+    if (response && response[Symbol.asyncIterator]) {
+        for await (const chunk of response) {
+            const text = chunk?.text ?? chunk?.delta?.text ?? chunk?.choices?.[0]?.delta?.content ?? '';
+            if (text) {
+                yield { text };
+            }
+        }
+    } else {
+        const text = typeof response === 'string'
+            ? response
+            : response?.message?.content?.[0]?.text ?? response?.text ?? '';
+        yield { text };
+    }
+}
+
 async function* streamOpenAICompatibleResponse(fullPrompt: string, history: Message[], modelConfig: ModelConfig, apiKey: string): AsyncGenerator<{ text: string; }> {
     let apiBaseUrl = '';
     const headers: Record<string, string> = {
@@ -305,7 +337,8 @@ export async function* streamChatResponse(
     }
 
     // Google provider: key is managed by the secure Vercel backend — no frontend key needed
-    const requiresKey = modelConfig.provider !== 'Google';
+    // Puter provider: uses user's puter account, no API key needed
+    const requiresKey = modelConfig.provider !== 'Google' && modelConfig.provider !== 'Puter' && modelConfig.provider !== 'Ollama';
 
     if (requiresKey && !effectiveApiKey) {
         const errJson = JSON.stringify({ conversation: `Materialization handshake failed: API key for ${modelConfig.provider} is not configured. Please initialize your keys in Settings for flawless materialization.`, files: [] });
@@ -319,6 +352,10 @@ export async function* streamChatResponse(
 
     try {
         switch (modelConfig.provider) {
+            case 'Puter':
+                yield* streamPuterResponse(fullPrompt, history, modelConfig);
+                break;
+
             case 'Google':
                 yield* streamGeminiResponse(fullPrompt, history, modelConfig, effectiveApiKey);
                 break;

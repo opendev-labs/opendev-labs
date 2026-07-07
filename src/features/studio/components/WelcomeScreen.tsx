@@ -16,7 +16,9 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
     const { hasApiKeys } = useAuth();
     const navigate = useNavigate();
 
-    if (!hasApiKeys) {
+    const isPuter = selectedModelId === 'puter-gpt-4o';
+
+    if (!hasApiKeys && !isPuter) {
         return (
             <div className="flex flex-col h-full w-full bg-[#080808] text-white p-8 items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-x-0 top-0 h-[800px] bg-gradient-to-b from-yellow-500/[0.02] via-transparent to-transparent opacity-50" />

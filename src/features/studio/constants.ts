@@ -11,7 +11,8 @@ export const SUGGESTED_PROMPTS = [
 ];
 
 export const SUPPORTED_MODELS: ModelConfig[] = [
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash ✦', provider: 'Google', apiIdentifier: 'gemini-2.0-flash' },
+    { id: 'puter-gpt-4o', name: 'GPT-4o (Free via Puter) ✦', provider: 'Puter', apiIdentifier: 'gpt-4o' },
+    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'Google', apiIdentifier: 'gemini-2.0-flash' },
     { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', provider: 'Google', apiIdentifier: 'gemini-2.0-flash-lite' },
     { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'Google', apiIdentifier: 'gemini-1.5-pro' },
     { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'Google', apiIdentifier: 'gemini-1.5-flash' },
