@@ -83,17 +83,109 @@ export const CodeSandboxPreview: React.FC<CodeSandboxPreviewProps> = ({ files })
                 }
             });
 
-            // If package.json is missing, supply a basic one to trigger Node devbox
+            // 🚀 SMART DEVBOX CONFIGURATION 🚀
+            // Detect project type based on files
+            const filePaths = Object.keys(formattedFiles);
+            const isNextJs = filePaths.some(p => p.startsWith('app/') || p.startsWith('pages/'));
+            const isViteReact = filePaths.some(p => p.includes('App.tsx') || p.includes('main.tsx'));
+            const hasTailwind = filePaths.some(p => formattedFiles[p].content.includes('@tailwind'));
+
             if (!formattedFiles['package.json']) {
-                formattedFiles['package.json'] = {
-                    content: JSON.stringify({
-                        name: "opendev-sandbox",
-                        version: "1.0.0",
-                        main: "index.js",
-                        dependencies: {}
-                    }, null, 2)
+                if (isNextJs) {
+                    formattedFiles['package.json'] = {
+                        content: JSON.stringify({
+                            name: "nextjs-devbox",
+                            version: "1.0.0",
+                            scripts: { dev: "next dev" },
+                            dependencies: {
+                                "next": "^14.0.0",
+                                "react": "^18.2.0",
+                                "react-dom": "^18.2.0",
+                                ...(hasTailwind ? { "tailwindcss": "latest", "postcss": "latest", "autoprefixer": "latest", "lucide-react": "latest" } : {})
+                            }
+                        }, null, 2)
+                    };
+                    
+                    if (!formattedFiles['next.config.js']) {
+                        formattedFiles['next.config.js'] = { content: `module.exports = { reactStrictMode: true }` };
+                    }
+                } else if (isViteReact) {
+                    formattedFiles['package.json'] = {
+                        content: JSON.stringify({
+                            name: "vite-react-devbox",
+                            version: "1.0.0",
+                            scripts: { dev: "vite" },
+                            dependencies: {
+                                "react": "^18.2.0",
+                                "react-dom": "^18.2.0",
+                                "lucide-react": "latest",
+                                ...(hasTailwind ? { "tailwindcss": "latest", "postcss": "latest", "autoprefixer": "latest" } : {})
+                            },
+                            devDependencies: {
+                                "vite": "latest",
+                                "@vitejs/plugin-react": "latest"
+                            }
+                        }, null, 2)
+                    };
+                    
+                    if (!formattedFiles['vite.config.js']) {
+                        formattedFiles['vite.config.js'] = {
+                            content: `import { defineConfig } from 'vite';\nimport react from '@vitejs/plugin-react';\n\nexport default defineConfig({\n  plugins: [react()],\n});`
+                        };
+                    }
+                    if (!formattedFiles['index.html']) {
+                        formattedFiles['index.html'] = {
+                            content: `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`
+                        };
+                    }
+                } else {
+                    formattedFiles['package.json'] = {
+                        content: JSON.stringify({
+                            name: "opendev-sandbox",
+                            version: "1.0.0",
+                            main: "index.js",
+                            scripts: { start: "node index.js" }
+                        }, null, 2)
+                    };
+                }
+            }
+
+            // Provide Tailwind config if needed and missing
+            if (hasTailwind && !formattedFiles['tailwind.config.js']) {
+                formattedFiles['tailwind.config.js'] = {
+                    content: `/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: { extend: {} },
+  plugins: [],
+}`
+                };
+                formattedFiles['postcss.config.js'] = {
+                    content: `module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}`
                 };
             }
+
 
             const response = await fetch('https://codesandbox.io/api/v1/sandboxes/define?json=1', {
                 method: 'POST',
