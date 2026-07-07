@@ -107,6 +107,26 @@ export async function getAIAssistance(logs: LogEntry[]): Promise<string> {
 }
 
 export async function generateAgentResponse(systemInstruction: string, userMessage: string, history: any[] = []): Promise<string> {
+    try {
+        // Try Puter.js AI first as requested
+        // @ts-ignore
+        if (window.puter && window.puter.ai) {
+            const formattedHistory = [
+                { role: 'system', content: systemInstruction },
+                ...history.map(h => ({
+                    role: (h.isAgent === false || h.senderId === 'user') ? 'user' : 'assistant',
+                    content: h.content
+                })),
+                { role: 'user', content: userMessage }
+            ];
+            // @ts-ignore
+            const response = await window.puter.ai.chat(formattedHistory);
+            return response?.message?.content || response?.toString() || "I am thinking...";
+        }
+    } catch (e) {
+        console.warn("Puter AI failed, falling back to Gemini:", e);
+    }
+
     const effectiveApiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_FIREBASE_API_KEY;
     if (!effectiveApiKey) {
         return "Offline. Please configure VITE_GEMINI_API_KEY in .env.local.";
@@ -115,7 +135,7 @@ export async function generateAgentResponse(systemInstruction: string, userMessa
     
     // Convert history messages to Gemini format
     const formattedHistory = history.map(h => ({
-        role: h.senderId === 'user' ? 'user' : 'model',
+        role: (h.isAgent === false || h.senderId === 'user') ? 'user' : 'model',
         parts: [{ text: h.content }]
     }));
 
