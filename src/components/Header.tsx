@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../features/void/hooks/useAuth';
+import { OpenDevLogo } from '../features/void/components/common/Icons';
 
 export const Header: React.FC = () => {
     const { isAuthenticated, logout } = useAuth();
@@ -28,10 +29,10 @@ export const Header: React.FC = () => {
             <div className={`mx-auto flex h-14 ${isFullWidthPage ? 'max-w-full px-6' : 'max-w-[1100px] px-6'} items-center justify-between`}>
                 <div className="flex items-center gap-8">
                     <Link to="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="shrink-0 flex items-center justify-center h-7 w-7">
-                            <div className="h-5 w-5 rounded-full bg-orange-500 group-hover:bg-orange-400 transition-colors shadow-[0_0_10px_rgba(249,115,22,0.4)] group-hover:shadow-[0_0_16px_rgba(249,115,22,0.6)]" />
+                        <div className="shrink-0 flex items-center justify-center text-orange-500 group-hover:text-orange-400 transition-colors drop-shadow-[0_0_8px_rgba(249,115,22,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(249,115,22,0.6)]">
+                            <OpenDevLogo className="h-7 w-7" />
                         </div>
-                        <span className="text-[14px] font-extrabold text-white tracking-tight lowercase">
+                        <span className="text-[14px] font-extrabold text-white tracking-tight lowercase ml-1">
                             opendev-<span className="text-orange-500 font-mono">labs</span>
                         </span>
                     </Link>
