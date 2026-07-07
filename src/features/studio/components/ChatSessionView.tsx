@@ -126,16 +126,16 @@ export function ChatSessionView({
   }, [chatPanelWidth]);
 
   return (
-    <div className="flex flex-col h-full bg-[#0C0C0C] text-zinc-400 selection:bg-white/10 selection:text-white overflow-hidden">
+    <div className="flex flex-col h-full bg-background text-muted-foreground selection:bg-primary/20 selection:text-foreground overflow-hidden">
       {/* 🏗️ UNIFIED WORKSPACE HEADER */}
-      <header className="h-[52px] border-b border-zinc-900 bg-[#0C0C0C] flex items-center justify-between px-4 z-40">
+      <header className="h-[52px] border-b border-border bg-background flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <h1 className="text-sm font-medium text-white transition-all cursor-default">{session.title || 'Untitled Session'}</h1>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-900 border border-zinc-800 rounded-md">
-               <span className="text-[11px] font-medium text-zinc-400">Public</span>
+            <h1 className="text-sm font-medium text-foreground transition-all cursor-default">{session.title || 'Untitled Session'}</h1>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-900 border border-border rounded-md">
+               <span className="text-[11px] font-medium text-muted-foreground">Public</span>
             </div>
-            <button className="text-zinc-500 hover:text-white transition-colors">
+            <button className="text-muted-foreground hover:text-foreground transition-colors">
               <ChevronsRightIcon className="w-4 h-4" />
             </button>
           </div>
@@ -143,16 +143,16 @@ export function ChatSessionView({
 
         <div className="flex items-center gap-6">
           {/* VIEW TOGGLES */}
-          <div className="flex items-center bg-black border border-zinc-900 rounded-lg p-1">
+          <div className="flex items-center bg-black border border-border rounded-lg p-1">
             <button
                onClick={() => setActiveTab('preview')}
-               className={`px-3 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'preview' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+               className={`px-3 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'preview' ? 'bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-zinc-300'}`}
             >
                Preview
             </button>
             <button
                onClick={() => setActiveTab('code')}
-               className={`px-2 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'code' ? 'bg-zinc-800 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-300'}`}
+               className={`px-2 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'code' ? 'bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-zinc-300'}`}
             >
                <CodeIcon className="w-4 h-4" />
             </button>
@@ -170,7 +170,7 @@ export function ChatSessionView({
                   }
                 }
               }}
-              className={`px-3 py-1.5 transition-colors flex items-center gap-2 text-[11px] font-medium border rounded-md ${isLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-zinc-500 hover:text-white border-zinc-800 hover:bg-zinc-800'}`}
+              className={`px-3 py-1.5 transition-colors flex items-center gap-2 text-[11px] font-medium border rounded-md ${isLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-muted-foreground hover:text-foreground border-border hover:bg-zinc-800'}`}
               title="Sync to Local Folder"
             >
               {isLinked ? 'Syncing Active' : 'Link Folder'}
@@ -186,7 +186,7 @@ export function ChatSessionView({
                     toast.error("Failed to pull files or folder is empty.");
                   }
                 }}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-medium rounded-md transition-colors border border-zinc-700"
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-foreground text-[11px] font-medium rounded-md transition-colors border border-zinc-700"
                 title="Pull from Local Folder"
               >
                 Pull
@@ -203,7 +203,7 @@ export function ChatSessionView({
                   toast.error('Failed to share.');
                 }
               }}
-              className="text-zinc-500 hover:text-white p-2 transition-colors"
+              className="text-muted-foreground hover:text-foreground p-2 transition-colors"
               title="Share to OpenHub"
             >
               <ShareIcon className="w-4 h-4" />
@@ -224,7 +224,7 @@ export function ChatSessionView({
         {/* CHAT PANEL */}
         <motion.div
           ref={chatViewRef}
-          className="h-full bg-[#0C0C0C] overflow-hidden relative"
+          className="h-full bg-background overflow-hidden relative"
           initial={false}
           animate={{ width: isCodeViewVisible ? `${chatPanelWidth}px` : '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -255,7 +255,7 @@ export function ChatSessionView({
               </div>
 
               <motion.div
-                className="flex-1 h-full bg-[#000000] relative overflow-hidden"
+                className="flex-1 h-full bg-background relative overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

@@ -106,7 +106,7 @@ const FileTreeView: React.FC<{
                 name="name"
                 defaultValue={defaultValue}
                 onBlur={onBlur}
-                className="bg-transparent text-white w-full focus:outline-none"
+                className="bg-transparent text-foreground w-full focus:outline-none"
                 autoComplete="off"
             />
         </form>
@@ -145,7 +145,7 @@ const FileTreeView: React.FC<{
                                 <button
                                     onClick={() => isFile && onSelectFile(node as FileNode)}
                                     style={{ paddingLeft: `${level * 1.25}rem` }}
-                                    className={`w-full text-left text-sm flex items-center justify-between gap-2 px-2 py-1 rounded-md ${activeFile?.path === currentPath ? 'bg-white/10 text-white' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+                                    className={`w-full text-left text-sm flex items-center justify-between gap-2 px-2 py-1 rounded-md ${activeFile?.path === currentPath ? 'bg-white/10 text-foreground' : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'}`}
                                 >
                                     <div className="flex items-center gap-2 truncate">
                                         {isFile ? <FileIcon className="h-4 w-4 flex-shrink-0" /> : <FolderIcon className="h-4 w-4 flex-shrink-0" />}
@@ -156,8 +156,8 @@ const FileTreeView: React.FC<{
                                     </div>
                                 </button>
                                 <div className="absolute top-1/2 -translate-y-1/2 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-md">
-                                    <button onClick={() => setRenaming(currentPath)} className="p-1 text-gray-400 hover:text-white" title="Rename"><PencilIcon className="w-3.5 h-3.5" /></button>
-                                    <button onClick={() => onDeleteFileOrFolder(currentPath, isFile)} className="p-1 text-gray-400 hover:text-red-500" title="Delete"><TrashIcon className="w-3.5 h-3.5" /></button>
+                                    <button onClick={() => setRenaming(currentPath)} className="p-1 text-muted-foreground hover:text-foreground" title="Rename"><PencilIcon className="w-3.5 h-3.5" /></button>
+                                    <button onClick={() => onDeleteFileOrFolder(currentPath, isFile)} className="p-1 text-muted-foreground hover:text-red-500" title="Delete"><TrashIcon className="w-3.5 h-3.5" /></button>
                                 </div>
                             </div>
                             {!isFile && (
@@ -270,32 +270,32 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
     );
 
     return (
-        <div className="flex flex-col h-full bg-[#050505]">
+        <div className="flex flex-col h-full bg-background">
             {activeTab === 'code' ? (
                 <div className="flex-1 flex overflow-hidden">
                     {isFileTreeVisible && (
-                        <aside className="w-64 bg-[#050505] p-6 overflow-y-auto border-r border-zinc-900/50">
-                            <header className="flex items-center justify-between pb-6 border-b border-zinc-900/30 mb-6">
-                                <h3 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Project Files</h3>
+                        <aside className="w-64 bg-background p-6 overflow-y-auto border-r border-border">
+                            <header className="flex items-center justify-between pb-6 border-b border-border/30 mb-6">
+                                <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Project Files</h3>
                                 <div className="flex items-center gap-1">
-                                    <button onClick={() => setRootCreating('folder')} className="p-1.5 hover:bg-zinc-900 text-zinc-600 hover:text-white transition-colors rounded-lg border border-transparent hover:border-zinc-800" title="New Folder">
+                                    <button onClick={() => setRootCreating('folder')} className="p-1.5 hover:bg-zinc-900 text-zinc-600 hover:text-foreground transition-colors rounded-lg border border-transparent hover:border-border" title="New Folder">
                                         <FolderPlusIcon className="w-3.5 h-3.5" />
                                     </button>
-                                    <button onClick={() => setRootCreating('file')} className="p-1.5 hover:bg-zinc-900 text-zinc-600 hover:text-white transition-colors rounded-lg border border-transparent hover:border-zinc-800" title="New File">
+                                    <button onClick={() => setRootCreating('file')} className="p-1.5 hover:bg-zinc-900 text-zinc-600 hover:text-foreground transition-colors rounded-lg border border-transparent hover:border-border" title="New File">
                                         <FilePlusIcon className="w-3.5 h-3.5" />
                                     </button>
                                 </div>
                             </header>
 
                             {rootCreating && (
-                                <form onSubmit={handleCreateSubmit} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 bg-zinc-900/50 border border-zinc-800/50 rounded-xl mb-3">
+                                <form onSubmit={handleCreateSubmit} className="w-full text-left text-sm flex items-center gap-2 px-3 py-2 bg-zinc-900/50 border border-border rounded-xl mb-3">
                                     {rootCreating === 'file' ? <FileIcon className="h-3.5 w-3.5 text-zinc-600" /> : <FolderIcon className="h-3.5 w-3.5 text-zinc-600" />}
                                     <input
                                         ref={inputRef}
                                         type="text"
                                         name="name"
                                         onBlur={() => setRootCreating(null)}
-                                        className="bg-transparent text-white text-[11px] w-full focus:outline-none placeholder-zinc-700 font-medium"
+                                        className="bg-transparent text-foreground text-[11px] w-full focus:outline-none placeholder-zinc-700 font-medium"
                                         autoComplete="off"
                                         placeholder="Name..."
                                     />
@@ -315,17 +315,17 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                             ) : (
                                 <div className="flex flex-col items-center justify-center mt-20 opacity-40">
                                    <div className="w-1.5 h-1.5 rounded-full bg-zinc-600 mb-4" />
-                                   <p className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider text-center">Empty Workspace</p>
+                                   <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider text-center">Empty Workspace</p>
                                 </div>
                             )}
                         </aside>
                     )}
 
-                    <main className="flex-1 flex flex-col overflow-hidden relative bg-[#080808]">
+                    <main className="flex-1 flex flex-col overflow-hidden relative bg-background">
                         {!isFileTreeVisible && (
                             <button
                                 onClick={() => setIsFileTreeVisible(true)}
-                                className="absolute top-6 left-6 z-10 p-2 bg-zinc-900/80 border border-zinc-800/50 hover:border-zinc-700 transition-colors rounded-xl backdrop-blur-md"
+                                className="absolute top-6 left-6 z-10 p-2 bg-zinc-900/80 border border-border hover:border-zinc-700 transition-colors rounded-xl backdrop-blur-md"
                                 title="Show Explorer"
                             >
                                 <SidebarIcon className="w-4 h-4 text-zinc-600" />
@@ -333,16 +333,16 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                         )}
                         {activeFile ? (
                             <>
-                                <div className="flex-shrink-0 bg-[#080808] px-8 h-16 flex items-center justify-between border-b border-zinc-900/50">
+                                <div className="flex-shrink-0 bg-background px-8 h-16 flex items-center justify-between border-b border-border">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-1.5 bg-zinc-900/50 border border-zinc-800/50 rounded-lg">
-                                           <FileIcon className="h-3.5 w-3.5 text-zinc-500" />
+                                        <div className="p-1.5 bg-zinc-900/50 border border-border rounded-lg">
+                                           <FileIcon className="h-3.5 w-3.5 text-muted-foreground" />
                                         </div>
-                                        <span className="text-[13px] font-medium text-white">{activeFile.path}</span>
+                                        <span className="text-[13px] font-medium text-foreground">{activeFile.path}</span>
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                        <span className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider">Saved</span>
+                                        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Saved</span>
                                     </div>
                                 </div>
                                 <div className="flex-1 relative">
@@ -375,10 +375,10 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                             </>
                         ) : (
                             <div className="flex flex-col items-center justify-center h-full">
-                                <div className="w-16 h-16 bg-zinc-900/30 border border-zinc-900/50 flex items-center justify-center mb-8 rounded-[2rem]">
+                                <div className="w-16 h-16 bg-zinc-900/30 border border-border flex items-center justify-center mb-8 rounded-[2rem]">
                                     <FileIcon className="h-6 w-6 text-zinc-800" />
                                 </div>
-                                <p className="text-sm font-medium text-zinc-500">Select a file to edit</p>
+                                <p className="text-sm font-medium text-muted-foreground">Select a file to edit</p>
                                 <p className="text-xs text-zinc-600 mt-2">Create a new file or select from the file explorer</p>
                             </div>
                         )}

@@ -7,12 +7,12 @@ export function Header() {
       <div className="container mx-auto flex items-center justify-between">
          <div className="flex items-center">
             <div className="flex items-center gap-2">
-                <OpendevLabsLogo className="h-7 w-7 text-white" />
-                <span className="text-lg font-semibold text-white">opendev-labs</span>
+                <OpendevLabsLogo className="h-7 w-7 text-foreground" />
+                <span className="text-lg font-semibold text-foreground">opendev-labs</span>
             </div>
         </div>
         <div className="flex items-center gap-4">
-          <button className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
+          <button className="text-sm font-medium text-gray-300 hover:text-foreground transition-colors">
             Sign In
           </button>
           <button className="px-4 py-2 text-sm font-medium bg-white text-black rounded-lg hover:bg-gray-200 transition-colors">

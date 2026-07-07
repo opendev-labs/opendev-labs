@@ -284,16 +284,16 @@ export default function OpenHub() {
                                     <iframe 
                                         srcDoc={`
                                             <!DOCTYPE html>
-                                            <html lang="en" class="dark">
+                                            <html lang="en" class="light">
                                             <head>
                                                 <meta charset="utf-8">
                                                 <meta name="viewport" content="width=device-width, initial-scale=1.5">
                                                 <script src="https://cdn.tailwindcss.com"></script>
                                                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
                                                 <style>
-                                                    body { font-family: 'Inter', sans-serif; background-color: #09090b; color: #fafafa; padding: 16px; }
+                                                    body { font-family: 'Inter', sans-serif; background-color: #ffffff; color: #000000; padding: 16px; }
                                                     ::-webkit-scrollbar { width: 6px; height: 6px; }
-                                                    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+                                                    ::-webkit-scrollbar-thumb { background: #e5e5e5; border-radius: 4px; }
                                                 </style>
                                             </head>
                                             <body>

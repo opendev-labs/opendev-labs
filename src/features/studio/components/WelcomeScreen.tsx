@@ -21,7 +21,7 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
 
 
     return (
-        <div className="flex flex-col h-full w-full bg-[#080808] text-white selection:bg-white/10 selection:text-white relative overflow-hidden">
+        <div className="flex flex-col h-full w-full bg-background text-foreground selection:bg-primary/20 selection:text-foreground relative overflow-hidden">
             {/* BACKGROUND EFFECTS */}
             <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <div 
@@ -36,18 +36,18 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
                     <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-zinc-800 text-xs font-medium text-zinc-400 mb-10 rounded-full"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-border text-xs font-medium text-muted-foreground mb-10 rounded-full"
                     >
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         OpenStudio AI IDE
                     </motion.div>
 
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight leading-[1.1]">
+                    <h1 className="text-5xl md:text-7xl font-bold text-foreground mb-6 tracking-tight leading-[1.1]">
                         Code at the speed<br />
-                        <span className="text-zinc-500">of thought.</span>
+                        <span className="text-muted-foreground">of thought.</span>
                     </h1>
 
-                    <p className="text-zinc-400 text-lg md:text-xl mb-16 max-w-2xl mx-auto leading-relaxed">
+                    <p className="text-muted-foreground text-lg md:text-xl mb-16 max-w-2xl mx-auto leading-relaxed">
                         AI-powered code generation with real npm execution.<br className="hidden md:block" /> Build, preview, and deploy instantly in your browser.
                     </p>
 
@@ -61,7 +61,7 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
                     </div>
 
                     <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-4xl">
-                        <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-[0.2em]">Quick Project Templates</h3>
+                        <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-[0.2em]">Quick Project Templates</h3>
                         <div className="flex flex-wrap items-center justify-center gap-4 w-full">
                             {[
                                 { name: 'Next.js Full-Stack App', prompt: 'Create a complete Next.js 14 application with App Router, Tailwind CSS, and a sample API route for user authentication.' },
@@ -75,7 +75,7 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.1 + (i * 0.05) }}
                                     onClick={() => onSendMessage(template.prompt)}
-                                    className="px-4 py-2.5 rounded-xl bg-[#121214] border border-[#27272a] text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500/50 hover:bg-red-500/10 transition-all cursor-pointer flex flex-col items-start gap-1 tracking-wide"
+                                    className="px-4 py-2.5 rounded-xl bg-card border border-border text-xs font-bold text-zinc-300 hover:text-foreground hover:border-red-500/50 hover:bg-red-500/10 transition-all cursor-pointer flex flex-col items-start gap-1 tracking-wide"
                                 >
                                     <span className="text-red-500 opacity-80">✦ {template.name}</span>
                                 </motion.button>

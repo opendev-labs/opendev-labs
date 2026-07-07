@@ -6,12 +6,12 @@ import { toast } from 'sonner';
 
 // Reusable component for a setting card
 const SettingsCard: React.FC<{ icon: React.ReactNode; title: string; description: string; children: React.ReactNode }> = ({ icon, title, description, children }) => (
-    <div className="bg-[#0A0A0A]/50 backdrop-blur-sm border border-zinc-900/50 rounded-2xl overflow-hidden mb-6 shadow-sm">
-        <div className="p-8 border-b border-zinc-900/30">
+    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden mb-6 shadow-sm">
+        <div className="p-8 border-b border-border/30">
             <div className="flex items-start gap-4">
-                <div className="text-zinc-600 p-2 bg-zinc-900/50 rounded-lg border border-zinc-800/50">{icon}</div>
+                <div className="text-zinc-600 p-2 bg-zinc-900/50 rounded-lg border border-border">{icon}</div>
                 <div>
-                    <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.2em] mb-1">{title}</h2>
+                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-[0.2em] mb-1">{title}</h2>
                     <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest opacity-80">{description}</p>
                 </div>
             </div>
@@ -23,7 +23,7 @@ const SettingsCard: React.FC<{ icon: React.ReactNode; title: string; description
 );
 
 const SettingsRow: React.FC<{ label: string; children: React.ReactNode; }> = ({ label, children }) => (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 border-b border-zinc-900/30 last:border-b-0">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 border-b border-border/30 last:border-b-0">
         <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-4 sm:mb-0">{label}</label>
         <div className="w-full sm:w-auto">{children}</div>
     </div>
@@ -61,14 +61,14 @@ export function SettingsView() {
     };
 
     return (
-        <div className="h-full overflow-y-auto bg-[#080808] text-white selection:bg-white/10 selection:text-white custom-scrollbar transition-all duration-500">
+        <div className="h-full overflow-y-auto bg-background text-foreground selection:bg-primary/20 selection:text-foreground custom-scrollbar transition-all duration-500">
             <div className="max-w-5xl mx-auto p-12 lg:p-20">
                 <header className="mb-20">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-zinc-800/50 text-[9px] font-bold text-zinc-600 mb-8 uppercase tracking-[0.3em] rounded-lg font-mono">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-border text-[9px] font-bold text-zinc-600 mb-8 uppercase tracking-[0.3em] rounded-lg font-mono">
                         <div className="w-1 h-1 rounded-full bg-zinc-700" />
                         System // Core Parameters
                     </div>
-                    <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-white mb-4">
+                    <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-foreground mb-4">
                         Handshake.<br /><span className="text-zinc-800">Uplink Configuration.</span>
                     </h1>
                 </header>
@@ -81,13 +81,13 @@ export function SettingsView() {
                     >
                         <div className="space-y-2">
                             <SettingsRow label="Full Name">
-                                <input type="text" disabled value="Sovereign User" className="bg-zinc-900/30 border border-zinc-800/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
+                                <input type="text" disabled value="Sovereign User" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
                             </SettingsRow>
                             <SettingsRow label="Uplink ID">
-                                <input type="email" disabled value="uplink@opendev-labs.io" className="bg-zinc-900/30 border border-zinc-800/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
+                                <input type="email" disabled value="uplink@opendev-labs.io" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
                             </SettingsRow>
                             <SettingsRow label="System Theme">
-                                <div className="bg-zinc-900/30 border border-zinc-800/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 opacity-50">
+                                <div className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 opacity-50">
                                    Titan // Black (Standard)
                                 </div>
                             </SettingsRow>
@@ -101,10 +101,10 @@ export function SettingsView() {
                     >
                         <div className="space-y-2">
                             <SettingsRow label="Consortium Name">
-                                <input type="text" disabled value="OpenDev Labs" className="bg-zinc-900/30 border border-zinc-800/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
+                                <input type="text" disabled value="OpenDev Labs" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
                             </SettingsRow>
                             <SettingsRow label="Active Nodes">
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-zinc-800/50 rounded-xl">Invite Architects</button>
+                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">Invite Architects</button>
                             </SettingsRow>
                         </div>
                     </SettingsCard>
@@ -117,7 +117,7 @@ export function SettingsView() {
                         <SettingsRow label="Resource Plan">
                             <div className="flex flex-col sm:flex-row items-center gap-4">
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 border border-emerald-500/20 px-4 py-2 bg-emerald-500/5 rounded-full">Unlimited Compute // Active</span>
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-zinc-800/50 rounded-xl">Manage Allocation</button>
+                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">Manage Allocation</button>
                             </div>
                         </SettingsRow>
                     </SettingsCard>
@@ -128,7 +128,7 @@ export function SettingsView() {
                         description="Custom model authentication for decentralized materialization."
                     >
                         <div className="space-y-4">
-                            <div className="p-4 bg-zinc-900/30 border border-zinc-800/30 rounded-xl mb-6">
+                            <div className="p-4 bg-zinc-900/30 border border-border/30 rounded-xl mb-6">
                                <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] leading-relaxed">
                                    Uplink Priority: Local materialization keys will override system mesh protocols. Ensure integrity before application.
                                </p>
@@ -141,10 +141,10 @@ export function SettingsView() {
                                         placeholder="Enter your Google Gemini key..."
                                         value={apiKeys.geminiApiKey}
                                         onChange={(e) => setApiKeys({...apiKeys, geminiApiKey: e.target.value})}
-                                        className="bg-[#050505] border border-zinc-900/80 focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-white transition-all focus:outline-none" 
+                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
                                     />
                                     <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white underline decoration-zinc-800 underline-offset-4">Google AI Studio</a>.
+                                        Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">Google AI Studio</a>.
                                     </p>
                                 </div>
                             </SettingsRow>
@@ -156,10 +156,10 @@ export function SettingsView() {
                                         placeholder="Enter your OpenRouter key..."
                                         value={apiKeys.openRouterApiKey}
                                         onChange={(e) => setApiKeys({...apiKeys, openRouterApiKey: e.target.value})}
-                                        className="bg-[#050505] border border-zinc-900/80 focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-white transition-all focus:outline-none" 
+                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
                                     />
                                     <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Optional. Connect to any model via <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white underline decoration-zinc-800 underline-offset-4">OpenRouter</a>.
+                                        Optional. Connect to any model via <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">OpenRouter</a>.
                                     </p>
                                 </div>
                             </SettingsRow>
@@ -171,10 +171,10 @@ export function SettingsView() {
                                         placeholder="Enter your OpenAI key..."
                                         value={apiKeys.openaiApiKey}
                                         onChange={(e) => setApiKeys({...apiKeys, openaiApiKey: e.target.value})}
-                                        className="bg-[#050505] border border-zinc-900/80 focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-white transition-all focus:outline-none" 
+                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
                                     />
                                     <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Optional. Get your key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-white underline decoration-zinc-800 underline-offset-4">OpenAI Dashboard</a>.
+                                        Optional. Get your key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">OpenAI Dashboard</a>.
                                     </p>
                                 </div>
                             </SettingsRow>
@@ -196,9 +196,9 @@ export function SettingsView() {
                         description="Core mesh diagnostics and connectivity reporting."
                     >
                         <div className="space-y-6">
-                            <div className="p-6 bg-[#050505] border border-zinc-900/80 rounded-2xl">
+                            <div className="p-6 bg-background border border-border rounded-2xl">
                                 <div className="flex items-center justify-between mb-6">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Database Cluster Status</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Database Cluster Status</span>
                                     <div className="flex items-center gap-2">
                                        <div className={`w-1.5 h-1.5 rounded-full ${integrity.mode === 'PRODUCTION' ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
                                        <span className={`text-[10px] font-bold uppercase tracking-widest ${integrity.mode === 'PRODUCTION' ? 'text-emerald-500' : 'text-red-500'}`}>
@@ -213,7 +213,7 @@ export function SettingsView() {
                                             <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest mb-2">// Missing Environment Parameters:</p>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                                 {integrity.missingVariables.map(v => (
-                                                    <div key={v} className="flex items-center gap-3 px-3 py-2 bg-zinc-900/30 border border-zinc-800/30 rounded-lg text-[10px] font-mono text-zinc-500">
+                                                    <div key={v} className="flex items-center gap-3 px-3 py-2 bg-zinc-900/30 border border-border/30 rounded-lg text-[10px] font-mono text-muted-foreground">
                                                         <span className="text-red-900 text-[8px]">×</span> {v}
                                                     </div>
                                                 ))}
@@ -234,13 +234,13 @@ export function SettingsView() {
                             </div>
                             
                             <SettingsRow label="Uplink Logs">
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-zinc-800/50 rounded-xl">View Transaction Manifest</button>
+                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">View Transaction Manifest</button>
                             </SettingsRow>
                         </div>
                     </SettingsCard>
                 </div>
 
-                <div className="mt-20 pt-10 border-t border-zinc-900/50 flex flex-col items-center">
+                <div className="mt-20 pt-10 border-t border-border flex flex-col items-center">
                     <p className="text-[9px] font-bold text-zinc-800 uppercase tracking-[0.5em]">End of Core Manifest</p>
                 </div>
             </div>

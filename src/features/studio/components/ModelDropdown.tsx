@@ -50,11 +50,11 @@ export const ModelDropdown: React.FC<ModelDropdownProps> = ({ isOpen, onClose, a
     };
 
     return (
-        <div ref={popoverRef} style={popoverStyle} className="bg-[#1C1C1C] border border-neutral-700 rounded-lg shadow-2xl text-white animate-fadeIn max-h-80 overflow-y-auto">
+        <div ref={popoverRef} style={popoverStyle} className="bg-card border border-border rounded-lg shadow-2xl text-foreground animate-fadeIn max-h-80 overflow-y-auto">
             <div className="p-2">
                 {sortedProviderKeys.map(provider => (
                     <div key={provider}>
-                        <h3 className="px-2 pt-2 pb-1 text-xs font-semibold text-gray-400">{provider}</h3>
+                        <h3 className="px-2 pt-2 pb-1 text-xs font-semibold text-muted-foreground">{provider}</h3>
                         <ul className="space-y-1">
                             {groupedModels[provider].map(model => (
                                 <li key={model.id}>

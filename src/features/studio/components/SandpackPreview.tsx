@@ -162,11 +162,11 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
 
   if (fileCount === 0) {
     return (
-      <div className="flex flex-col h-full bg-[#080808]">
+      <div className="flex flex-col h-full bg-background">
         <BrowserBar url="nexus://waiting-for-materialization" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
-            <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center mx-auto animate-pulse">
+            <div className="w-12 h-12 bg-white/5 border border-border rounded-2xl flex items-center justify-center mx-auto animate-pulse">
                 <SpinnerIcon className="w-5 h-5 text-zinc-700" />
             </div>
             <p className="text-zinc-600 text-[10px] uppercase font-bold tracking-[0.4em]">Awaiting Genesis Protocol</p>
@@ -177,7 +177,7 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white overflow-hidden rounded-r-3xl border-l border-zinc-900 shadow-2xl">
+    <div className="flex flex-col h-full bg-white overflow-hidden rounded-r-3xl border-l border-border shadow-2xl">
       <BrowserBar 
         url="localhost:5173" 
         showConsole={showConsole} 
@@ -200,7 +200,7 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
               'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
             ],
           }}
-          theme="dark"
+          theme="light"
         >
           <SandpackLayout style={{ height: '100%', border: 'none', borderRadius: 0, background: 'transparent' }}>
             <div className={cn("flex flex-col h-full w-full transition-all duration-500", showConsole ? "pb-40" : "")}>
@@ -212,7 +212,7 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
                 />
             </div>
             {showConsole && (
-                <div className="absolute bottom-0 left-0 right-0 h-40 bg-[#0A0A0A] border-t border-zinc-800 font-mono text-[10px] overflow-hidden border-b border-zinc-900">
+                <div className="absolute bottom-0 left-0 right-0 h-40 bg-card border-t border-border font-mono text-[10px] overflow-hidden border-b border-border">
                     <SandpackConsole style={{ height: '100%', backgroundColor: '#0A0A0A' }} />
                 </div>
             )}
@@ -227,24 +227,24 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
  * Browser chrome bar that sits above the preview.
  */
 const BrowserBar: React.FC<{ url: string; showConsole?: boolean; onToggleConsole?: () => void }> = ({ url, showConsole, onToggleConsole }) => (
-  <div className="h-14 bg-[#0A0A0A] border-b border-zinc-900 flex items-center px-6 gap-6 flex-shrink-0">
+  <div className="h-14 bg-card border-b border-border flex items-center px-6 gap-6 flex-shrink-0">
     <div className="flex items-center gap-3">
       <div className="flex gap-1.5 mr-2">
         <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
         <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
         <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
       </div>
-      <button className="text-zinc-600 hover:text-white transition-colors">
+      <button className="text-zinc-600 hover:text-foreground transition-colors">
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
       </button>
-      <button className="text-zinc-600 hover:text-white transition-colors">
+      <button className="text-zinc-600 hover:text-foreground transition-colors">
         <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
       </button>
     </div>
 
-    <div className="flex-1 bg-[#050505] border border-zinc-900 rounded-xl h-9 flex items-center px-4 gap-3 group focus-within:border-zinc-700 transition-all">
+    <div className="flex-1 bg-background border border-border rounded-xl h-9 flex items-center px-4 gap-3 group focus-within:border-zinc-700 transition-all">
       <svg className="w-3 h-3 text-zinc-700" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-3.44A20.01 20.01 0 0110 11.218m8.239-4.239A9.954 9.954 0 0121 12c0 1.221-.219 2.39-.621 3.475m-3.475 3.475A9.954 9.954 0 0112 21c-1.221 0-2.39-.219-3.475-.621m-3.475-3.475A9.954 9.954 0 013 12c0-1.221.219-2.39.621-3.475m3.475-3.475A9.954 9.954 0 0112 3c1.221 0 2.39.219 3.475.621m3.475 3.475A20.01 20.01 0 0114 11.218" /></svg>
-      <span className="text-[11px] text-zinc-500 font-mono truncate">{url}</span>
+      <span className="text-[11px] text-muted-foreground font-mono truncate">{url}</span>
     </div>
 
     <div className="flex items-center gap-4">
@@ -253,15 +253,15 @@ const BrowserBar: React.FC<{ url: string; showConsole?: boolean; onToggleConsole
         className={cn(
             "px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all border",
             showConsole 
-                ? "bg-zinc-800 text-white border-zinc-700" 
-                : "bg-transparent text-zinc-500 border-zinc-900 hover:border-zinc-800 hover:text-zinc-400"
+                ? "bg-zinc-800 text-foreground border-zinc-700" 
+                : "bg-transparent text-muted-foreground border-border hover:border-border hover:text-muted-foreground"
         )}
       >
         Console
       </button>
       <div className="flex items-center gap-2">
         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">
+        <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
             Handshake Active
         </span>
       </div>

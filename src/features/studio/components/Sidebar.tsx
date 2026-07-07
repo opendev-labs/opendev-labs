@@ -25,18 +25,18 @@ export function Sidebar({ onNavigate, recentChats, onSelectChat, onDeleteSession
   ];
 
   return (
-    <aside className="w-[260px] bg-[#000000] flex flex-col h-full z-40">
+    <aside className="w-[260px] bg-background flex flex-col h-full z-40">
       {/* 🏙️ LOGO & BRANDING */}
       <div className="p-4 flex items-center gap-2 mb-4">
-        <div className="flex items-center px-1">
-          <span className="text-lg font-bold text-white tracking-tight">Open</span>
-          <div className="bg-zinc-800 px-1.5 py-0.5 rounded ml-1">
-             <span className="text-[11px] font-bold text-white">Studio</span>
+        <div className="flex items-center px-1 gap-2">
+          <div className="w-7 h-7 rounded bg-black text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            O
           </div>
+          <span className="text-lg font-bold text-foreground tracking-tight">OpenStudio</span>
         </div>
-        <button className="ml-auto text-zinc-500 hover:text-white transition-colors">
+        <button className="ml-auto text-muted-foreground hover:text-foreground transition-colors">
           {/* Panel toggle icon or similar */}
-          <div className="w-4 h-4 rounded border border-zinc-800 flex items-center justify-center">
+          <div className="w-4 h-4 rounded border border-border flex items-center justify-center">
             <div className="w-2.5 h-[1px] bg-zinc-600" />
           </div>
         </button>
@@ -45,7 +45,7 @@ export function Sidebar({ onNavigate, recentChats, onSelectChat, onDeleteSession
       <div className="px-4 mb-8">
         <button
           onClick={() => onNavigate('new-chat')}
-          className="w-full h-10 flex items-center justify-center gap-2 bg-zinc-900/50 border border-zinc-800/50 text-white rounded-xl font-bold text-[12px] hover:bg-zinc-800 transition-all"
+          className="w-full h-10 flex items-center justify-center gap-2 bg-zinc-900/50 border border-border text-foreground rounded-xl font-bold text-[12px] hover:bg-zinc-800 transition-all"
         >
           Start new chat
         </button>
@@ -62,8 +62,8 @@ export function Sidebar({ onNavigate, recentChats, onSelectChat, onDeleteSession
                 onClick={() => onNavigate(item.id)}
                 className={`w-full group flex items-center gap-3 px-3 py-2 transition-all duration-300 rounded-lg ${
                   isActive 
-                    ? 'bg-zinc-900 text-white' 
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30'
+                    ? 'bg-zinc-900 text-foreground' 
+                    : 'text-muted-foreground hover:text-zinc-300 hover:bg-zinc-900/30'
                 }`}
               >
                 <item.icon className="h-4 w-4" />
@@ -86,8 +86,8 @@ export function Sidebar({ onNavigate, recentChats, onSelectChat, onDeleteSession
                   onClick={() => onSelectChat(chat.id)}
                   className={`w-full flex items-center gap-2 px-3 py-2 transition-all duration-300 rounded-lg text-left ${
                     activeChatId === chat.id 
-                      ? 'bg-[#1A1A1A] text-white shadow-sm' 
-                      : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/30'
+                      ? 'bg-muted text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-zinc-300 hover:bg-zinc-900/30'
                   }`}
                 >
                   <span className="text-[13px] font-medium truncate w-full">{chat.title || 'Untitled Session'}</span>
@@ -105,7 +105,7 @@ export function Sidebar({ onNavigate, recentChats, onSelectChat, onDeleteSession
              OL
            </div>
            <div className="flex flex-col">
-              <span className="text-[12px] font-bold text-white group-hover:text-white transition-colors">opendev-labs</span>
+              <span className="text-[12px] font-bold text-foreground group-hover:text-foreground transition-colors">opendev-labs</span>
            </div>
          </div>
       </div>

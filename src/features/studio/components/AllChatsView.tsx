@@ -37,11 +37,11 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
     }, [sessions, searchTerm]);
 
     return (
-        <div className="h-full overflow-y-auto bg-black text-white selection:bg-white selection:text-black">
+        <div className="h-full overflow-y-auto bg-black text-foreground selection:bg-white selection:text-black">
             <div className="max-w-4xl mx-auto p-12">
                 <header className="flex items-center justify-between mb-16">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 text-[9px] font-bold text-zinc-500 mb-6 uppercase tracking-[0.3em]">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-border text-[9px] font-bold text-muted-foreground mb-6 uppercase tracking-[0.3em]">
                             Archives // Neural Repository
                         </div>
                         <h1 className="text-6xl font-bold tracking-tighter lowercase leading-none">
@@ -50,7 +50,7 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
                     </div>
                     <button
                         onClick={() => onNavigate('new-chat')}
-                        className="flex items-center gap-3 px-6 py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-black hover:bg-red-500 hover:text-white transition-all duration-300 rounded-none shadow-2xl"
+                        className="flex items-center gap-3 px-6 py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-black hover:bg-red-500 hover:text-foreground transition-all duration-300 rounded-none shadow-2xl"
                     >
                         <NewChatIcon className="h-4 w-4" />
                         Materialize Node
@@ -64,7 +64,7 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
                         placeholder="Search archives by project name or purpose..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-zinc-950 border border-zinc-900 rounded-none pl-14 pr-6 py-4 text-[11px] font-mono text-zinc-300 placeholder-zinc-800 focus:outline-none focus:border-zinc-700 transition-colors"
+                        className="w-full bg-zinc-950 border border-border rounded-none pl-14 pr-6 py-4 text-[11px] font-mono text-zinc-300 placeholder-zinc-800 focus:outline-none focus:border-zinc-700 transition-colors"
                     />
                 </div>
 
@@ -74,12 +74,12 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
                             <div key={session.id} className="group relative">
                                 <button
                                     onClick={() => onSelectChat(session.id)}
-                                    className="w-full text-left p-8 bg-zinc-950/50 border border-zinc-900 rounded-none hover:border-zinc-700 transition-all duration-300 flex items-center justify-between"
+                                    className="w-full text-left p-8 bg-zinc-950/50 border border-border rounded-none hover:border-zinc-700 transition-all duration-300 flex items-center justify-between"
                                 >
                                     <div>
                                         <div className="flex items-center gap-4 mb-2">
                                             <div className="w-1.5 h-1.5 rounded-none bg-zinc-800 group-hover:bg-red-500 transition-colors" />
-                                            <h2 className="text-[12px] font-bold text-white uppercase tracking-widest truncate">{session.title}</h2>
+                                            <h2 className="text-[12px] font-bold text-foreground uppercase tracking-widest truncate">{session.title}</h2>
                                         </div>
                                         <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-1 ml-5">
                                             Handshake: {timeAgo(session.lastUpdated)}
@@ -93,7 +93,7 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
                                             onDeleteSession(session.id);
                                         }
                                     }}
-                                    className="absolute right-8 top-1/2 -translate-y-1/2 p-3 rounded-none text-zinc-700 opacity-0 group-hover:opacity-100 hover:bg-zinc-900 hover:text-red-500 transition-all border border-zinc-900"
+                                    className="absolute right-8 top-1/2 -translate-y-1/2 p-3 rounded-none text-zinc-700 opacity-0 group-hover:opacity-100 hover:bg-zinc-900 hover:text-red-500 transition-all border border-border"
                                     aria-label={`Delete chat ${session.title}`}
                                 >
                                     <TrashIcon className="h-4 w-4" />
@@ -101,8 +101,8 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-24 px-8 border border-dashed border-zinc-900 rounded-none">
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-zinc-500">Node records void</h3>
+                        <div className="text-center py-24 px-8 border border-dashed border-border rounded-none">
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground">Node records void</h3>
                             <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-700 mt-4 leading-relaxed max-w-xs mx-auto">
                                 {searchTerm ? 'The requested identifier does not exist in the current neural history.' : 'Initialize your first node to populate the system archives.'}
                             </p>

@@ -111,11 +111,11 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
-      <DialogContent className="bg-[#0A0A0A] border-zinc-800 rounded-2xl max-w-md p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="p-6 border-b border-zinc-900">
-          <DialogTitle className="text-[13px] font-bold uppercase tracking-[0.2em] text-white flex items-center gap-3">
-            <div className="p-2 bg-white/5 border border-zinc-800 rounded-lg">
-              <DeployIcon className="w-4 h-4 text-white" />
+      <DialogContent className="bg-card border-border rounded-2xl max-w-md p-0 overflow-hidden shadow-2xl">
+        <DialogHeader className="p-6 border-b border-border">
+          <DialogTitle className="text-[13px] font-bold uppercase tracking-[0.2em] text-foreground flex items-center gap-3">
+            <div className="p-2 bg-white/5 border border-border rounded-lg">
+              <DeployIcon className="w-4 h-4 text-foreground" />
             </div>
             Deploy to GitHub Pages
           </DialogTitle>
@@ -127,7 +127,7 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
             <div className="space-y-4">
               <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl">
                 <p className="text-[11px] text-red-400 font-bold uppercase tracking-widest mb-3">GitHub Not Connected</p>
-                <p className="text-[11px] text-zinc-400 leading-relaxed mb-4">Connect your GitHub account to deploy projects to GitHub Pages.</p>
+                <p className="text-[11px] text-muted-foreground leading-relaxed mb-4">Connect your GitHub account to deploy projects to GitHub Pages.</p>
                 <button
                   onClick={handleConnectGitHub}
                   className="w-full px-4 py-3 text-[11px] font-bold uppercase tracking-widest bg-white text-black hover:bg-zinc-200 transition-all rounded-xl"
@@ -148,17 +148,17 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
                   value={repoName}
                   onChange={(e) => setRepoName(e.target.value.replace(/[^a-z0-9-]/gi, '-').toLowerCase())}
                   placeholder="my-awesome-project"
-                  className="w-full bg-[#050505] border border-zinc-800 focus:border-zinc-600 rounded-xl px-4 py-3 text-[12px] font-mono text-white transition-all focus:outline-none"
+                  className="w-full bg-background border border-border focus:border-zinc-600 rounded-xl px-4 py-3 text-[12px] font-mono text-foreground transition-all focus:outline-none"
                 />
                 <p className="text-[9px] text-zinc-600 mt-2 font-mono">
                   github.com/{user?.name?.toLowerCase().replace(/\s/g, '') || 'user'}/{repoName || '...'}
                 </p>
               </div>
 
-              <div className="p-3 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
+              <div className="p-3 bg-zinc-900/50 border border-border rounded-xl">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Files to deploy</span>
-                  <span className="text-[11px] text-white font-bold">{files.filter(f => !f.path.endsWith('.keep')).length}</span>
+                  <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">Files to deploy</span>
+                  <span className="text-[11px] text-foreground font-bold">{files.filter(f => !f.path.endsWith('.keep')).length}</span>
                 </div>
               </div>
 
@@ -171,7 +171,7 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
               <button
                 onClick={handleDeploy}
                 disabled={!repoName.trim()}
-                className="w-full px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] bg-white text-black hover:bg-emerald-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-xl shadow-lg"
+                className="w-full px-4 py-3.5 text-[11px] font-bold uppercase tracking-[0.2em] bg-white text-black hover:bg-emerald-500 hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all rounded-xl shadow-lg"
               >
                 Deploy Now
               </button>
@@ -182,13 +182,13 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
           {state === 'deploying' && (
             <div className="space-y-6 py-4">
               <div className="flex items-center justify-center gap-3">
-                <SpinnerIcon className="w-5 h-5 animate-spin text-white" />
-                <span className="text-[12px] font-bold text-white uppercase tracking-widest">{progress?.step || 'Deploying'}...</span>
+                <SpinnerIcon className="w-5 h-5 animate-spin text-foreground" />
+                <span className="text-[12px] font-bold text-foreground uppercase tracking-widest">{progress?.step || 'Deploying'}...</span>
               </div>
               <div className="w-full bg-zinc-900 rounded-full h-1 overflow-hidden">
                 <div className="bg-white h-full rounded-full animate-pulse" style={{ width: '60%' }} />
               </div>
-              <p className="text-center text-[10px] text-zinc-500 font-mono">{progress?.detail || 'Please wait...'}</p>
+              <p className="text-center text-[10px] text-muted-foreground font-mono">{progress?.detail || 'Please wait...'}</p>
             </div>
           )}
 
@@ -199,22 +199,22 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
                 <div className="w-12 h-12 mx-auto bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center">
                   <span className="text-emerald-500 text-xl">✓</span>
                 </div>
-                <p className="text-[12px] font-bold text-white uppercase tracking-widest">Deployed Successfully</p>
-                <p className="text-[10px] text-zinc-500">Your app will be live in ~30 seconds.</p>
+                <p className="text-[12px] font-bold text-foreground uppercase tracking-widest">Deployed Successfully</p>
+                <p className="text-[10px] text-muted-foreground">Your app will be live in ~30 seconds.</p>
               </div>
 
-              <div className="p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-xl space-y-3">
+              <div className="p-4 bg-zinc-900/50 border border-border rounded-xl space-y-3">
                 <div>
                   <label className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest block mb-1">Live URL</label>
                   <div className="flex items-center gap-2">
                     <input
                       readOnly
                       value={deployedUrl}
-                      className="flex-1 bg-[#050505] border border-zinc-800 rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-400 focus:outline-none"
+                      className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-[11px] font-mono text-emerald-400 focus:outline-none"
                     />
                     <button
                       onClick={handleCopyUrl}
-                      className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest bg-zinc-800 text-white hover:bg-zinc-700 transition-all rounded-lg"
+                      className="px-3 py-2 text-[9px] font-bold uppercase tracking-widest bg-zinc-800 text-foreground hover:bg-zinc-700 transition-all rounded-lg"
                     >
                       Copy
                     </button>
@@ -265,7 +265,7 @@ export function DeployDialog({ open, onClose, files, sessionTitle }: DeployDialo
               </div>
               <button
                 onClick={() => setState('idle')}
-                className="w-full px-4 py-3 text-[10px] font-bold uppercase tracking-widest bg-zinc-900 text-white border border-zinc-800 hover:bg-zinc-800 transition-all rounded-xl"
+                className="w-full px-4 py-3 text-[10px] font-bold uppercase tracking-widest bg-zinc-900 text-foreground border border-border hover:bg-zinc-800 transition-all rounded-xl"
               >
                 Try Again
               </button>
