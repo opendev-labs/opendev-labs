@@ -59,7 +59,7 @@ function detectDependencies(files: FileNode[]): Record<string, string> {
 /**
  * Detect project framework from file extensions.
  */
-function detectTemplate(files: FileNode[]): 'react-ts' | 'vue' | 'svelte' | 'vanilla' | 'static' | 'nextjs' | 'node' {
+function detectTemplate(files: FileNode[]): 'vite-react-ts' | 'vite-vue-ts' | 'vite-svelte-ts' | 'vanilla' | 'static' | 'nextjs' | 'node' {
   const hasNextConfig = files.some(f => f.path.includes('next.config'));
   const hasAppDir = files.some(f => f.path.startsWith('app/') || f.path.startsWith('/app/'));
   const hasPagesDir = files.some(f => f.path.startsWith('pages/') || f.path.startsWith('/pages/'));
@@ -73,10 +73,10 @@ function detectTemplate(files: FileNode[]): 'react-ts' | 'vue' | 'svelte' | 'van
   const hasServerOnly = files.some(f => f.path === 'server.js' || f.path === '/server.js') && !hasHtmlOnly && !hasTsx;
 
   if (hasServerOnly) return 'node';
-  if (hasVue) return 'vue';
-  if (hasSvelte) return 'svelte';
+  if (hasVue) return 'vite-vue-ts';
+  if (hasSvelte) return 'vite-svelte-ts';
   if (hasHtmlOnly) return 'static';
-  return 'react-ts';
+  return 'vite-react-ts';
 }
 
 /**
@@ -94,10 +94,10 @@ function convertFiles(files: FileNode[], template: string): Record<string, strin
   }
 
   // For React projects, ensure we have proper entry points
-  if (template === 'react-ts') {
-    // If they have App.tsx but no index.tsx, create the entry point
+  if (template === 'vite-react-ts') {
+    // If they have App.tsx but no main.tsx or index.tsx, create the entry point
     const hasIndex = Object.keys(sandpackFiles).some(p =>
-      /^\/?(src\/)?index\.(tsx|jsx|ts|js)$/.test(p)
+      /^\/?(src\/)?(main|index)\.(tsx|jsx|ts|js)$/.test(p)
     );
     const hasApp = Object.keys(sandpackFiles).some(p =>
       /^\/?(src\/)?App\.(tsx|jsx)$/.test(p)
@@ -110,9 +110,9 @@ function convertFiles(files: FileNode[], template: string): Record<string, strin
       );
       const appImport = appPath?.replace(/^\//, '').replace(/\.(tsx|jsx)$/, '');
 
-      sandpackFiles['/index.tsx'] = `import React from 'react';
+      sandpackFiles['/src/main.tsx'] = `import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './${appImport}';
+import App from '../${appImport}';
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);
