@@ -92,5 +92,56 @@ export const LocalSyncService = {
     
     getLinkedFolderName() {
         return this.directoryHandle?.name || null;
+    },
+
+    /**
+     * Pull all files from the local directory into a virtual file tree.
+     */
+    async pullFromLocal(): Promise<FileNode[]> {
+        if (!this.directoryHandle) {
+            console.warn("No local folder linked.");
+            return [];
+        }
+
+        const fileTree: FileNode[] = [];
+
+        try {
+            // Verify permission
+            // @ts-ignore
+            const permission = await this.directoryHandle.queryPermission({ mode: 'readwrite' });
+            if (permission !== 'granted') {
+                // @ts-ignore
+                const request = await this.directoryHandle.requestPermission({ mode: 'readwrite' });
+                if (request !== 'granted') return [];
+            }
+
+            // Recursive function to traverse directory
+            async function traverse(dirHandle: any, currentPath: string) {
+                // @ts-ignore
+                for await (const entry of dirHandle.values()) {
+                    if (entry.name === 'node_modules' || entry.name === '.git' || entry.name === '.next' || entry.name === 'dist') {
+                        continue;
+                    }
+                    
+                    const fullPath = currentPath ? `${currentPath}/${entry.name}` : entry.name;
+                    
+                    if (entry.kind === 'file') {
+                        const file = await entry.getFile();
+                        // Ignore binary/large files based on heuristics or mime type
+                        if (file.size > 1024 * 1024) continue; // Skip files > 1MB
+                        const content = await file.text();
+                        fileTree.push({ path: fullPath, content: content });
+                    } else if (entry.kind === 'directory') {
+                        await traverse(entry, fullPath);
+                    }
+                }
+            }
+
+            await traverse(this.directoryHandle, '');
+            return fileTree;
+        } catch (e) {
+            console.error("Failed to pull from local folder:", e);
+            return [];
+        }
     }
 };

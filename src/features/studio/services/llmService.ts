@@ -62,16 +62,12 @@ const toGenericHistory = (messages: Message[]) => {
         }));
 };
 
-const buildFullPrompt = (prompt: string, fileTree: FileNode[]): string => {
-    let fullPrompt = prompt;
-    if (fileTree && fileTree.length > 0) {
-        const fileContext = {
-            files: fileTree.map(f => ({ path: f.path, content: f.content }))
-        };
-        const contextString = `\n\n[Current Project Files]\n\`\`\`json\n${JSON.stringify(fileContext, null, 2)}\n\`\`\``;
-        fullPrompt += contextString;
-    }
-    return fullPrompt;
+const generateFileTreeContext = (fileTree: FileNode[]): string => {
+    if (!fileTree || fileTree.length === 0) return '';
+    const fileContext = {
+        files: fileTree.map(f => ({ path: f.path, content: f.content }))
+    };
+    return `\n\n[Current Project Files (Virtual File System)]\n\`\`\`json\n${JSON.stringify(fileContext)}\n\`\`\`\n\nCRITICAL: The above is the current state of the workspace. If you need to modify existing files, you MUST use action: "modified" and provide the full updated content based on these files.`;
 }
 
 // --- Provider-Specific Clients ---
@@ -100,7 +96,7 @@ async function* streamOpenAICompatibleResponse(fullPrompt: string, history: Mess
     }
 
     const messages = [
-        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC },
+        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC + generateFileTreeContext(history.length > 0 ? (history as any).fileTree || [] : []) },
         ...toGenericHistory(history),
         { role: 'user', content: fullPrompt }
     ];
@@ -220,7 +216,7 @@ async function* streamHuggingFaceResponse(fullPrompt: string, history: Message[]
 
 async function* streamOllamaResponse(fullPrompt: string, history: Message[], modelConfig: ModelConfig): AsyncGenerator<{ text: string; }> {
     const messages = [
-        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC },
+        { role: 'system', content: TARS_SYSTEM_INSTRUCTION_GENERIC + generateFileTreeContext(history.length > 0 ? (history as any).fileTree || [] : []) },
         ...toGenericHistory(history),
         { role: 'user', content: fullPrompt }
     ];
@@ -317,7 +313,9 @@ export async function* streamChatResponse(
         return;
     }
 
-    const fullPrompt = buildFullPrompt(prompt, fileTree);
+    // Pass fileTree out to streamChatResponse so it can be picked up by the provider clients
+    (history as any).fileTree = fileTree;
+    const fullPrompt = prompt;
 
     try {
         switch (modelConfig.provider) {

@@ -47,6 +47,15 @@ export async function* streamGeminiResponse(fullPrompt: string, history: Message
     }
     const ai = new GoogleGenAI({ apiKey: effectiveApiKey });
 
+    const fileTree = (history as any).fileTree || [];
+    let fileContextString = '';
+    if (fileTree.length > 0) {
+        const fileContext = {
+            files: fileTree.map((f: any) => ({ path: f.path, content: f.content }))
+        };
+        fileContextString = `\n\n[Current Project Files (Virtual File System)]\n\`\`\`json\n${JSON.stringify(fileContext)}\n\`\`\`\n\nCRITICAL: The above is the current state of the workspace. If you need to modify existing files, you MUST use action: "modified" and provide the full updated content based on these files.`;
+    }
+
     const contents = [
         ...toGeminiHistory(history),
         { role: 'user', parts: [{ text: fullPrompt }] }
@@ -56,7 +65,7 @@ export async function* streamGeminiResponse(fullPrompt: string, history: Message
         model: modelConfig.apiIdentifier,
         contents: contents,
         config: {
-            systemInstruction: OPEN_STUDIO_SYSTEM_INSTRUCTION_GEMINI,
+            systemInstruction: OPEN_STUDIO_SYSTEM_INSTRUCTION_GEMINI + fileContextString,
             responseMimeType: "application/json",
             responseSchema: {
                 type: Type.OBJECT,

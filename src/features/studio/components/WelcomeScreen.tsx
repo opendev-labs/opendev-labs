@@ -97,24 +97,27 @@ export function WelcomeScreen({ onSendMessage, isThinking, selectedModelId, onMo
                         />
                     </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-6 w-full max-w-4xl">
-                        {[
-                            'Create a beautiful landing page design',
-                            'Build a serverless Node backend',
-                            'Map out system architecture',
-                            'Generate a React dashboard'
-                        ].map((suggestion, i) => (
-                            <motion.button
-                                key={i}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.1 + (i * 0.05) }}
-                                onClick={() => onSendMessage(suggestion)}
-                                className="text-sm text-zinc-500 hover:text-white transition-colors cursor-pointer flex items-center gap-2 tracking-wide"
-                            >
-                                <span className="opacity-40">✦</span> {suggestion}
-                            </motion.button>
-                        ))}
+                    <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-4xl">
+                        <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-[0.2em]">Quick Project Templates</h3>
+                        <div className="flex flex-wrap items-center justify-center gap-4 w-full">
+                            {[
+                                { name: 'Next.js Full-Stack App', prompt: 'Create a complete Next.js 14 application with App Router, Tailwind CSS, and a sample API route for user authentication.' },
+                                { name: 'Three.js 3D Simulation', prompt: 'Build an immersive 3D particle simulation using Three.js and @react-three/fiber with post-processing effects.' },
+                                { name: 'React UI Dashboard', prompt: 'Generate a modern React single-page application dashboard using shadcn/ui components, dark mode, and responsive layout.' },
+                                { name: 'Node.js Express API', prompt: 'Scaffold a Node.js Express API server with WebSocket real-time communication support and MongoDB connection setup.' }
+                            ].map((template, i) => (
+                                <motion.button
+                                    key={i}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 + (i * 0.05) }}
+                                    onClick={() => onSendMessage(template.prompt)}
+                                    className="px-4 py-2.5 rounded-xl bg-[#121214] border border-[#27272a] text-xs font-bold text-zinc-300 hover:text-white hover:border-red-500/50 hover:bg-red-500/10 transition-all cursor-pointer flex flex-col items-start gap-1 tracking-wide"
+                                >
+                                    <span className="text-red-500 opacity-80">✦ {template.name}</span>
+                                </motion.button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </main>

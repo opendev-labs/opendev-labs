@@ -22,6 +22,7 @@ interface ChatSessionViewProps {
   // Model props
   selectedModelId: string;
   onModelChange: (modelId: string) => void;
+  onReplaceFileTree: (fileTree: FileNode[]) => void;
 }
 
 export function ChatSessionView({
@@ -35,6 +36,7 @@ export function ChatSessionView({
   onRenameFileOrFolder,
   selectedModelId,
   onModelChange,
+  onReplaceFileTree,
 }: ChatSessionViewProps) {
   const { user, profile } = useAuth();
   const lastMessage = session.messages[session.messages.length - 1];
@@ -173,6 +175,23 @@ export function ChatSessionView({
             >
               {isLinked ? 'Syncing Active' : 'Link Folder'}
             </button>
+            {isLinked && (
+              <button
+                onClick={async () => {
+                  const files = await LocalSyncService.pullFromLocal();
+                  if (files && files.length > 0) {
+                    onReplaceFileTree(files);
+                    toast.success(`Pulled ${files.length} files from local folder.`);
+                  } else {
+                    toast.error("Failed to pull files or folder is empty.");
+                  }
+                }}
+                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-medium rounded-md transition-colors border border-zinc-700"
+                title="Pull from Local Folder"
+              >
+                Pull
+              </button>
+            )}
             <button
               onClick={async () => {
                 if (!user || !profile) { toast.error('Login required to share.'); return; }

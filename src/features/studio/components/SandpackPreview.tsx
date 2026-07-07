@@ -3,6 +3,7 @@ import {
   SandpackProvider,
   SandpackPreview as SandpackPreviewComponent,
   SandpackLayout,
+  SandpackConsole,
 } from '@codesandbox/sandpack-react';
 import type { FileNode } from '../types';
 import { SpinnerIcon, FilePlusIcon } from './icons/Icons';
@@ -210,20 +211,8 @@ export const SandpackPreview: React.FC<SandpackPreviewProps> = ({ files }) => {
                 />
             </div>
             {showConsole && (
-                <div className="absolute bottom-0 left-0 right-0 h-40 bg-[#0A0A0A] border-t border-zinc-800 p-4 font-mono text-[10px] overflow-auto border-b border-zinc-900">
-                    <div className="flex items-center justify-between mb-3">
-                        <span className="text-zinc-600 font-bold uppercase tracking-widest text-[8px]">Console Output</span>
-                        <div className="flex gap-1">
-                            <div className="w-1.5 h-1.5 rounded-full bg-red-500/50" />
-                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/50" />
-                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/50" />
-                        </div>
-                    </div>
-                   <div className="text-emerald-500/80 leading-relaxed">
-                        &gt; Nexus Runtime v2026.4.15 Initialized<br />
-                        &gt; Materializing dependencies...<br />
-                        &gt; Application mounted successfully.
-                   </div>
+                <div className="absolute bottom-0 left-0 right-0 h-40 bg-[#0A0A0A] border-t border-zinc-800 font-mono text-[10px] overflow-hidden border-b border-zinc-900">
+                    <SandpackConsole style={{ height: '100%', backgroundColor: '#0A0A0A' }} />
                 </div>
             )}
           </SandpackLayout>

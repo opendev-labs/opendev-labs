@@ -328,6 +328,15 @@ function App() {
     }));
   };
 
+  const handleReplaceFileTree = (fileTree: FileNode[]) => {
+    setSessions(currentSessions => currentSessions.map(s => {
+      if (s.id === activeSessionId) {
+        return { ...s, fileTree, activeFile: fileTree[0] || null };
+      }
+      return s;
+    }));
+  };
+
   const handleSendMessage = async (prompt: string) => {
     setIsThinking(true);
 
@@ -614,6 +623,9 @@ function App() {
                 onAddFileOrFolder={handleAddFileOrFolder}
                 onDeleteFileOrFolder={handleDeleteFileOrFolder}
                 onRenameFileOrFolder={handleRenameFileOrFolder}
+                selectedModelId={selectedModelId}
+                onModelChange={handleModelChange}
+                onReplaceFileTree={handleReplaceFileTree}
               />
             )}
             {view === 'new-chat' && !activeSessionId && (
