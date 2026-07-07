@@ -7,7 +7,7 @@ import { useLocation } from 'react-router-dom';
 export default function Layout() {
   const location = useLocation();
   const isHomePage = location.pathname === '/';
-  const isFullWidthPage = isHomePage || location.pathname.startsWith('/open-hub');
+  const isFullWidthPage = isHomePage || location.pathname.startsWith('/open-hub') || location.pathname.startsWith('/user');
 
   return (
     <div className="min-h-screen bg-[#09090b] text-[#fafafa] selection:bg-red-500/20 selection:text-white font-sans flex flex-col">

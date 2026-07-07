@@ -76,7 +76,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-red-500 selection:text-black font-sans pb-20">
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-red-500 selection:text-black font-sans pb-20 pt-14">
             {/* Header / Banner Section */}
             <div className="relative h-[25vh] md:h-[35vh] w-full bg-zinc-900 overflow-hidden">
                 {profile.bannerUrl ? (
@@ -87,7 +87,7 @@ export default function ProfilePage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
             </div>
 
-            <main className="max-w-[1200px] mx-auto px-4 md:px-8 relative">
+            <main className="w-full px-4 md:px-12 lg:px-24 xl:px-32 relative">
                 {/* Profile Header Card */}
                 <div className="flex flex-col md:flex-row gap-8 items-end -mt-20 mb-12">
                     <div className="w-32 h-32 md:w-44 md:h-44 rounded-3xl border-8 border-black bg-zinc-900 overflow-hidden shadow-2xl shrink-0 relative z-10">
