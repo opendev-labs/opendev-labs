@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Terminal, Database, Cpu, Zap, Box, Code, Activity, Users, Shield, ShieldCheck, Github, MessageSquare, Heart, Share2, MoreHorizontal, User as UserIcon, Briefcase, Globe, TrendingUp, Sparkles, Plus, Award, Image as ImageIcon, MapPin, Calendar, Check, AlertCircle, Search, Filter, ArrowRight, Crown, Lock, Unlock } from 'lucide-react';
+import { Terminal, Database, Cpu, Zap, Box, Code, Activity, Users, Shield, ShieldCheck, Github, MessageSquare, Heart, Share2, MoreHorizontal, User as UserIcon, Briefcase, Globe, TrendingUp, Sparkles, Plus, Award, Image as ImageIcon, MapPin, Calendar, Check, AlertCircle, Search, Filter, ArrowRight, Crown, Lock, Unlock, Trash2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../components/ui/Card';
@@ -166,6 +166,17 @@ export default function OpenHub() {
             console.error("Failed to create post:", e);
         } finally {
             setIsPosting(false);
+        }
+    };
+
+    const handleDeletePost = async (postId: string) => {
+        if (!user) return;
+        try {
+            const userContext = { uid: 'global', email: 'global' };
+            await LamaDB.store.collection('open_hub_posts', userContext).delete(postId);
+            setPosts(prev => prev.filter(p => p.id !== postId && p.id_db !== postId));
+        } catch (e) {
+            console.error("Failed to delete post:", e);
         }
     };
 
@@ -529,7 +540,18 @@ export default function OpenHub() {
                                                             <p className="text-[9px] text-zinc-500 font-mono">@{post.author.handle || 'user'}</p>
                                                         </div>
                                                     </div>
-                                                    <span className="text-[8px] text-zinc-600 font-mono">{new Date(post.timestamp).toLocaleDateString()}</span>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[8px] text-zinc-600 font-mono">{new Date(post.timestamp).toLocaleDateString()}</span>
+                                                        {user?.uid === post.uid && (
+                                                            <button 
+                                                                onClick={() => handleDeletePost(post.id || post.id_db)}
+                                                                className="text-zinc-600 hover:text-red-500 transition-colors p-1"
+                                                                title="Delete post"
+                                                            >
+                                                                <Trash2 size={14} />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
 
                                                 <p className="text-xs text-zinc-300 leading-relaxed font-medium whitespace-pre-wrap">{post.content}</p>
