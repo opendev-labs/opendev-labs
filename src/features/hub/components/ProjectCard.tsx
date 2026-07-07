@@ -29,7 +29,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ metadata, isAgent }) =
                     {metadata.platform === 'github' ? (
                         <Github size={40} className="text-zinc-800 group-hover:text-white transition-colors" />
                     ) : (
-                        <Globe size={40} className="text-zinc-800 group-hover:text-orange-500 transition-colors" />
+                        <Globe size={40} className="text-zinc-800 group-hover:text-red-500 transition-colors" />
                     )}
                 </div>
 
@@ -39,7 +39,7 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ metadata, isAgent }) =
                         <div>
                             <div className="flex items-center gap-2 mb-1">
                                 <span className={`text-[8px] font-black px-1.5 py-0.5 rounded border uppercase tracking-tighter ${
-                                    metadata.platform === 'github' ? 'bg-zinc-800 text-white border-zinc-700' : 'bg-orange-500/10 text-orange-500 border-orange-500/20'
+                                    metadata.platform === 'github' ? 'bg-zinc-800 text-white border-zinc-700' : 'bg-red-500/10 text-red-500 border-red-500/20'
                                 }`}>
                                     {metadata.platform} Registry
                                 </span>
@@ -49,12 +49,12 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ metadata, isAgent }) =
                                     </span>
                                 )}
                             </div>
-                            <h4 className="text-[13px] font-bold text-white uppercase tracking-tight group-hover:text-orange-500 transition-colors leading-tight">
+                            <h4 className="text-[13px] font-bold text-white uppercase tracking-tight group-hover:text-red-500 transition-colors leading-tight">
                                 {metadata.name}
                             </h4>
                         </div>
                         <div className="flex items-center gap-1 bg-zinc-950 px-2 py-1 rounded-md border border-zinc-900">
-                            <Star size={10} className="text-orange-500" fill="currentColor" />
+                            <Star size={10} className="text-red-500" fill="currentColor" />
                             <span className="text-[10px] font-bold text-white leading-none">{metadata.stars}</span>
                         </div>
                     </div>

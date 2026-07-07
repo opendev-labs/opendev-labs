@@ -14,8 +14,8 @@ const OfficeDashboard: React.FC = () => {
             desc: 'Hyper-intelligent new age agentic IDE.',
             icon: Cpu,
             path: '/open-studio',
-            color: 'text-orange-500',
-            bg: 'bg-orange-500/5'
+            color: 'text-red-500',
+            bg: 'bg-red-500/5'
         },
         {
             id: 'void',

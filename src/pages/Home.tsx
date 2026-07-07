@@ -29,44 +29,44 @@ const ScenarioCard = ({ icon: Icon, title, desc, onClick, actionLabel }: {
 }) => (
     <div
         onClick={onClick}
-        className="group cursor-pointer relative p-8 bg-zinc-950/40 border border-zinc-900 rounded-3xl hover:border-orange-500/20 hover:bg-orange-500/[0.01] transition-all duration-500 shadow-2xl flex flex-col justify-between h-[280px]"
+        className="group cursor-pointer relative p-8 bg-zinc-950/40 border border-zinc-900 rounded-3xl hover:border-red-500/20 hover:bg-red-500/[0.01] transition-all duration-500 shadow-2xl flex flex-col justify-between h-[280px]"
     >
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/0 to-red-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
         <div>
-            <div className="w-12 h-12 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center mb-6 group-hover:border-orange-500/20 group-hover:bg-orange-500/5 transition-all duration-500">
-                <Icon size={20} className="text-zinc-500 group-hover:text-orange-500 transition-colors duration-500" />
+            <div className="w-12 h-12 rounded-2xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center mb-6 group-hover:border-red-500/20 group-hover:bg-red-500/5 transition-all duration-500">
+                <Icon size={20} className="text-zinc-500 group-hover:text-red-500 transition-colors duration-500" />
             </div>
-            <h3 className="text-[15px] font-extrabold text-white mb-2 tracking-tight group-hover:text-orange-500 transition-colors duration-500 uppercase">{title}</h3>
+            <h3 className="text-[15px] font-extrabold text-white mb-2 tracking-tight group-hover:text-red-500 transition-colors duration-500 uppercase">{title}</h3>
             <p className="text-[13px] text-zinc-500 leading-relaxed font-medium">{desc}</p>
         </div>
-        <span className="text-[10px] font-bold text-zinc-600 group-hover:text-orange-400 flex items-center gap-1.5 transition-colors uppercase tracking-widest pt-4">
+        <span className="text-[10px] font-bold text-zinc-600 group-hover:text-red-400 flex items-center gap-1.5 transition-colors uppercase tracking-widest pt-4">
             {actionLabel} <ArrowRight size={12} className="group-hover:translate-x-1 transition-transform" />
         </span>
     </div>
 );
 
 const CodeBlock = () => (
-    <div className="bg-[#08080a] border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 glow-orange-sm">
+    <div className="bg-[#08080a] border border-zinc-900 rounded-2xl overflow-hidden shadow-2xl relative z-10 glow-red-sm">
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-900/60 bg-zinc-950/80">
             <div className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                 <div className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
             </div>
-            <span className="text-[10px] text-orange-500/70 font-mono font-bold uppercase tracking-widest">open-studio terminal</span>
+            <span className="text-[10px] text-red-500/70 font-mono font-bold uppercase tracking-widest">open-studio terminal</span>
         </div>
         <div className="p-6 font-mono text-[12px] leading-relaxed space-y-3.5 text-zinc-400">
             <div>
                 <span className="text-zinc-700 font-bold">&gt;&gt;&gt;</span>{' '}
                 <span className="text-zinc-500">initialize</span>{' '}
-                <span className="text-orange-400">opendev-labs/open-studio</span>
+                <span className="text-red-400">opendev-labs/open-studio</span>
             </div>
             <div>
                 <span className="text-zinc-700 font-bold">&gt;&gt;&gt;</span>{' '}
                 <span className="text-zinc-400">compile prompt:</span>{' '}
                 <span className="text-white">"three.js interactive galaxy simulation"</span>
             </div>
-            <div className="pl-4 border-l border-orange-500/20 text-[11px] text-zinc-500 space-y-1">
+            <div className="pl-4 border-l border-red-500/20 text-[11px] text-zinc-500 space-y-1">
                 <div>[1] resolving three.js package via npm gateway...</div>
                 <div>[2] installing dependency three@latest... done.</div>
                 <div>[3] materializing sandbox rendering tree... done.</div>
@@ -76,15 +76,15 @@ const CodeBlock = () => (
                     <span className="text-emerald-500 font-extrabold">✓</span>{' '}
                     <span className="text-[11px] text-zinc-400 font-bold uppercase tracking-wide">Handshake Successful</span>
                 </div>
-                <span className="text-[9px] bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded text-orange-400 font-bold tracking-widest uppercase">Live</span>
+                <span className="text-[9px] bg-red-500/10 border border-red-500/20 px-2.5 py-0.5 rounded text-red-400 font-bold tracking-widest uppercase">Live</span>
             </div>
         </div>
     </div>
 );
 
 const Stat = ({ value, label }: { value: string; label: string }) => (
-    <div className="text-center p-6 bg-zinc-950/20 border border-zinc-900/50 rounded-2xl relative overflow-hidden group hover:border-orange-500/10 transition-colors">
-        <div className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter group-hover:text-orange-500 transition-colors">{value}</div>
+    <div className="text-center p-6 bg-zinc-950/20 border border-zinc-900/50 rounded-2xl relative overflow-hidden group hover:border-red-500/10 transition-colors">
+        <div className="text-3xl md:text-4xl font-extrabold text-white tracking-tighter group-hover:text-red-500 transition-colors">{value}</div>
         <div className="text-[10px] text-zinc-500 mt-1 uppercase font-bold tracking-widest">{label}</div>
     </div>
 );
@@ -97,10 +97,10 @@ export default function Home() {
     const { isAuthenticated } = useAuth();
 
     return (
-        <div className="flex flex-col w-full bg-[#020202] min-h-screen overflow-hidden relative selection:bg-orange-500/30 selection:text-white bg-dot-pattern-orange">
+        <div className="flex flex-col w-full bg-[#020202] min-h-screen overflow-hidden relative selection:bg-red-500/30 selection:text-white bg-dot-pattern-orange">
             {/* Ambient Radial Gradient Background Elements */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] max-w-[1000px] h-[400px] bg-orange-500/[0.04] blur-[150px] rounded-full pointer-events-none z-0" />
-            <div className="absolute top-[40vh] right-[10vw] w-[300px] h-[300px] bg-orange-500/[0.02] blur-[100px] rounded-full pointer-events-none z-0" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] max-w-[1000px] h-[400px] bg-red-500/[0.04] blur-[150px] rounded-full pointer-events-none z-0" />
+            <div className="absolute top-[40vh] right-[10vw] w-[300px] h-[300px] bg-red-500/[0.02] blur-[100px] rounded-full pointer-events-none z-0" />
 
             {/* ── HERO ─────────────────────────────── */}
             <section className="relative px-6 pt-36 pb-24 md:pt-52 md:pb-36 overflow-hidden">
@@ -109,7 +109,7 @@ export default function Home() {
                         initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-[10px] font-bold text-orange-400 mb-8 uppercase tracking-[0.2em] shadow-lg shadow-orange-500/5"
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-[10px] font-bold text-red-400 mb-8 uppercase tracking-[0.2em] shadow-lg shadow-red-500/5"
                     >
                         <Terminal size={12} className="animate-pulse" />
                         <span>Genesis Protocol v1.0 // Sovereign AI environment</span>
@@ -123,7 +123,7 @@ export default function Home() {
                     >
                         build, deploy, and share<br />
                         <span className="text-zinc-600">with </span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500 font-mono">ai friends.</span>
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-amber-500 font-mono">ai friends.</span>
                     </motion.h1>
 
                     <motion.p
@@ -143,7 +143,7 @@ export default function Home() {
                     >
                         <button
                             onClick={() => navigate(isAuthenticated ? '/open-studio' : '/auth')}
-                            className="w-full sm:w-auto h-12 px-10 bg-orange-500 text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-orange-600 hover:shadow-[0_0_30px_rgba(249,115,22,0.3)] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-orange-500/10"
+                            className="w-full sm:w-auto h-12 px-10 bg-red-500 text-black text-xs font-bold uppercase tracking-widest rounded-full hover:bg-red-600 hover:shadow-[0_0_30px_rgba(239,68,68,0.3)] transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-red-500/10"
                         >
                             Configure Handshake <ArrowRight size={16} />
                         </button>
@@ -220,8 +220,8 @@ export default function Home() {
                                 { icon: Bot, text: 'Customizable Developer AI Friends' },
                             ].map((item, i) => (
                                 <div key={i} className="flex items-center gap-3">
-                                    <div className="w-6 h-6 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center flex-shrink-0">
-                                        <item.icon size={12} className="text-orange-400" />
+                                    <div className="w-6 h-6 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-center flex-shrink-0">
+                                        <item.icon size={12} className="text-red-400" />
                                     </div>
                                     <span className="text-[13px] font-medium text-zinc-300">{item.text}</span>
                                 </div>
@@ -244,7 +244,7 @@ export default function Home() {
 
             {/* ── CTA ────────────────────────────────── */}
             <section className="py-32 border-t border-zinc-950/80 bg-zinc-950/10 relative">
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60vw] h-[200px] bg-orange-500/[0.02] blur-[120px] rounded-full pointer-events-none z-0" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[60vw] h-[200px] bg-red-500/[0.02] blur-[120px] rounded-full pointer-events-none z-0" />
                 <div className="max-w-[600px] mx-auto px-6 text-center relative z-10">
                     <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4 lowercase">
                         Start building today

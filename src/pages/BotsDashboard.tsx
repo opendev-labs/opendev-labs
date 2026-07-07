@@ -89,7 +89,7 @@ export default function BotsDashboard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
                 <div className="flex flex-col">
                     <div className="inline-flex items-center gap-4 mb-8">
-                        <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em]">
+                        <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em]">
                             &larr; Return to Mesh
                         </Link>
                         <div className="w-1 h-1 rounded-full bg-zinc-800" />
@@ -110,7 +110,7 @@ export default function BotsDashboard() {
                 <Button
                     size="lg"
                     onClick={() => setIsCreating(true)}
-                    className="bg-orange-600 text-white font-bold hover:bg-orange-500 transition-colors uppercase tracking-[0.2em] text-[10px] h-12 px-8"
+                    className="bg-red-600 text-white font-bold hover:bg-red-500 transition-colors uppercase tracking-[0.2em] text-[10px] h-12 px-8"
                 >
                     <Plus className="mr-2 h-4 w-4" />
                     Initialize New Bot
@@ -129,7 +129,7 @@ export default function BotsDashboard() {
                     {isLoading ? (
                         <div className="py-20 flex flex-col items-center justify-center">
                             <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }}>
-                                <Settings className="h-12 w-12 text-orange-500 opacity-50" />
+                                <Settings className="h-12 w-12 text-red-500 opacity-50" />
                             </motion.div>
                             <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px] mt-4">Polling Active Channels...</span>
                         </div>

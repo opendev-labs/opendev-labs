@@ -42,18 +42,18 @@ export default function DiscordVerifyPage() {
     }
 
     return (
-        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 selection:bg-orange-500 selection:text-black">
+        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 selection:bg-red-500 selection:text-black">
             <div className="max-w-[500px] w-full bg-zinc-950 border border-zinc-900 p-12 relative overflow-hidden">
                 {/* Visual Flair */}
-                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-orange-600 to-transparent" />
+                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-red-600 to-transparent" />
                 <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <Shield size={120} className="text-orange-500" />
+                    <Shield size={120} className="text-red-500" />
                 </div>
 
                 <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-10">
                         <div className="w-10 h-10 bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                            <Bot size={20} className="text-orange-500" />
+                            <Bot size={20} className="text-red-500" />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold tracking-tighter lowercase leading-none">handshake<br /><span className="text-zinc-600">protocol.</span></h1>
@@ -67,7 +67,7 @@ export default function DiscordVerifyPage() {
                                     Initialize the cryptographic link between your <span className="text-white font-bold">OpenDev ID</span> and <span className="text-white font-bold">Discord Identity</span>. This will enable advanced roles and sovereign access across the mesh.
                                 </p>
                                 <Button
-                                    className="w-full h-12 bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-none hover:bg-orange-500 hover:text-white transition-all"
+                                    className="w-full h-12 bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-none hover:bg-red-500 hover:text-white transition-all"
                                     onClick={() => {
                                         // Redirect to Discord OAuth URL
                                         // This URL should be generated based on your Discord App config
@@ -82,7 +82,7 @@ export default function DiscordVerifyPage() {
 
                         {status === 'loading' && (
                             <div className="flex flex-col items-center py-10 space-y-4">
-                                <Loader2 size={32} className="text-orange-500 animate-spin" />
+                                <Loader2 size={32} className="text-red-500 animate-spin" />
                                 <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Synchronizing Identity...</p>
                             </div>
                         )}
@@ -132,7 +132,7 @@ export default function DiscordVerifyPage() {
                     <div className="mt-12 pt-8 border-t border-zinc-900 flex justify-between items-center text-[9px] font-bold text-zinc-700 uppercase tracking-widest">
                         <span>Terminal: v4.2.0-LKD</span>
                         <div className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 bg-orange-500 animate-pulse" />
+                            <div className="w-1.5 h-1.5 bg-red-500 animate-pulse" />
                             <span>Mesh Online</span>
                         </div>
                     </div>

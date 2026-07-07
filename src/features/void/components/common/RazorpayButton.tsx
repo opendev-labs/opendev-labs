@@ -46,7 +46,7 @@ export const RazorpayButton: React.FC<RazorpayButtonProps> = ({
             <div className="ml-4 h-8 w-[1px] bg-zinc-800 group-hover:bg-zinc-200 transition-colors" />
 
             <div className="flex items-center gap-2">
-                <span className="text-xl font-bold italic text-orange-500 group-hover:text-black">₹{amount}</span>
+                <span className="text-xl font-bold italic text-red-500 group-hover:text-black">₹{amount}</span>
             </div>
 
             {/* Razorpay branding text */}

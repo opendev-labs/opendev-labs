@@ -260,13 +260,13 @@ export function AgentBuilder() {
   const getNodeColor = (type: NodeType) => {
     switch (type) {
       case "trigger":
-        return "bg-orange-500/10 border-orange-500/30 dark:bg-blue-900/50 dark:border-blue-700"
+        return "bg-red-500/10 border-red-500/30 dark:bg-blue-900/50 dark:border-blue-700"
       case "skill":
         return "bg-zinc-900 border-zinc-800 dark:bg-green-900/50 dark:border-green-700"
       case "condition":
         return "bg-yellow-100 border-yellow-300 dark:bg-yellow-900/50 dark:border-yellow-700"
       case "response":
-        return "bg-orange-500/5 border-orange-500/20 dark:bg-purple-900/50 dark:border-purple-700"
+        return "bg-red-500/5 border-red-500/20 dark:bg-purple-900/50 dark:border-purple-700"
       case "api":
         return "bg-red-100 border-red-300 dark:bg-red-900/50 dark:border-red-700"
       case "database":
@@ -341,7 +341,7 @@ export function AgentBuilder() {
         <h3 className="font-medium mb-4">Components</h3>
         <div className="space-y-2">
           <Button variant="outline" className="w-full justify-start" onClick={() => addNode("trigger")}>
-            <MessageSquare className="mr-2 h-4 w-4 text-orange-500" />
+            <MessageSquare className="mr-2 h-4 w-4 text-red-500" />
             Trigger
           </Button>
           <Button variant="outline" className="w-full justify-start" onClick={() => addNode("skill")}>
@@ -353,7 +353,7 @@ export function AgentBuilder() {
             Condition
           </Button>
           <Button variant="outline" className="w-full justify-start" onClick={() => addNode("response")}>
-            <Bot className="mr-2 h-4 w-4 text-orange-400" />
+            <Bot className="mr-2 h-4 w-4 text-red-400" />
             Response
           </Button>
           <Button variant="outline" className="w-full justify-start" onClick={() => addNode("api")}>

@@ -212,7 +212,7 @@ export const MessagingLayer: React.FC = () => {
                                         <input 
                                             value={newAgentName}
                                             onChange={e => setNewAgentName(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-500/50"
                                             placeholder="e.g. Ada, DevMate"
                                         />
                                     </div>
@@ -221,7 +221,7 @@ export const MessagingLayer: React.FC = () => {
                                         <input 
                                             value={newAgentRole}
                                             onChange={e => setNewAgentRole(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-500/50"
                                             placeholder="e.g. Senior Coder, UI Expert"
                                         />
                                     </div>
@@ -230,7 +230,7 @@ export const MessagingLayer: React.FC = () => {
                                         <textarea 
                                             value={newAgentPersonality}
                                             onChange={e => setNewAgentPersonality(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50 min-h-[100px]"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-500/50 min-h-[100px]"
                                             placeholder="e.g. You are very supportive and enthusiastic. Explain code concepts simply."
                                         />
                                     </div>
@@ -239,7 +239,7 @@ export const MessagingLayer: React.FC = () => {
                                         <input 
                                             value={newAgentAvatarSeed}
                                             onChange={e => setNewAgentAvatarSeed(e.target.value)}
-                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-red-500/50"
                                             placeholder="Leave blank to use name seed"
                                         />
                                     </div>
@@ -247,7 +247,7 @@ export const MessagingLayer: React.FC = () => {
                                         <Button 
                                             onClick={handleCreateAgent}
                                             disabled={isCreatingAgent || !newAgentName || !newAgentPersonality}
-                                            className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-10 hover:bg-orange-500 hover:text-white transition-all h-10 shadow-lg disabled:opacity-50"
+                                            className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-10 hover:bg-red-500 hover:text-white transition-all h-10 shadow-lg disabled:opacity-50"
                                         >
                                             {isCreatingAgent ? 'Initializing...' : 'Create Agent'}
                                         </Button>
@@ -316,7 +316,7 @@ export const MessagingLayer: React.FC = () => {
                         <div className="p-6 border-b border-zinc-900 bg-zinc-950/50 flex justify-between items-center shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center border border-zinc-800">
-                                    <Terminal size={20} className="text-orange-500" />
+                                    <Terminal size={20} className="text-red-500" />
                                 </div>
                                 <div>
                                     <h3 className="text-[12px] font-bold text-white uppercase tracking-widest leading-none mb-1">Global Mesh Channel</h3>

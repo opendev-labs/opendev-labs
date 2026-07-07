@@ -63,7 +63,7 @@ const changelogData: ChangeEntry[] = [
 const CategoryBadge = ({ type }: { type: ChangeEntry['type'] }) => {
     const colors = {
         CORE: "bg-blue-500/10 text-blue-500 border-blue-500/20",
-        AI: "bg-orange-500/10 text-orange-500 border-orange-500/20",
+        AI: "bg-red-500/10 text-red-500 border-red-500/20",
         NEXUS: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
         SYSTEM: "bg-zinc-500/10 text-zinc-500 border-zinc-500/20"
     };
@@ -77,7 +77,7 @@ const CategoryBadge = ({ type }: { type: ChangeEntry['type'] }) => {
 
 export const Changelog: React.FC = () => {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-orange-500/30">
+        <div className="min-h-screen bg-black text-white selection:bg-red-500/30">
             <Header />
 
             <main className="container mx-auto max-w-4xl px-6 pt-32 pb-40">
@@ -88,7 +88,7 @@ export const Changelog: React.FC = () => {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-center gap-2 text-zinc-500 text-[10px] font-bold uppercase tracking-[0.4em] justify-center md:justify-start"
                     >
-                        <Terminal size={14} className="text-orange-500" /> Registry // Evolution Path
+                        <Terminal size={14} className="text-red-500" /> Registry // Evolution Path
                     </motion.div>
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
@@ -125,7 +125,7 @@ export const Changelog: React.FC = () => {
                             {/* Marker */}
                             <div className="absolute left-0 md:left-1/2 top-4 -translate-x-1/2 z-10 hidden md:block">
                                 <div className="w-4 h-4 rounded-full bg-black border-2 border-zinc-700 flex items-center justify-center">
-                                    <div className="w-1 h-1 rounded-full bg-orange-500 animate-pulse" />
+                                    <div className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
                                 </div>
                             </div>
 
@@ -153,7 +153,7 @@ export const Changelog: React.FC = () => {
                                 <ul className="space-y-3">
                                     {entry.updates.map((update, idx) => (
                                         <li key={idx} className="flex items-start gap-3 group">
-                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-orange-500 transition-colors shrink-0" />
+                                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-zinc-800 group-hover:bg-red-500 transition-colors shrink-0" />
                                             <span className="text-[13px] text-zinc-400 font-medium leading-relaxed group-hover:text-zinc-200 transition-colors">
                                                 {update}
                                             </span>
@@ -165,7 +165,7 @@ export const Changelog: React.FC = () => {
                             {/* Decorative Side (Icon/Visual) */}
                             <div className="md:w-1/2 flex items-center justify-center md:px-12">
                                 <div className="w-full aspect-square md:aspect-video rounded-3xl bg-[#0D0D0D] border border-zinc-900 flex flex-col items-center justify-center gap-6 group hover:border-zinc-700 transition-all p-8 text-center">
-                                    <div className="w-20 h-20 rounded-2xl bg-black border border-zinc-900 flex items-center justify-center text-zinc-700 group-hover:text-orange-500 group-hover:scale-110 transition-all duration-500">
+                                    <div className="w-20 h-20 rounded-2xl bg-black border border-zinc-900 flex items-center justify-center text-zinc-700 group-hover:text-red-500 group-hover:scale-110 transition-all duration-500">
                                         <entry.icon size={40} strokeWidth={1.5} />
                                     </div>
                                     <div className="space-y-1 opacity-0 group-hover:opacity-100 transition-opacity duration-500">

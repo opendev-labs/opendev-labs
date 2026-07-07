@@ -27,7 +27,7 @@ const systems = [
         status: "OPTIMAL",
         load: "12%",
         icon: Database,
-        color: "text-orange-500",
+        color: "text-red-500",
         path: "/lamadb"
     },
     {
@@ -67,7 +67,7 @@ const systems = [
         status: "OPTIMAL",
         load: "62%",
         icon: Globe,
-        color: "text-orange-500",
+        color: "text-red-500",
         path: "/nexus"
     },
     {
@@ -86,7 +86,7 @@ export default function SystemsRegistry() {
     const { user } = useAuth();
 
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-orange-500 selection:text-black font-sans pb-20">
+        <div className="min-h-screen bg-black text-white selection:bg-red-500 selection:text-black font-sans pb-20">
             <main className="max-w-[1200px] mx-auto p-6 md:p-12 space-y-12">
                 <header className="flex flex-col md:flex-row items-start md:items-end justify-between gap-8 border-b border-zinc-900 pb-12 pt-10">
                     <div className="space-y-6">
@@ -99,7 +99,7 @@ export default function SystemsRegistry() {
                                 Module: <span className="text-white">Registry // Core Systems</span>
                             </div>
                         </div>
-                        <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-none bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-orange-500 uppercase tracking-[0.4em]">
+                        <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-none bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-red-500 uppercase tracking-[0.4em]">
                             <ShieldCheck size={14} />
                             <span>Systems Integrity Registry // v12.01</span>
                         </div>
@@ -127,7 +127,7 @@ export default function SystemsRegistry() {
                         <input
                             type="text"
                             placeholder="Search Registry..."
-                            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-orange-500 outline-none transition-all"
+                            className="w-full bg-zinc-950 border border-zinc-900 rounded-xl py-3 pl-12 pr-4 text-sm focus:border-red-500 outline-none transition-all"
                         />
                     </div>
                     <div className="flex gap-2 w-full md:w-auto">
@@ -139,7 +139,7 @@ export default function SystemsRegistry() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {systems.map((system) => (
-                        <Card key={system.id} className="bg-zinc-950/20 border-zinc-900 hover:border-orange-500/50 transition-all group p-8 rounded-3xl relative overflow-hidden">
+                        <Card key={system.id} className="bg-zinc-950/20 border-zinc-900 hover:border-red-500/50 transition-all group p-8 rounded-3xl relative overflow-hidden">
                             <div className="absolute top-0 right-0 p-4">
                                 <span className={`text-[8px] font-bold uppercase tracking-[0.2em] px-2 py-1 rounded bg-black border border-zinc-800 ${system.status === 'OPTIMAL' ? 'text-emerald-500' : 'text-blue-500'}`}>
                                     {system.status}
@@ -164,7 +164,7 @@ export default function SystemsRegistry() {
                                         <div className="flex items-center gap-2">
                                             <div className="w-20 h-1 bg-zinc-900 rounded-full overflow-hidden">
                                                 <div
-                                                    className="h-full bg-orange-500"
+                                                    className="h-full bg-red-500"
                                                     style={{ width: system.load }}
                                                 />
                                             </div>
@@ -172,7 +172,7 @@ export default function SystemsRegistry() {
                                         </div>
                                     </div>
                                     <Link to={system.path}>
-                                        <Button size="icon" variant="ghost" className="rounded-xl hover:bg-orange-500 hover:text-white transition-all">
+                                        <Button size="icon" variant="ghost" className="rounded-xl hover:bg-red-500 hover:text-white transition-all">
                                             <ArrowRight size={18} />
                                         </Button>
                                     </Link>

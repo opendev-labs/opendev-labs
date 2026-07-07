@@ -32,7 +32,7 @@ const platforms = [
         icon: Flame,
         description: 'Google Cloud hosting',
         recommended: false,
-        color: 'text-orange-500'
+        color: 'text-red-500'
     },
     {
         id: 'huggingface' as DeploymentPlatform,

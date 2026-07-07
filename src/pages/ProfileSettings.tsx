@@ -63,18 +63,18 @@ export default function ProfileSettings() {
     if (isLoading) return null;
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-orange-500 selection:text-black font-sans pb-20">
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-red-500 selection:text-black font-sans pb-20">
             <main className="max-w-[1000px] mx-auto p-4 md:p-8 space-y-8">
                 <header className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-10 border-b border-zinc-900">
                     <div className="space-y-4">
-                        <Link to={`/user/${profile?.username}`} className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em] flex items-center gap-2">
+                        <Link to={`/user/${profile?.username}`} className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em] flex items-center gap-2">
                             <ArrowLeft size={12} />
                             Back to Profile
                         </Link>
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase">Edit <span className="text-zinc-600">Profile.</span></h1>
                     </div>
                     <div className="flex gap-4">
-                        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-orange-500 uppercase tracking-widest">
+                        <div className="inline-flex items-center gap-3 px-4 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-[10px] font-bold text-red-500 uppercase tracking-widest">
                             <Shield size={14} />
                             <span>Verified Security</span>
                         </div>
@@ -86,7 +86,7 @@ export default function ProfileSettings() {
                         {/* Visual Identity Section */}
                         <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
                             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <ImageIcon size={14} className="text-orange-500" /> Visual Identity
+                                <ImageIcon size={14} className="text-red-500" /> Visual Identity
                             </h3>
 
                             <div className="space-y-6">
@@ -97,7 +97,7 @@ export default function ProfileSettings() {
                                             <img src={formData.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.name}`} alt="Preview" className="w-full h-full object-cover" />
                                         </div>
                                         <Input
-                                            className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm grow"
+                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm grow"
                                             placeholder="https://..."
                                             value={formData.avatarUrl}
                                             onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
@@ -115,7 +115,7 @@ export default function ProfileSettings() {
                                         )}
                                     </div>
                                     <Input
-                                        className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm"
+                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
                                         placeholder="https://..."
                                         value={formData.bannerUrl}
                                         onChange={(e) => setFormData({ ...formData, bannerUrl: e.target.value })}
@@ -127,7 +127,7 @@ export default function ProfileSettings() {
                         {/* Basic Info Section */}
                         <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
                             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <Sparkles size={14} className="text-orange-500" /> Professional Details
+                                <Sparkles size={14} className="text-red-500" /> Professional Details
                             </h3>
 
                             <div className="space-y-6">
@@ -144,7 +144,7 @@ export default function ProfileSettings() {
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Professional Headline</Label>
                                     <Input
-                                        className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm"
+                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
                                         placeholder="Full Stack Engineer @ Meta"
                                         value={formData.headline}
                                         onChange={(e) => setFormData({ ...formData, headline: e.target.value })}
@@ -154,7 +154,7 @@ export default function ProfileSettings() {
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">About / Biography</Label>
                                     <Textarea
-                                        className="bg-black border-zinc-900 focus:border-orange-500 rounded-2xl min-h-[150px] text-sm leading-relaxed p-4"
+                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-2xl min-h-[150px] text-sm leading-relaxed p-4"
                                         placeholder="Tell your professional story..."
                                         value={formData.bio}
                                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
@@ -166,7 +166,7 @@ export default function ProfileSettings() {
                                         <MapPin size={12} /> Location
                                     </Label>
                                     <Input
-                                        className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm"
+                                        className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm"
                                         placeholder="New York, NY"
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
@@ -178,25 +178,25 @@ export default function ProfileSettings() {
                         {/* External Links Section */}
                         <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl space-y-8">
                             <h3 className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] flex items-center gap-2">
-                                <LinkIcon size={14} className="text-orange-500" /> Digital Presence
+                                <LinkIcon size={14} className="text-red-500" /> Digital Presence
                             </h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Globe size={12} /> Personal Website</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
+                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.website} onChange={(e) => setFormData({ ...formData, website: e.target.value })} />
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Github size={12} /> GitHub Profile</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm" value={formData.github} onChange={(e) => setFormData({ ...formData, github: e.target.value })} />
+                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.github} onChange={(e) => setFormData({ ...formData, github: e.target.value })} />
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Linkedin size={12} /> LinkedIn Profile</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm" value={formData.linkedin} onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })} />
+                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.linkedin} onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })} />
                                 </div>
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 flex items-center gap-2"><Twitter size={12} /> Twitter / X</Label>
-                                    <Input className="bg-black border-zinc-900 focus:border-orange-500 rounded-xl h-12 text-sm" value={formData.twitter} onChange={(e) => setFormData({ ...formData, twitter: e.target.value })} />
+                                    <Input className="bg-black border-zinc-900 focus:border-red-500 rounded-xl h-12 text-sm" value={formData.twitter} onChange={(e) => setFormData({ ...formData, twitter: e.target.value })} />
                                 </div>
                             </div>
                         </section>
@@ -210,7 +210,7 @@ export default function ProfileSettings() {
                                     <Button
                                         type="submit"
                                         disabled={isSaving}
-                                        className="w-full h-14 bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-orange-500 hover:text-white transition-all shadow-lg active:scale-95"
+                                        className="w-full h-14 bg-white text-black font-bold uppercase tracking-[0.2em] text-[10px] rounded-2xl hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-95"
                                     >
                                         {isSaving ? <Loader2 size={16} className="animate-spin" /> : (
                                             <div className="flex items-center gap-2">

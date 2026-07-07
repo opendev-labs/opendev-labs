@@ -47,20 +47,20 @@ export default function AgentsLanding() {
             <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
                 <span className="text-zinc-600 uppercase tracking-widest text-[10px] font-bold">Autonomous Protocol</span>
                 <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-none bg-orange-500 animate-pulse" />
-                    <span className="text-[11px] font-bold uppercase text-orange-500">
+                    <div className="w-1.5 h-1.5 rounded-none bg-red-500 animate-pulse" />
+                    <span className="text-[11px] font-bold uppercase text-red-500">
                         Mesh Online
                     </span>
                 </div>
             </div>
 
             <div className="p-6 bg-zinc-950 border border-zinc-900 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-[2px] h-full bg-orange-600" />
+                <div className="absolute top-0 left-0 w-[2px] h-full bg-red-600" />
                 <div className="text-zinc-500 font-mono text-[9px] font-bold uppercase tracking-[0.3em] mb-3 opacity-50">Active Agents</div>
                 <div className="space-y-3">
                     <div className="flex items-center justify-between">
                         <span className="text-zinc-400">▸ OPEN_STUDIO_NODE_01</span>
-                        <span className="text-orange-500/80 text-[10px]">COLLECTING_LOGS</span>
+                        <span className="text-red-500/80 text-[10px]">COLLECTING_LOGS</span>
                     </div>
                     <div className="flex items-center justify-between">
                         <span className="text-zinc-400">▸ ARCHITECT_CORE</span>

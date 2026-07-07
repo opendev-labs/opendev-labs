@@ -200,7 +200,7 @@ export default function AgentsDashboard() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
                 <div className="flex flex-col">
                     <div className="inline-flex items-center gap-4 mb-8">
-                        <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em]">
+                        <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em]">
                             &larr; Return to Mesh
                         </Link>
                         <div className="w-1 h-1 rounded-full bg-zinc-800" />
@@ -219,7 +219,7 @@ export default function AgentsDashboard() {
                 </div>
                 <Dialog open={isCreating} onOpenChange={setIsCreating}>
                     <DialogTrigger asChild>
-                        <Button size="lg" className="bg-orange-600 text-white font-bold hover:bg-orange-500 transition-colors uppercase tracking-[0.2em] text-[10px] h-12 px-8">
+                        <Button size="lg" className="bg-red-600 text-white font-bold hover:bg-red-500 transition-colors uppercase tracking-[0.2em] text-[10px] h-12 px-8">
                             <Plus className="mr-2 h-4 w-4" />
                             Build Agent
                         </Button>
@@ -252,7 +252,7 @@ export default function AgentsDashboard() {
                                     placeholder="e.g. Customer Support Bot"
                                     value={newAgentName}
                                     onChange={(e) => setNewAgentName(e.target.value)}
-                                    className="bg-black border-zinc-900 rounded-none focus:border-orange-500 transition-colors"
+                                    className="bg-black border-zinc-900 rounded-none focus:border-red-500 transition-colors"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -262,7 +262,7 @@ export default function AgentsDashboard() {
                                     placeholder="What does this agent do?"
                                     value={newAgentDescription}
                                     onChange={(e) => setNewAgentDescription(e.target.value)}
-                                    className="bg-black border-zinc-900 rounded-none focus:border-orange-500 transition-colors min-h-[100px]"
+                                    className="bg-black border-zinc-900 rounded-none focus:border-red-500 transition-colors min-h-[100px]"
                                 />
                             </div>
                         </div>
@@ -280,7 +280,7 @@ export default function AgentsDashboard() {
                             <Button
                                 onClick={handleCreateAgent}
                                 disabled={!newAgentName}
-                                className="bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase tracking-widest text-[10px]"
+                                className="bg-red-600 hover:bg-red-500 text-white font-bold uppercase tracking-widest text-[10px]"
                             >
                                 Initialize Agent
                             </Button>
@@ -299,7 +299,7 @@ export default function AgentsDashboard() {
                 <TabsContent value="my-agents" className="space-y-4">
                     {isLoading ? (
                         <div className="py-20 flex flex-col items-center justify-center">
-                            <Loader2 className="h-12 w-12 text-orange-500 animate-spin mb-4" />
+                            <Loader2 className="h-12 w-12 text-red-500 animate-spin mb-4" />
                             <span className="text-zinc-500 font-bold uppercase tracking-widest text-[10px]">Synchronizing with Mesh...</span>
                         </div>
                     ) : agents.length === 0 ? (
@@ -309,7 +309,7 @@ export default function AgentsDashboard() {
                                     <Bot className="h-16 w-16 text-zinc-800 mb-6" />
                                     <p className="text-center text-zinc-500 mb-8 font-medium">No active agents in this node.</p>
                                     <Button
-                                        className="bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8"
+                                        className="bg-red-600 hover:bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8"
                                         onClick={() => setIsCreating(true)}
                                     >
                                         <Plus className="mr-2 h-4 w-4" />
@@ -351,7 +351,7 @@ export default function AgentsDashboard() {
                                     <CardHeader className="pb-0">
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-none shadow-sm">{template.icon}</div>
-                                            <Badge variant="outline" className="bg-orange-500/10 border-orange-500/20 text-orange-400 rounded-none text-[8px] tracking-widest uppercase py-1">
+                                            <Badge variant="outline" className="bg-red-500/10 border-red-500/20 text-red-400 rounded-none text-[8px] tracking-widest uppercase py-1">
                                                 Template
                                             </Badge>
                                         </div>
@@ -364,7 +364,7 @@ export default function AgentsDashboard() {
                                             <ul className="grid grid-cols-1 gap-2">
                                                 {template.skills.map((skill, index) => (
                                                     <li key={index} className="flex items-center text-xs font-medium text-zinc-400">
-                                                        <Zap className="mr-3 h-3 w-3 text-orange-500" />
+                                                        <Zap className="mr-3 h-3 w-3 text-red-500" />
                                                         {skill}
                                                     </li>
                                                 ))}
@@ -373,7 +373,7 @@ export default function AgentsDashboard() {
                                     </CardContent>
                                     <CardFooter className="pt-8">
                                         <Button
-                                            className="w-full bg-white text-black font-bold hover:bg-orange-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-[10px] h-12 rounded-none"
+                                            className="w-full bg-white text-black font-bold hover:bg-red-500 hover:text-white transition-all duration-300 uppercase tracking-widest text-[10px] h-12 rounded-none"
                                             onClick={() => handleUseTemplate(template.id)}
                                         >
                                             <Sparkles className="mr-2 h-4 w-4" />

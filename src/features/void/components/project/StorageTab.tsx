@@ -18,7 +18,7 @@ const DatabaseIcon: React.FC<{ type: DatabaseType }> = ({ type }) => {
         [DatabaseType.SUPABASE]: { label: 'SUPA', color: 'text-emerald-500' },
         [DatabaseType.NEON]: { label: 'NEON', color: 'text-zinc-400' },
         [DatabaseType.MONGODB]: { label: 'DOC', color: 'text-green-600' },
-        [DatabaseType.LAMADB]: { label: 'LAMA', color: 'text-orange-500' },
+        [DatabaseType.LAMADB]: { label: 'LAMA', color: 'text-red-500' },
     };
     const item = config[type] || { label: 'DB', color: 'text-zinc-600' };
 

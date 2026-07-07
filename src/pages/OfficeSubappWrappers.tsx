@@ -46,7 +46,7 @@ export const UnifiedOfficeCockpit: React.FC = () => {
             {/* Header / Brand Context */}
             <div className="flex flex-col mb-12 pt-10">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em]">
+                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em]">
                         &larr; Return to Mesh
                     </Link>
                     <div className="w-1 h-1 rounded-full bg-zinc-800" />
@@ -67,9 +67,9 @@ export const UnifiedOfficeCockpit: React.FC = () => {
                     </div>
 
                     <div className="flex items-center gap-4 bg-zinc-950 border border-zinc-900 p-4 rounded-none">
-                        <div className="w-2 h-2 rounded-none bg-orange-500 animate-pulse" />
+                        <div className="w-2 h-2 rounded-none bg-red-500 animate-pulse" />
                         <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-                            Mesh Connectivity: <span className="text-orange-500">Optimized</span>
+                            Mesh Connectivity: <span className="text-red-500">Optimized</span>
                         </div>
                     </div>
                 </div>
@@ -77,12 +77,12 @@ export const UnifiedOfficeCockpit: React.FC = () => {
                 {/* Hybrid Telemetry (Cloud Console Vibes) */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-12">
                     {[
-                        { label: 'Neural Uplink', value: '100%', icon: Activity, color: 'text-orange-500' },
-                        { label: 'DB Mesh (LamaDB)', value: dbStats.vaults, icon: Database, color: 'text-orange-500' },
-                        { label: 'Latency', value: '0.4ms', icon: Zap, color: 'text-orange-500' },
+                        { label: 'Neural Uplink', value: '100%', icon: Activity, color: 'text-red-500' },
+                        { label: 'DB Mesh (LamaDB)', value: dbStats.vaults, icon: Database, color: 'text-red-500' },
+                        { label: 'Latency', value: '0.4ms', icon: Zap, color: 'text-red-500' },
                         { label: 'Security Node', value: 'Titan-Sovereign', icon: Shield, color: 'text-white' }
                     ].map((stat, i) => (
-                        <div key={i} className="bg-zinc-950 border border-zinc-900 p-6 hover:border-orange-500/30 transition-all group rounded-none">
+                        <div key={i} className="bg-zinc-950 border border-zinc-900 p-6 hover:border-red-500/30 transition-all group rounded-none">
                             <div className="flex items-center gap-3 mb-2">
                                 <stat.icon size={12} className={`${stat.color} opacity-20 group-hover:opacity-100 transition-opacity`} />
                                 <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em]">{stat.label}</span>

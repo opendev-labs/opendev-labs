@@ -29,11 +29,11 @@ export const Header: React.FC = () => {
             <div className={`mx-auto flex h-14 ${isFullWidthPage ? 'max-w-full px-6' : 'max-w-[1100px] px-6'} items-center justify-between`}>
                 <div className="flex items-center gap-8">
                     <Link to="/" className="flex items-center gap-2 group shrink-0">
-                        <div className="shrink-0 flex items-center justify-center text-orange-500 group-hover:text-orange-400 transition-colors drop-shadow-[0_0_8px_rgba(249,115,22,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(249,115,22,0.6)]">
+                        <div className="shrink-0 flex items-center justify-center text-red-500 group-hover:text-red-400 transition-colors drop-shadow-[0_0_8px_rgba(239,68,68,0.4)] group-hover:drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]">
                             <OpenDevLogo className="h-7 w-7" />
                         </div>
                         <span className="text-[14px] font-extrabold text-white tracking-tight lowercase ml-1">
-                            opendev-<span className="text-orange-500 font-mono">labs</span>
+                            opendev-<span className="text-red-500 font-mono">labs</span>
                         </span>
                     </Link>
                     
@@ -41,34 +41,34 @@ export const Header: React.FC = () => {
                         <Link 
                             to="/open-studio" 
                             className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/open-studio') ? 'text-orange-500 font-semibold' : 'text-zinc-400 hover:text-white'
+                                pathname.startsWith('/open-studio') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
                             }`}
                         >
                             IDE
                             {pathname.startsWith('/open-studio') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-orange-500" />
+                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
                             )}
                         </Link>
                         <Link 
                             to="/open-hub" 
                             className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/open-hub') ? 'text-orange-500 font-semibold' : 'text-zinc-400 hover:text-white'
+                                pathname.startsWith('/open-hub') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
                             }`}
                         >
                             Hub
                             {pathname.startsWith('/open-hub') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-orange-500" />
+                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
                             )}
                         </Link>
                         <Link 
                             to="/docs" 
                             className={`transition-colors relative py-1 ${
-                                pathname.startsWith('/docs') ? 'text-orange-500 font-semibold' : 'text-zinc-400 hover:text-white'
+                                pathname.startsWith('/docs') ? 'text-red-500 font-semibold' : 'text-zinc-400 hover:text-white'
                             }`}
                         >
                             Docs
                             {pathname.startsWith('/docs') && (
-                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-orange-500" />
+                                <span className="absolute bottom-0 left-0 w-full h-[1px] bg-red-500" />
                             )}
                         </Link>
                     </nav>
@@ -95,7 +95,7 @@ export const Header: React.FC = () => {
                     ) : (
                         <button 
                             onClick={() => navigate('/auth')}
-                            className="rounded bg-orange-600 px-4 py-1.5 text-[11px] font-bold text-white hover:bg-orange-500 transition-all uppercase tracking-wider"
+                            className="rounded bg-red-600 px-4 py-1.5 text-[11px] font-bold text-white hover:bg-red-500 transition-all uppercase tracking-wider"
                         >
                             Sign In
                         </button>

@@ -94,7 +94,7 @@ export const SyncStackConsole: React.FC = () => {
             {/* Context Header */}
             <div className="flex flex-col mb-8 max-w-[1400px] mx-auto w-full">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em]">
+                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em]">
                         &larr; Return to Mesh
                     </Link>
                     <div className="w-1 h-1 rounded-full bg-zinc-800" />

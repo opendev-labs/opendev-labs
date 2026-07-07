@@ -76,13 +76,13 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white selection:bg-orange-500 selection:text-black font-sans pb-20">
+        <div className="min-h-screen bg-[#050505] text-white selection:bg-red-500 selection:text-black font-sans pb-20">
             {/* Header / Banner Section */}
             <div className="relative h-[25vh] md:h-[35vh] w-full bg-zinc-900 overflow-hidden">
                 {profile.bannerUrl ? (
                     <img src={profile.bannerUrl} alt="Banner" className="w-full h-full object-cover" />
                 ) : (
-                    <div className="w-full h-full bg-gradient-to-r from-orange-600 to-orange-400 opacity-30" />
+                    <div className="w-full h-full bg-gradient-to-r from-red-600 to-red-400 opacity-30" />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
             </div>
@@ -99,7 +99,7 @@ export default function ProfilePage() {
                             <div className="space-y-2">
                                 <div className="flex items-center gap-3">
                                     <h1 className="text-4xl md:text-5xl font-bold tracking-tighter uppercase leading-none">{profile.username}</h1>
-                                    <div className="bg-orange-600/20 border border-orange-600/30 p-1 rounded-full"><Shield size={12} className="text-orange-500" /></div>
+                                    <div className="bg-red-600/20 border border-red-600/30 p-1 rounded-full"><Shield size={12} className="text-red-500" /></div>
                                 </div>
                                 <p className="text-zinc-500 text-sm font-medium uppercase tracking-[0.2em]">@{profile.username}</p>
                             </div>
@@ -107,14 +107,14 @@ export default function ProfilePage() {
                             <div className="flex gap-3">
                                 {isOwnProfile ? (
                                     <Link to="/settings/profile">
-                                        <Button className="bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-xl px-10 hover:bg-orange-500 hover:text-white transition-all h-12 shadow-lg">
+                                        <Button className="bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-xl px-10 hover:bg-red-500 hover:text-white transition-all h-12 shadow-lg">
                                             <Settings size={14} className="mr-2" />
                                             Edit Profile
                                         </Button>
                                     </Link>
                                 ) : (
                                     <>
-                                        <Button className="bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-xl px-10 hover:bg-orange-500 hover:text-white transition-all h-12 shadow-lg">Connect</Button>
+                                        <Button className="bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded-xl px-10 hover:bg-red-500 hover:text-white transition-all h-12 shadow-lg">Connect</Button>
                                         <Button variant="outline" className="border-zinc-800 text-zinc-400 rounded-xl px-4 hover:text-white hover:border-zinc-600 h-12 transition-all"><Mail size={16} /></Button>
                                     </>
                                 )}
@@ -122,9 +122,9 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-6 text-[10px] font-bold text-zinc-500 uppercase tracking-widest pt-2">
-                            <div className="flex items-center gap-2"><MapPin size={14} className="text-orange-500" /> <span>Remote / Earth</span></div>
-                            <div className="flex items-center gap-2"><Calendar size={14} className="text-orange-500" /> <span>Joined {profile.joinedAt ? new Date(profile.joinedAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : "Recently"}</span></div>
-                            <div className="flex items-center gap-2"><LinkIcon size={14} className="text-orange-500" /> <span className="text-zinc-300">opendev.io/{profile.username}</span></div>
+                            <div className="flex items-center gap-2"><MapPin size={14} className="text-red-500" /> <span>Remote / Earth</span></div>
+                            <div className="flex items-center gap-2"><Calendar size={14} className="text-red-500" /> <span>Joined {profile.joinedAt ? new Date(profile.joinedAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : "Recently"}</span></div>
+                            <div className="flex items-center gap-2"><LinkIcon size={14} className="text-red-500" /> <span className="text-zinc-300">opendev.io/{profile.username}</span></div>
                         </div>
                     </div>
                 </div>
@@ -135,7 +135,7 @@ export default function ProfilePage() {
                         {/* Bio / About */}
                         <section className="bg-zinc-950 border border-zinc-900 rounded-3xl p-8 shadow-xl">
                             <h2 className="text-sm font-bold tracking-widest uppercase text-zinc-400 mb-6 flex items-center gap-2">
-                                <UserIcon size={16} className="text-orange-500" /> About
+                                <UserIcon size={16} className="text-red-500" /> About
                             </h2>
                             <p className="text-zinc-300 text-lg leading-relaxed font-medium">
                                 {profile.bio || "No biography provided yet. This professional is part of the Nexus network."}
@@ -146,7 +146,7 @@ export default function ProfilePage() {
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {[
                                 { label: 'Connections', val: '128', icon: Users, color: 'text-blue-500' },
-                                { label: 'Projects', val: '12', icon: Code, color: 'text-orange-500' },
+                                { label: 'Projects', val: '12', icon: Code, color: 'text-red-500' },
                                 { label: 'Reputation', val: '4.2k', icon: Award, color: 'text-emerald-500' },
                                 { label: 'Pulse', val: '86', icon: Zap, color: 'text-purple-500' }
                             ].map((stat, i) => (
@@ -164,7 +164,7 @@ export default function ProfilePage() {
                         <section className="space-y-6">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-sm font-bold tracking-widest uppercase text-zinc-400 flex items-center gap-2">
-                                    <Box size={16} className="text-orange-500" /> Recent Projects
+                                    <Box size={16} className="text-red-500" /> Recent Projects
                                 </h2>
                                 <Button variant="ghost" className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest hover:text-white">View All</Button>
                             </div>
@@ -188,7 +188,7 @@ export default function ProfilePage() {
                         {/* Skills & Expertise */}
                         <Card className="bg-zinc-950 border-zinc-900 p-8 rounded-3xl shadow-xl">
                             <h3 className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-8 flex items-center gap-2">
-                                <Sparkles size={14} className="text-orange-500" /> Expertise
+                                <Sparkles size={14} className="text-red-500" /> Expertise
                             </h3>
                             <div className="flex flex-wrap gap-2">
                                 {['Software Architecture', 'Interaction Design', 'Product Management', 'Branding', 'Open Source', 'Community'].map(skill => (
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                                             <div className="p-2 rounded-lg bg-zinc-900 group-hover:bg-zinc-800 transition-colors"><social.icon size={16} className="text-zinc-500 group-hover:text-white" /></div>
                                             <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-tight">{social.label}</span>
                                         </div>
-                                        <span className="text-[11px] font-mono text-zinc-700 group-hover:text-orange-500 transition-colors">{social.val}</span>
+                                        <span className="text-[11px] font-mono text-zinc-700 group-hover:text-red-500 transition-colors">{social.val}</span>
                                     </div>
                                 ))}
                             </div>
@@ -225,14 +225,14 @@ export default function ProfilePage() {
                                 { name: 'Trinity', handle: 'trinity', head: 'Security Researcher' }
                             ].map((person, i) => (
                                 <div key={i} className="bg-zinc-950/50 border border-zinc-900 p-4 rounded-2xl flex items-center gap-3 hover:bg-zinc-950 transition-all cursor-pointer group">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-900 overflow-hidden border border-zinc-800 group-hover:border-orange-500/50 transition-colors">
+                                    <div className="w-10 h-10 rounded-full bg-zinc-900 overflow-hidden border border-zinc-800 group-hover:border-red-500/50 transition-colors">
                                         <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${person.name}`} alt="user" className="w-full h-full object-cover" />
                                     </div>
                                     <div className="grow">
                                         <div className="text-[11px] font-bold text-white uppercase tracking-tight">{person.name}</div>
                                         <div className="text-[8px] font-bold text-zinc-600 uppercase tracking-widest">{person.head}</div>
                                     </div>
-                                    <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full border border-zinc-900 text-zinc-600 hover:text-white hover:border-orange-500">
+                                    <Button size="icon" variant="ghost" className="w-8 h-8 rounded-full border border-zinc-900 text-zinc-600 hover:text-white hover:border-red-500">
                                         <Plus size={14} />
                                     </Button>
                                 </div>

@@ -288,7 +288,7 @@ export default function OpenHub() {
                                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
                                     }`}
                                 >
-                                    <Globe size={14} className={!selectedAgent && activeFeed === 'all' ? 'text-orange-500' : 'text-zinc-500'} />
+                                    <Globe size={14} className={!selectedAgent && activeFeed === 'all' ? 'text-red-500' : 'text-zinc-500'} />
                                     <span>Global Feed</span>
                                 </button>
                                 <button
@@ -299,7 +299,7 @@ export default function OpenHub() {
                                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
                                     }`}
                                 >
-                                    <TrendingUp size={14} className={!selectedAgent && activeFeed === 'trending' ? 'text-orange-500' : 'text-zinc-500'} />
+                                    <TrendingUp size={14} className={!selectedAgent && activeFeed === 'trending' ? 'text-red-500' : 'text-zinc-500'} />
                                     <span>Trending Posts</span>
                                 </button>
                                 <button
@@ -310,7 +310,7 @@ export default function OpenHub() {
                                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/50'
                                     }`}
                                 >
-                                    <Box size={14} className={!selectedAgent && activeFeed === 'projects' ? 'text-orange-500' : 'text-zinc-500'} />
+                                    <Box size={14} className={!selectedAgent && activeFeed === 'projects' ? 'text-red-500' : 'text-zinc-500'} />
                                     <span>Layout Blueprints</span>
                                 </button>
                             </div>
@@ -335,7 +335,7 @@ export default function OpenHub() {
                                                 <input 
                                                     value={newAgentName}
                                                     onChange={e => setNewAgentName(e.target.value)}
-                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
                                                     placeholder="e.g. Ada, DevMate"
                                                 />
                                             </div>
@@ -344,7 +344,7 @@ export default function OpenHub() {
                                                 <input 
                                                     value={newAgentRole}
                                                     onChange={e => setNewAgentRole(e.target.value)}
-                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
                                                     placeholder="e.g. UI Architect"
                                                 />
                                             </div>
@@ -353,7 +353,7 @@ export default function OpenHub() {
                                                 <textarea 
                                                     value={newAgentPersonality}
                                                     onChange={e => setNewAgentPersonality(e.target.value)}
-                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50 min-h-[80px]"
+                                                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 min-h-[80px]"
                                                     placeholder="e.g. Speak logically, help with Three.js..."
                                                 />
                                             </div>
@@ -361,7 +361,7 @@ export default function OpenHub() {
                                                 <Button 
                                                     onClick={handleCreateAgent}
                                                     disabled={isCreatingAgent || !newAgentName || !newAgentPersonality}
-                                                    className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-8 hover:bg-orange-500 hover:text-white transition-all h-9 disabled:opacity-50"
+                                                    className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-8 hover:bg-red-500 hover:text-white transition-all h-9 disabled:opacity-50"
                                                 >
                                                     {isCreatingAgent ? 'Creating...' : 'Create Agent'}
                                                 </Button>
@@ -397,7 +397,7 @@ export default function OpenHub() {
                                             <span className="truncate">{agent.name}</span>
                                         </div>
                                         {agent.isCustom && (
-                                            <span className="text-[7px] bg-orange-500/10 border border-orange-500/20 text-orange-400 font-extrabold px-1.5 rounded-sm uppercase tracking-tighter shrink-0 ml-1">Friend</span>
+                                            <span className="text-[7px] bg-red-500/10 border border-red-500/20 text-red-400 font-extrabold px-1.5 rounded-sm uppercase tracking-tighter shrink-0 ml-1">Friend</span>
                                         )}
                                     </button>
                                 ))}
@@ -419,7 +419,7 @@ export default function OpenHub() {
                             <div className="px-3 py-2.5 rounded-lg bg-zinc-950 border border-[#1f1f23] space-y-2">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-1.5">
-                                        <Zap size={10} className="text-orange-500 shrink-0" />
+                                        <Zap size={10} className="text-red-500 shrink-0" />
                                         <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
                                             AI Prompts
                                         </p>
@@ -431,7 +431,7 @@ export default function OpenHub() {
                                 {/* Progress bar */}
                                 <div className="w-full h-1 bg-zinc-900 rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-500 ${isAtLimit ? 'bg-red-500' : 'bg-orange-500'}`}
+                                        className={`h-full rounded-full transition-all duration-500 ${isAtLimit ? 'bg-red-500' : 'bg-red-500'}`}
                                         style={{ width: `${Math.min(100, (promptCount / FREE_PROMPT_LIMIT) * 100)}%` }}
                                     />
                                 </div>
@@ -464,7 +464,7 @@ export default function OpenHub() {
                                     value={searchQuery}
                                     onChange={e => setSearchQuery(e.target.value)}
                                     placeholder="Filter feed..."
-                                    className="w-full bg-zinc-950 border border-zinc-900 rounded-md py-1 pl-7 pr-3 text-[10px] text-white focus:outline-none focus:border-orange-500/50 placeholder:text-zinc-600"
+                                    className="w-full bg-zinc-950 border border-zinc-900 rounded-md py-1 pl-7 pr-3 text-[10px] text-white focus:outline-none focus:border-red-500/50 placeholder:text-zinc-600"
                                 />
                             </div>
                         )}
@@ -485,7 +485,7 @@ export default function OpenHub() {
                                         <Button 
                                             onClick={handleCreatePost}
                                             disabled={isPosting || !newPostContent.trim()}
-                                            className="bg-orange-600 hover:bg-orange-500 text-white text-[10px] font-bold uppercase tracking-wider h-8 rounded px-5 disabled:opacity-50"
+                                            className="bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold uppercase tracking-wider h-8 rounded px-5 disabled:opacity-50"
                                         >
                                             {isPosting ? 'Posting...' : 'Broadcast'}
                                         </Button>
@@ -541,21 +541,21 @@ export default function OpenHub() {
                                                                 setPreviewProject(post.attachedProject);
                                                             }
                                                         }}
-                                                        className="bg-zinc-950 border border-zinc-900 rounded-xl p-4 group cursor-pointer hover:border-orange-500/20 hover:bg-orange-500/[0.01] transition-all flex items-center justify-between"
+                                                        className="bg-zinc-950 border border-zinc-900 rounded-xl p-4 group cursor-pointer hover:border-red-500/20 hover:bg-red-500/[0.01] transition-all flex items-center justify-between"
                                                     >
                                                         <div className="flex items-center gap-3 min-w-0">
-                                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 group-hover:border-orange-500/20 transition-colors">
-                                                                <Code size={18} className="text-zinc-500 group-hover:text-orange-500 transition-colors" />
+                                                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 group-hover:border-red-500/20 transition-colors">
+                                                                <Code size={18} className="text-zinc-500 group-hover:text-red-500 transition-colors" />
                                                             </div>
                                                             <div className="min-w-0">
                                                                 <h6 className="font-bold text-xs text-white truncate">{post.attachedProject.title}</h6>
                                                                 <p className="text-[9px] text-zinc-500 truncate max-w-xs">{post.attachedProject.description}</p>
                                                                 {post.attachedProject.code && (
-                                                                    <span className="text-[7px] text-orange-500 font-bold uppercase tracking-widest block mt-1 animate-pulse">▶ Play Live Sandbox</span>
+                                                                    <span className="text-[7px] text-red-500 font-bold uppercase tracking-widest block mt-1 animate-pulse">▶ Play Live Sandbox</span>
                                                                 )}
                                                             </div>
                                                         </div>
-                                                        <ArrowRight size={14} className="text-zinc-700 group-hover:text-orange-400 group-hover:translate-x-0.5 transition-all shrink-0" />
+                                                        <ArrowRight size={14} className="text-zinc-700 group-hover:text-red-400 group-hover:translate-x-0.5 transition-all shrink-0" />
                                                     </div>
                                                 )}
                                             </Card>
@@ -762,7 +762,7 @@ export default function OpenHub() {
                                                     onClick={() => { setSelectedAgent(null); setActiveFeed(tag); }}
                                                     className={`px-3 py-1 rounded bg-zinc-950 border text-[9px] font-bold uppercase tracking-wider transition-colors ${
                                                         activeFeed === tag 
-                                                        ? 'border-orange-500/30 text-orange-400' 
+                                                        ? 'border-red-500/30 text-red-400' 
                                                         : 'border-zinc-900 text-zinc-500 hover:text-zinc-300 hover:border-zinc-800'
                                                     }`}
                                                 >

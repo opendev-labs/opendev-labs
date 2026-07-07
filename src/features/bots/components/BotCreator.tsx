@@ -49,12 +49,12 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] bg-zinc-950 border-zinc-900 text-white p-0 overflow-hidden rounded-none border-t-4 border-t-orange-600">
+            <DialogContent className="sm:max-w-[600px] bg-zinc-950 border-zinc-900 text-white p-0 overflow-hidden rounded-none border-t-4 border-t-red-600">
                 <div className="p-8">
                     <DialogHeader className="mb-8">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="w-8 h-8 bg-zinc-900 border border-zinc-800 flex items-center justify-center">
-                                <span className="text-[10px] font-bold text-orange-500">{step}/3</span>
+                                <span className="text-[10px] font-bold text-red-500">{step}/3</span>
                             </div>
                             <DialogTitle className="text-3xl font-bold tracking-tighter lowercase">
                                 {step === 1 && "Select Mesh Channel"}
@@ -83,11 +83,11 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                         key={p.id}
                                         onClick={() => setFormData({ ...formData, platform: p.id as any })}
                                         className={`flex items-center gap-4 p-4 border transition-all text-left group ${formData.platform === p.id
-                                                ? 'bg-zinc-900 border-orange-500'
+                                                ? 'bg-zinc-900 border-red-500'
                                                 : 'bg-black border-zinc-900 hover:border-zinc-700'
                                             }`}
                                     >
-                                        <div className={`p-3 bg-zinc-950 border ${formData.platform === p.id ? 'border-orange-500/50' : 'border-zinc-800'}`}>
+                                        <div className={`p-3 bg-zinc-950 border ${formData.platform === p.id ? 'border-red-500/50' : 'border-zinc-800'}`}>
                                             <p.icon size={20} className={p.color} />
                                         </div>
                                         <div>
@@ -95,7 +95,7 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                             <p className="text-[10px] text-zinc-500">{p.desc}</p>
                                         </div>
                                         {formData.platform === p.id && (
-                                            <Check size={16} className="ml-auto text-orange-500" />
+                                            <Check size={16} className="ml-auto text-red-500" />
                                         )}
                                     </button>
                                 ))}
@@ -117,7 +117,7 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                             placeholder="Found in Developer Portal"
                                             value={formData.appId}
                                             onChange={(e) => setFormData({ ...formData, appId: e.target.value })}
-                                            className="bg-black border-zinc-900 focus:border-orange-500 rounded-none h-12 text-sm font-mono"
+                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-none h-12 text-sm font-mono"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -126,15 +126,15 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                             placeholder="Cryptographic key for interaction signing"
                                             value={formData.publicKey}
                                             onChange={(e) => setFormData({ ...formData, publicKey: e.target.value })}
-                                            className="bg-black border-zinc-900 focus:border-orange-500 rounded-none h-12 text-sm font-mono"
+                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-none h-12 text-sm font-mono"
                                         />
                                     </div>
                                 </div>
                                 <div className="p-4 bg-zinc-900 border border-zinc-800 flex items-start gap-4">
-                                    <Info size={16} className="text-orange-500 mt-1 shrink-0" />
+                                    <Info size={16} className="text-red-500 mt-1 shrink-0" />
                                     <div>
                                         <p className="text-[10px] text-zinc-400 leading-relaxed font-medium">
-                                            Need the credentials? Access the <a href="https://discord.com/developers/applications" target="_blank" className="text-white underline hover:text-orange-500 transition-colors">Discord Developer Portal</a> to materialize your application ID and public key.
+                                            Need the credentials? Access the <a href="https://discord.com/developers/applications" target="_blank" className="text-white underline hover:text-red-500 transition-colors">Discord Developer Portal</a> to materialize your application ID and public key.
                                         </p>
                                     </div>
                                 </div>
@@ -156,7 +156,7 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                             placeholder="e.g. opendev-bots"
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="bg-black border-zinc-900 focus:border-orange-500 rounded-none h-12 text-sm"
+                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-none h-12 text-sm"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -165,7 +165,7 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                                             placeholder="Transmission summary..."
                                             value={formData.description}
                                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                            className="bg-black border-zinc-900 focus:border-orange-500 rounded-none text-sm min-h-[100px]"
+                                            className="bg-black border-zinc-900 focus:border-red-500 rounded-none text-sm min-h-[100px]"
                                         />
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@ export const BotCreator: React.FC<BotCreatorProps> = ({ isOpen, onClose, onCreat
                     <Button
                         onClick={step === 3 ? handleSubmit : handleNext}
                         disabled={(step === 2 && (!formData.appId || !formData.publicKey)) || (step === 3 && !formData.name)}
-                        className="bg-orange-600 hover:bg-orange-500 text-white font-bold uppercase tracking-widest text-[10px] h-10 px-8 rounded-none transition-all"
+                        className="bg-red-600 hover:bg-red-500 text-white font-bold uppercase tracking-widest text-[10px] h-10 px-8 rounded-none transition-all"
                     >
                         {step === 3 ? "Initialize Protocol" : "Advance"}
                         <ChevronRight size={14} className="ml-2" />

@@ -380,7 +380,7 @@ export const IDEPage: React.FC = () => {
             <DialogTrigger asChild>
               <Button 
                 disabled={!generatedCode}
-                className="h-8 bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold flex items-center gap-1.5 px-3 rounded-md shadow-md shadow-orange-500/10 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
+                className="h-8 bg-red-600 hover:bg-red-500 text-white text-xs font-bold flex items-center gap-1.5 px-3 rounded-md shadow-md shadow-red-500/10 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-50"
               >
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -398,7 +398,7 @@ export const IDEPage: React.FC = () => {
                   <input 
                     value={publishName}
                     onChange={e => setPublishName(e.target.value)}
-                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50"
+                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-red-500/50"
                     placeholder="e.g. My Portfolio, Particle Field"
                   />
                 </div>
@@ -407,7 +407,7 @@ export const IDEPage: React.FC = () => {
                   <textarea 
                     value={publishDescription}
                     onChange={e => setPublishDescription(e.target.value)}
-                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-orange-500/50 min-h-[80px]"
+                    className="w-full bg-[#18181b] border border-[#27272a] rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-red-500/50 min-h-[80px]"
                     placeholder="e.g. A gorgeous Three.js particle field with physics simulation..."
                   />
                 </div>
@@ -415,7 +415,7 @@ export const IDEPage: React.FC = () => {
                   <Button 
                     onClick={handlePublishToCommunity}
                     disabled={isPublishing || !publishName}
-                    className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-8 hover:bg-orange-500 hover:text-white transition-all h-9 disabled:opacity-50"
+                    className="bg-white text-black font-bold uppercase tracking-widest text-[9px] rounded-xl px-8 hover:bg-red-500 hover:text-white transition-all h-9 disabled:opacity-50"
                   >
                     {isPublishing ? 'Publishing...' : 'Broadcast'}
                   </Button>
@@ -613,7 +613,7 @@ export const IDEPage: React.FC = () => {
                       <div key={i} className="leading-relaxed whitespace-pre-wrap">{log}</div>
                     ))}
                     {isGenerating && (
-                      <div className="text-orange-500 animate-pulse">▋ Streaming design matrix...</div>
+                      <div className="text-red-500 animate-pulse">▋ Streaming design matrix...</div>
                     )}
                   </div>
                 )}
@@ -632,8 +632,8 @@ export const IDEPage: React.FC = () => {
       {/* Paywall Dialog */}
       <Dialog open={showPaywall} onOpenChange={setShowPaywall}>
         <DialogContent className="bg-zinc-950 border-[#1f1f23] rounded-2xl max-w-sm p-6 shadow-2xl text-center text-white">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange-500/20 mb-4">
-            <svg className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-500/20 mb-4">
+            <svg className="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
@@ -651,7 +651,7 @@ export const IDEPage: React.FC = () => {
           <div className="mt-6 flex flex-col gap-3">
             <Button
               onClick={handleUpgrade}
-              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold h-11 rounded-xl"
+              className="w-full bg-red-600 hover:bg-red-500 text-white font-bold h-11 rounded-xl"
             >
               Pay with Razorpay
             </Button>

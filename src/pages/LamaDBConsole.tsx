@@ -32,7 +32,7 @@ export const LamaDBConsole = () => {
         <div className="min-h-screen bg-black pt-12 pb-20 px-6 max-w-[1400px] mx-auto animate-in fade-in duration-700">
             <div className="flex flex-col mb-12">
                 <div className="flex items-center gap-4 mb-8">
-                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-orange-500 transition-colors uppercase tracking-[0.4em]">
+                    <Link to="/" className="text-[10px] font-bold text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-[0.4em]">
                         &larr; Return to Mesh
                     </Link>
                     <div className="w-1 h-1 rounded-full bg-zinc-800" />
@@ -44,8 +44,8 @@ export const LamaDBConsole = () => {
                 <div className="flex items-end justify-between border-b border-zinc-900 pb-8">
                     <div>
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-orange-500/10 border border-orange-500/20 flex items-center justify-center">
-                                <Database size={20} className="text-orange-500" />
+                            <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                                <Database size={20} className="text-red-500" />
                             </div>
                             <h1 className="text-3xl font-bold text-white tracking-tighter">LamaDB // Registry</h1>
                         </div>
@@ -55,8 +55,8 @@ export const LamaDBConsole = () => {
                         <div className="text-right">
                             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Protocol Status</p>
                             <div className="flex items-center justify-end gap-2 mt-1">
-                                <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                                <span className="text-orange-500 font-bold text-sm">SYNCHRONIZED</span>
+                                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                <span className="text-red-500 font-bold text-sm">SYNCHRONIZED</span>
                             </div>
                         </div>
                     </div>
@@ -70,12 +70,12 @@ export const LamaDBConsole = () => {
                     { label: 'Avg Latency', value: stats.latency, icon: Zap },
                     { label: 'Storage Used', value: '14.2 MB', icon: Database }
                 ].map((stat, i) => (
-                    <div key={i} className="bg-zinc-950 border border-zinc-900 p-6 flex items-center justify-between group hover:border-orange-500/30 transition-colors rounded-none">
+                    <div key={i} className="bg-zinc-950 border border-zinc-900 p-6 flex items-center justify-between group hover:border-red-500/30 transition-colors rounded-none">
                         <div>
                             <p className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold mb-2">{stat.label}</p>
                             <p className="text-2xl font-bold text-zinc-300 tracking-tight">{stat.value}</p>
                         </div>
-                        <stat.icon size={20} className="text-zinc-800 group-hover:text-orange-500 transition-colors" />
+                        <stat.icon size={20} className="text-zinc-800 group-hover:text-red-500 transition-colors" />
                     </div>
                 ))}
             </div>
@@ -91,7 +91,7 @@ export const LamaDBConsole = () => {
                         <div className="p-0 overflow-hidden">
                             <div className="font-mono text-xs p-4 space-y-2">
                                 <div className="text-zinc-500">$ query.collection('projects').where('userId', '==', '{user?.uid}')</div>
-                                <div className="text-orange-500/80">▸ Found 3 documents in 0.4ms</div>
+                                <div className="text-red-500/80">▸ Found 3 documents in 0.4ms</div>
                             </div>
                             <div className="font-mono text-xs p-4 bg-black/50 border-t border-zinc-900/50 space-y-1">
                                 {logs.map((log, i) => (
@@ -101,13 +101,13 @@ export const LamaDBConsole = () => {
                         </div>
                     </div>
 
-                    <div className="bg-zinc-950 border border-zinc-900 p-12 flex flex-col items-center justify-center text-center min-h-[350px] group hover:border-orange-500/10 transition-colors">
-                        <Database size={40} className="text-zinc-800 mb-6 group-hover:text-orange-500/40 transition-colors" />
+                    <div className="bg-zinc-950 border border-zinc-900 p-12 flex flex-col items-center justify-center text-center min-h-[350px] group hover:border-red-500/10 transition-colors">
+                        <Database size={40} className="text-zinc-800 mb-6 group-hover:text-red-500/40 transition-colors" />
                         <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-widest">Collections</h3>
                         <p className="text-zinc-600 text-[11px] font-bold uppercase tracking-widest max-w-sm mb-8 leading-relaxed">
                             You have access to the global mesh. Create a new collection to start syncing state.
                         </p>
-                        <Button variant="secondary" size="md" className="rounded-none border-zinc-800 hover:border-orange-500 transition-colors uppercase tracking-widest text-[10px]">Create Collection</Button>
+                        <Button variant="secondary" size="md" className="rounded-none border-zinc-800 hover:border-red-500 transition-colors uppercase tracking-widest text-[10px]">Create Collection</Button>
                     </div>
                 </div>
 
@@ -116,7 +116,7 @@ export const LamaDBConsole = () => {
                     <div className="space-y-6">
                         {[1, 2, 3, 4].map((i) => (
                             <div key={i} className="flex items-center gap-4">
-                                <div className="w-1.5 h-1.5 rounded-none bg-orange-500/30 group-hover:bg-orange-500 animate-pulse" />
+                                <div className="w-1.5 h-1.5 rounded-none bg-red-500/30 group-hover:bg-red-500 animate-pulse" />
                                 <div className="flex-1">
                                     <div className="h-[1px] w-full bg-zinc-900 mb-2" />
                                     <div className="flex justify-between items-center">
