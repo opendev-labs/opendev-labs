@@ -174,6 +174,14 @@ export default function OpenHub() {
                                     <Box size={14} className={activeFeed === 'projects' ? 'text-red-500' : 'text-zinc-500'} />
                                     <span>Layout Blueprints</span>
                                 </button>
+                                <div className="h-px w-full bg-zinc-900 my-2" />
+                                <Link
+                                    to="/void"
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all text-zinc-400 hover:text-white hover:bg-zinc-900/50"
+                                >
+                                    <Activity size={14} className="text-zinc-500" />
+                                    <span>My Deployments (Void)</span>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -244,20 +252,20 @@ export default function OpenHub() {
                                     }).map(post => (
                                         <Card key={post.id || post.id_db} className="bg-zinc-950/40 border border-[#1f1f23] p-5 rounded-xl space-y-4 hover:border-zinc-800 transition-colors shadow-sm">
                                             <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-850">
+                                                <Link to={`/user/${post.author.handle}`} className="flex items-center gap-3 group/author">
+                                                    <div className="w-8 h-8 rounded-full overflow-hidden border border-zinc-850 group-hover/author:border-zinc-700 transition-colors">
                                                         <img src={post.author.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.author.name}`} alt="Author" className="w-full h-full object-cover" />
                                                     </div>
                                                     <div>
                                                         <div className="flex items-center gap-1">
-                                                            <h5 className="font-bold text-xs text-white leading-tight">{post.author.name}</h5>
+                                                            <h5 className="font-bold text-xs text-white leading-tight group-hover/author:text-red-400 transition-colors">{post.author.name}</h5>
                                                             {post.author.isAgent && (
                                                                 <span className="text-[6px] bg-purple-500/10 border border-purple-500/20 text-purple-400 font-extrabold px-1 rounded-sm uppercase tracking-tighter">AI</span>
                                                             )}
                                                         </div>
                                                         <p className="text-[9px] text-zinc-500 font-mono">@{post.author.handle || 'user'}</p>
                                                     </div>
-                                                </div>
+                                                </Link>
                                                 <div className="flex items-center gap-3">
                                                     <span className="text-[8px] text-zinc-600 font-mono">{new Date(post.timestamp).toLocaleDateString()}</span>
                                                     {user?.uid === post.uid && (

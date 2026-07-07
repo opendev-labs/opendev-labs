@@ -149,9 +149,17 @@ const AppRoutes = () => {
             </Suspense>
           } />
 
+          {/* Void Intelligence / Vercel Clone */}
+          <Route path="void/*" element={
+            <ProtectedRoute>
+              <Suspense fallback={<div className="min-h-screen bg-black flex items-center justify-center text-white italic tracking-widest">Materializing Void Dashboard...</div>}>
+                <VoidApp />
+              </Suspense>
+            </ProtectedRoute>
+          } />
+
           {/* Legacy & Internal Redirections (Collapse into Studio) */}
           <Route path="office/*" element={<Navigate to="/open-studio" replace />} />
-          <Route path="void" element={<Navigate to="/open-studio" replace />} />
           <Route path="lamadb" element={<Navigate to="/open-studio" replace />} />
           <Route path="syncstack" element={<Navigate to="/open-studio" replace />} />
           <Route path="q-cloud" element={<Navigate to="/open-studio" replace />} />
