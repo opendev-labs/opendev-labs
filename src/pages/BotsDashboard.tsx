@@ -6,10 +6,10 @@ import { LamaDB } from "../lib/lamaDB"
 import { useAuth } from "../features/void/hooks/useAuth"
 
 // UI Components
-import { Badge } from "../components/ui/shadcn/badge"
-import { Button } from "../components/ui/shadcn/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/shadcn/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/shadcn/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BotCreator } from "../features/bots/components/BotCreator"
 
 interface BotEntity {

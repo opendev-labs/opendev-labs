@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '../../../components/ui/Card';
 import { Github, Star, GitBranch, ExternalLink, Globe, Layout, Cpu } from 'lucide-react';
-import { Button } from '../../../components/ui/shadcn/button';
+import { Button } from '@/components/ui/button';
 
 interface ProjectMetadata {
     id: string;

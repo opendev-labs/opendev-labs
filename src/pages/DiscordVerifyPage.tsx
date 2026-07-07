@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { useSearchParams, Link } from "react-router-dom"
 import { Shield, CheckCircle2, AlertCircle, Loader2, ExternalLink, Bot, Lock } from "lucide-react"
-import { Button } from "../components/ui/shadcn/button"
+import { Button } from "@/components/ui/button"
 import { motion } from "framer-motion"
 
 export default function DiscordVerifyPage() {

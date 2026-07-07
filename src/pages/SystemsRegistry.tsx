@@ -16,7 +16,7 @@ import {
     ShieldCheck
 } from "lucide-react";
 import { Card } from "../components/ui/Card";
-import { Button } from "../components/ui/shadcn/button";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "../features/void/hooks/useAuth";
 
 const systems = [

@@ -3,10 +3,10 @@ import { Terminal, Database, Cpu, Zap, Box, Code, Activity, Users, Shield, Shiel
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/shadcn/button';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '../features/void/hooks/useAuth';
 import { LamaDB } from '../lib/lamaDB';
-import { Textarea } from '../components/ui/shadcn/textarea';
+import { Textarea } from '@/components/ui/textarea';
 
 import { ProjectCard } from '../features/hub/components/ProjectCard';
 import { HubService, ProjectMetadata } from '../services/hubService';

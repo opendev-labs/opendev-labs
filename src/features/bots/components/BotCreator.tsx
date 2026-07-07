@@ -1,11 +1,11 @@
 import React, { useState } from "react"
 import { Bot, Zap, Globe, Smartphone, Shield, Plus, Info, ExternalLink, ChevronRight, ChevronLeft, Check } from "lucide-react"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../../components/ui/shadcn/dialog"
-import { Button } from "../../../components/ui/shadcn/button"
-import { Input } from "../../../components/ui/shadcn/input"
-import { Label } from "../../../components/ui/shadcn/label"
-import { Textarea } from "../../../components/ui/shadcn/textarea"
-import { Badge } from "../../../components/ui/shadcn/badge"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface BotCreatorProps {

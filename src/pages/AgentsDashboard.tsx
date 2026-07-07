@@ -6,10 +6,10 @@ import { LamaDB } from "../lib/lamaDB"
 import { useAuth } from "../features/void/hooks/useAuth"
 
 // Ported Shadcn-like components
-import { Badge } from "../components/ui/shadcn/badge"
-import { Button } from "../components/ui/shadcn/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/shadcn/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/shadcn/tabs"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import {
     Dialog,
     DialogContent,
@@ -18,10 +18,10 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "../components/ui/shadcn/dialog"
-import { Input } from "../components/ui/shadcn/input"
-import { Label } from "../components/ui/shadcn/label"
-import { Textarea } from "../components/ui/shadcn/textarea"
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 
 // Ported Agents components
 import { AgentBuilder } from "../components/agents/agent-builder"

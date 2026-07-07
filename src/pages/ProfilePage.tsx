@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User as UserIcon, Briefcase, Globe, Github, Twitter, Linkedin, Mail, Shield, Zap, Database, Terminal, Code, BookOpen, Plus, ExternalLink, Settings, Award, MapPin, Calendar, Link as LinkIcon, Users, Box, Heart, Sparkles } from "lucide-react";
 import { useAuth } from "../features/void/hooks/useAuth";
-import { Button } from "../components/ui/shadcn/button";
+import { Button } from "@/components/ui/button";
 import { Card } from "../components/ui/Card";
 import { ProjectCard } from "../features/hub/components/ProjectCard";
 import { LamaDB } from "../lib/lamaDB";

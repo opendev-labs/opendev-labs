@@ -4,10 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { User as UserIcon, Shield, Loader2, Save, ArrowLeft, Globe, Github, Linkedin, Twitter, Briefcase, Award, Image as ImageIcon, Sparkles, MapPin, Link as LinkIcon } from "lucide-react";
 import { useAuth } from "../features/void/hooks/useAuth";
-import { Button } from "../components/ui/shadcn/button";
-import { Input } from "../components/ui/shadcn/input";
-import { Label } from "../components/ui/shadcn/label";
-import { Textarea } from "../components/ui/shadcn/textarea";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Card } from "../components/ui/Card";
 
 export default function ProfileSettings() {

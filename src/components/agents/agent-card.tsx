@@ -3,12 +3,12 @@
 import type React from "react"
 
 import { motion } from "framer-motion"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/shadcn/card"
-import { Button } from "../ui/shadcn/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/shadcn/dropdown-menu"
-import { Badge } from "../ui/shadcn/badge"
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Badge } from "@/components/ui/badge"
 import { Bot, Copy, MoreHorizontal, Pencil, Play, Trash } from "lucide-react"
-import { toast } from "../../hooks/shadcn/use-toast"
+import { toast } from "@/hooks/use-toast"
 
 interface AgentCardProps {
   agent: {
