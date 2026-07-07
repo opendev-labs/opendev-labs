@@ -105,7 +105,7 @@ const AppRoutes = () => {
 
         {/* Main Website (Shared Layout) */}
         <Route element={<Layout />}>
-          <Route index element={<Home />} />
+          <Route index element={<VoidLanding />} />
 
           {/* Primary Unified Products */}
           <Route path="open-hub" element={
