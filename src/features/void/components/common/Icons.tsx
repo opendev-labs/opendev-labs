@@ -252,7 +252,5 @@ export const GoogleIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 export const OpenDevLogo: React.FC<{ className?: string }> = ({ className }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className || "w-6 h-6"}>
-        <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10s10-4.477 10-10c0-5.523-4.477-10-10-10zM6.5 12c0-3.038 2.462-5.5 5.5-5.5S17.5 8.962 17.5 12 15.038 17.5 12 17.5 6.5 15.038 6.5 12z" />
-    </svg>
+    <img src="/opendev-labs.png" alt="OpenDev Labs Logo" className={className || "w-6 h-6 rounded-sm"} />
 );
