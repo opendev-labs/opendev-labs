@@ -4,117 +4,74 @@ import { Button } from '../components/ui/button';
 import { GoogleLoginButton } from '../components/GoogleLoginButton';
 import { useAuth } from '../context/AuthContext';
 import { useServices } from '../context/ServicesContext';
-import { ArrowRight, Calendar, Users, Zap } from 'lucide-react';
+import { ArrowRight, Check, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export const BookingLanding: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const { services } = useServices();
-  const [activeTab, setActiveTab] = useState<'services' | 'portfolio' | 'about'>('services');
 
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-32 px-4 sm:px-6 lg:px-8">
-        {/* Animated background gradient */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-block px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <span className="text-sm font-medium text-primary">✨ Professional Services</span>
-            </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tighter mb-6 leading-tight">
-              Build Something{' '}
-              <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                Extraordinary
+      <section className="relative pt-32 pb-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-20">
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-tight">
+              Book Your{' '}
+              <span className="relative">
+                Consultation
+                <span className="absolute bottom-2 left-0 w-full h-1 bg-primary/30"></span>
               </span>
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 leading-relaxed">
-              Expert development, design, and strategy consulting. Book your consultation today and let's create your next big idea together.
+            <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mt-8">
+              Expert services tailored to your needs. Schedule a time that works for you.
             </p>
+          </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              {isAuthenticated ? (
-                <>
-                  <Link to="/booking">
-                    <Button size="lg" className="w-full sm:w-auto">
-                      Book an Appointment
-                      <ArrowRight className="w-4 h-4 ml-2" />
-                    </Button>
-                  </Link>
-                  <Link to="/dashboard">
-                    <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                      Go to Dashboard
-                    </Button>
-                  </Link>
-                </>
-              ) : (
-                <div className="w-full sm:w-auto">
-                  <GoogleLoginButton size="lg" text="Sign in to Book" />
+          {/* CTA Section */}
+          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-32">
+            {isAuthenticated ? (
+              <>
+                <Link to="/booking" className="w-full sm:w-auto">
+                  <Button size="lg" className="w-full sm:w-auto px-8 py-6 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90">
+                    Book Now
+                    <ArrowRight className="w-4 h-4 ml-3" />
+                  </Button>
+                </Link>
+                <div className="text-sm text-muted-foreground">
+                  Signed in as <span className="font-semibold text-foreground">{user?.email}</span>
                 </div>
-              )}
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-4 mt-16 pt-12 border-t border-border">
-              <div>
-                <div className="text-3xl font-bold text-primary">500+</div>
-                <p className="text-sm text-muted-foreground mt-2">Projects Completed</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-secondary">98%</div>
-                <p className="text-sm text-muted-foreground mt-2">Client Satisfaction</p>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-accent">10+</div>
-                <p className="text-sm text-muted-foreground mt-2">Years Experience</p>
-              </div>
-            </div>
+              </>
+            ) : (
+              <>
+                <GoogleLoginButton />
+                <p className="text-sm text-muted-foreground">Sign in with Google to continue</p>
+              </>
+            )}
           </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-20 px-4 sm:px-6 lg:px-8 bg-card/50 border-t border-b border-border">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold mb-4">Our Services</h2>
-            <p className="text-lg text-muted-foreground">
-              Choose from our range of professional services tailored to your needs
-            </p>
-          </div>
+      <section className="border-t border-border py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-5xl sm:text-6xl font-bold tracking-tight mb-4 text-center">Our Services</h2>
+          <p className="text-lg text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+            Choose from our comprehensive range of professional services
+          </p>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service) => (
-              <div
-                key={service.id}
-                className="group relative overflow-hidden rounded-xl bg-background border border-border p-8 hover:border-primary/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${service.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                <div className="relative z-10">
-                  <div className="text-5xl mb-4">{service.icon}</div>
-                  <h3 className="text-xl font-bold mb-2">{service.name}</h3>
-                  <p className="text-muted-foreground mb-4">{service.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-primary font-medium">{service.duration} mins</span>
-                    {service.price > 0 && (
-                      <span className="text-lg font-bold text-foreground">${service.price}</span>
-                    )}
-                  </div>
-                  {isAuthenticated && (
-                    <Button
-                      size="sm"
-                      className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      Book Now
-                    </Button>
-                  )}
+              <div key={service.id} className="border border-border rounded-lg p-8 hover:border-foreground/50 transition-colors duration-300">
+                <Briefcase className="w-8 h-8 mb-4 text-foreground" />
+                <h3 className="text-2xl font-semibold mb-3">{service.name}</h3>
+                <p className="text-muted-foreground mb-6 leading-relaxed">{service.description}</p>
+                <div className="flex items-baseline gap-2 mb-6">
+                  <span className="text-3xl font-bold">${service.price}</span>
+                  <span className="text-muted-foreground">per {service.duration} mins</span>
                 </div>
               </div>
             ))}
@@ -122,111 +79,69 @@ export const BookingLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-16 text-center">Why Choose Us</h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                <Calendar className="w-6 h-6 text-primary" />
+      {/* Why Us Section */}
+      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-secondary/30">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-5xl sm:text-6xl font-bold tracking-tight mb-16 text-center">Why Choose Us</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              {
+                title: 'Expert Team',
+                description: 'Highly qualified professionals with years of industry experience'
+              },
+              {
+                title: 'Flexible Scheduling',
+                description: 'Book appointments at times that work best for your schedule'
+              },
+              {
+                title: 'Professional Service',
+                description: 'Dedicated support and consultation tailored to your needs'
+              }
+            ].map((item, idx) => (
+              <div key={idx} className="flex flex-col items-start">
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 mb-6">
+                  <Check className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
+                <p className="text-muted-foreground leading-relaxed">{item.description}</p>
               </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">Google Calendar Sync</h3>
-                <p className="text-muted-foreground">
-                  Real-time availability sync. Book directly into our calendar with instant confirmation.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center flex-shrink-0">
-                <Users className="w-6 h-6 text-secondary" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">Expert Team</h3>
-                <p className="text-muted-foreground">
-                  Experienced professionals with proven track records in web development, design, and strategy.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-6 items-start">
-              <div className="w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-6 h-6 text-accent" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold mb-2">Quick Turnaround</h3>
-                <p className="text-muted-foreground">
-                  Fast, efficient service delivery. We respect your time and deliver results quickly.
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 border-t border-border">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl sm:text-5xl font-bold mb-6">Ready to Get Started?</h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Schedule a consultation with our team today. Let's discuss your project and create a plan for success.
+      {/* Footer CTA */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-border">
+        <div className="max-w-3xl mx-auto text-center">
+          <h3 className="text-4xl sm:text-5xl font-bold tracking-tight mb-6">Ready to Get Started?</h3>
+          <p className="text-lg text-muted-foreground mb-8">
+            Schedule your consultation today and let's discuss your project
           </p>
           {isAuthenticated ? (
             <Link to="/booking">
-              <Button size="lg">
-                Book Your Appointment Now
-                <ArrowRight className="w-4 h-4 ml-2" />
+              <Button size="lg" className="px-8 py-6 text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90">
+                Book Appointment
+                <ArrowRight className="w-4 h-4 ml-3" />
               </Button>
             </Link>
           ) : (
-            <GoogleLoginButton size="lg" text="Sign in to Book" />
+            <GoogleLoginButton />
           )}
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-card border-t border-border py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8 pb-8 border-b border-border">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold">
-                  OD
-                </div>
-                <span className="font-bold">OpenDev</span>
-              </div>
-              <p className="text-muted-foreground text-sm">Expert development and design services.</p>
+      <footer className="border-t border-border py-12 px-4 sm:px-6 lg:px-8 bg-secondary/50">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-6 md:mb-0">
+              <h4 className="font-bold text-lg">OpenDev Labs</h4>
+              <p className="text-sm text-muted-foreground mt-1">Professional Services</p>
             </div>
-            <div>
-              <h4 className="font-bold mb-4">Services</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition">Web Development</a></li>
-                <li><a href="#" className="hover:text-foreground transition">UI/UX Design</a></li>
-                <li><a href="#" className="hover:text-foreground transition">Strategy</a></li>
-              </ul>
+            <div className="text-center md:text-right text-sm text-muted-foreground">
+              <p>&copy; 2024 OpenDev Labs. All rights reserved.</p>
             </div>
-            <div>
-              <h4 className="font-bold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition">About</a></li>
-                <li><a href="#" className="hover:text-foreground transition">Blog</a></li>
-                <li><a href="#" className="hover:text-foreground transition">Contact</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-bold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-foreground transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-foreground transition">Terms</a></li>
-                <li><a href="#" className="hover:text-foreground transition">Cookies</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="text-center text-muted-foreground text-sm">
-            <p>&copy; 2024 OpenDev. All rights reserved.</p>
           </div>
         </div>
       </footer>
