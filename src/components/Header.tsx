@@ -30,10 +30,10 @@ export const Header: React.FC = () => {
                     </Link>
                     <nav className="flex items-center gap-4 text-sm lg:gap-6">
                         <Link 
-                            to="/open-studio" 
-                            className={`transition-colors hover:text-foreground/80 ${pathname.startsWith('/open-studio') ? 'text-foreground' : 'text-foreground/60'}`}
+                            to="/nanopi" 
+                            className={`transition-colors hover:text-foreground/80 ${pathname.startsWith('/nanopi') ? 'text-foreground' : 'text-foreground/60'}`}
                         >
-                            IDE
+                            NanoPi
                         </Link>
                         <Link 
                             to="/open-hub" 
