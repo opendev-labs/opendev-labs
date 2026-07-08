@@ -50,3 +50,5 @@ export const GoogleLoginButton: React.FC<GoogleLoginButtonProps> = ({
     />
   );
 };
+
+export default GoogleLoginButton;
