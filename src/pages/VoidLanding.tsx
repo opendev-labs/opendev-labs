@@ -58,14 +58,6 @@ const products = [
     color: 'from-violet-500/10 to-purple-500/10 border-violet-500/20',
   },
   {
-    name: 'OpenStudio',
-    description: 'An agentic, AI-native development workspace with cloud sandboxes, live preview, and continuous neural code assistance.',
-    tag: 'Dev IDE',
-    href: '/open-studio',
-    icon: '⚡',
-    color: 'from-blue-500/10 to-cyan-500/10 border-blue-500/20',
-  },
-  {
     name: 'OpenHub',
     description: 'The central command hub for managing all your OpenDev Labs products, services, and cloud deployments in one unified interface.',
     tag: 'Platform',
@@ -238,7 +230,7 @@ export default function VoidLanding() {
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#services" className="hover:text-foreground transition-colors">Services</a>
             <Link to="/nanopi" className="hover:text-foreground transition-colors">NanoPi</Link>
-            <Link to="/open-studio" className="hover:text-foreground transition-colors">OpenStudio</Link>
+            <Link to="/open-hub" className="hover:text-foreground transition-colors">OpenHub</Link>
             <a href="https://github.com/opendev-labs" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors flex items-center gap-1">
               GitHub <ExternalLink className="h-3 w-3" />
             </a>
