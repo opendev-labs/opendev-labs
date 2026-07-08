@@ -23,6 +23,12 @@ import AgentsLanding from './pages/AgentsLanding';
 import Spoon from './pages/Spoon';
 import Product from './pages/Product';
 import Changelog from './pages/Changelog';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { AuthProvider as BookingAuthProvider } from './context/AuthContext';
+import { ServicesProvider } from './context/ServicesContext';
+import BookingLanding from './pages/BookingLanding';
+import BookingPage from './pages/BookingPage';
+import AdminDashboard from './pages/AdminDashboard';
 const lazyWithRetry = (componentImport: () => Promise<any>) =>
   lazy(async () => {
     const pageHasAlreadyBeenForceRefreshed = JSON.parse(
@@ -103,6 +109,12 @@ const AppRoutes = () => {
             <SyncStackAuthPage />
           </Suspense>
         } />
+        {/* Booking System Routes */}
+        <Route path="book" element={<BookingLanding />} />
+        <Route path="booking" element={<BookingPage />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="dashboard/appointments" element={<AdminDashboard />} />
+
         {/* Main Website (Shared Layout) */}
         <Route element={<Layout />}>
           <Route index element={<VoidLanding />} />
@@ -178,14 +190,22 @@ const AppRoutes = () => {
 }
 
 export default function App() {
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+  
   return (
-    <AuthProvider>
-      <ErrorBoundary>
-        <Preloader />
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
-      </ErrorBoundary>
-    </AuthProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BookingAuthProvider>
+        <ServicesProvider>
+          <AuthProvider>
+            <ErrorBoundary>
+              <Preloader />
+              <BrowserRouter>
+                <AppRoutes />
+              </BrowserRouter>
+            </ErrorBoundary>
+          </AuthProvider>
+        </ServicesProvider>
+      </BookingAuthProvider>
+    </GoogleOAuthProvider>
   )
 }
