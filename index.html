@@ -1,32 +1,423 @@
-<!doctype html>
-<html lang="en" class="dark">
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opendev-labs</title>
-  <!-- Start Single Page Apps for GitHub Pages -->
-  <script type="text/javascript">
-    (function(l) {
-      if (l.search[1] === '/' ) {
-        var decoded = l.search.slice(1).split('&').map(function(s) { 
-          return s.replace(/~and~/g, '&') 
-        }).join('?');
-        window.history.replaceState(null, null,
-            l.pathname.slice(0, -1) + decoded + l.hash
-        );
-      }
-    }(window.location))
-  </script>
-  <!-- End Single Page Apps for GitHub Pages -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenDev Labs | Premium Software Development Company</title>
+  <meta name="description" content="OpenDev Labs is a software development company building custom WebApps, Android Mobile Apps, OpenRouter AI tools, and Managed Domain Infrastructure.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- CDN Scripts for Three.js, GSAP & Lucide Icons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-
 <body>
-  <div id="root"></div>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script type="module" src="/src/main.tsx"></script>
+  <!-- WebGL 3D Canvas Background Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Single Floating Bottom-Right 3D Settings Action Button -->
+  <button class="floating-settings-btn interactive" onclick="toggleSettingsDrawer()" title="3D Lab Matrix Settings">
+    <i data-lucide="settings" style="width:22px; height:22px;"></i>
+  </button>
+
+  <!-- Settings Slide-Over Drawer Modal -->
+  <div class="settings-drawer-backdrop interactive" id="settings-drawer-backdrop">
+    <div class="settings-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="sliders" style="color:var(--accent-red); width:18px; height:18px;"></i>
+          <h3>3D LAB MATRIX CONTROLS</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="toggleSettingsDrawer()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; flex:1;">
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Fog Color Theme Palette</label>
+          <div class="theme-presets" style="gap:10px;">
+            <div class="theme-dot active" style="background:#F02050; width:28px; height:28px;" onclick="setTheme('red')" title="Cyber Red"></div>
+            <div class="theme-dot" style="background:#00F2FE; width:28px; height:28px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+            <div class="theme-dot" style="background:#7928CA; width:28px; height:28px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+            <div class="theme-dot" style="background:#00FF88; width:28px; height:28px;" onclick="setTheme('green')" title="Matrix Green"></div>
+            <div class="theme-dot" style="background:#FF9900; width:28px; height:28px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div class="control-row">
+          <span>Wireframe Mesh</span>
+          <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Camera Angle View</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('default')">Orbit</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('top')">Top</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('close')">Street</button>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem;">
+            <span style="color:var(--muted-foreground);">Traffic Speed</span>
+            <span id="speed-val" style="font-family:var(--font-mono); color:var(--accent-green);">0.001</span>
+          </div>
+          <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-shadcn-red" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Cmd+K Command Palette Modal -->
+  <div class="cmd-modal-backdrop interactive" id="cmd-modal">
+    <div class="cmd-modal-dialog">
+      <div class="cmd-search-bar">
+        <i data-lucide="search" style="width:18px; height:18px; color:var(--muted-foreground);"></i>
+        <input type="text" id="cmd-input" placeholder="Type a command or search..." onkeyup="filterCommands(this.value)">
+        <span class="kbd-shortcut">ESC</span>
+      </div>
+
+      <div class="cmd-list" id="cmd-list">
+        <div class="cmd-group-label">OpenDev Software Company Services</div>
+        <div class="cmd-item" onclick="executeCmd('goto-booking')">
+          <span><i data-lucide="code" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> Custom WebApps & Websites ($150–$2.5k)</span>
+          <span class="kbd-shortcut">W</span>
+        </div>
+        <div class="cmd-item" onclick="executeCmd('goto-booking')">
+          <span><i data-lucide="smartphone" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> Native Android Mobile Apps ($600–$1.5k)</span>
+          <span class="kbd-shortcut">A</span>
+        </div>
+        <div class="cmd-item" onclick="executeCmd('goto-domains')">
+          <span><i data-lucide="globe" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> Managed Domain Buying & DNS ($50/yr)</span>
+          <span class="kbd-shortcut">D</span>
+        </div>
+        <div class="cmd-item" onclick="executeCmd('goto-ai')">
+          <span><i data-lucide="cpu" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> OpenRouter AI Systems (DeepSeek/Llama)</span>
+          <span class="kbd-shortcut">I</span>
+        </div>
+        <div class="cmd-item" onclick="executeCmd('goto-marketplace')">
+          <span><i data-lucide="shopping-bag" style="width:14px; height:14px; vertical-align:middle; margin-right:8px;"></i> Browse Software Templates Marketplace</span>
+          <span class="kbd-shortcut">M</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Website Content Overlay -->
+  <div class="content-wrapper">
+
+    <!-- Top Navbar -->
+    <header class="navbar interactive">
+      <a href="#" class="brand-logo">
+        <div class="logo-box">
+          <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+        </div>
+        <span>opendev<span class="highlight">-labs</span></span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="booking.html">Software Services</a></li>
+        <li><a href="marketplace.html">Templates</a></li>
+        <li><a href="ai-cloud.html">Web-AI & Vercel</a></li>
+        <li><a href="domains.html">Managed Domains</a></li>
+        <li><a href="pricing.html">Pricing ($)</a></li>
+      </ul>
+
+      <div class="nav-right">
+        <div class="cmd-k-trigger" onclick="openCmdModal()">
+          <i data-lucide="search" style="width:14px; height:14px;"></i>
+          <span>Search...</span>
+          <span class="kbd-shortcut">⌘K</span>
+        </div>
+
+        <a href="booking.html" class="btn btn-shadcn-red">Book Project</a>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="launch-badge interactive">
+        <span style="color:var(--accent-red); font-weight:700;">OPENDEV LABS</span>
+        <span>— Custom Web Apps, Android Apps, AI & Cloud Infrastructure</span>
+        <i data-lucide="arrow-right" style="width:14px; height:14px;"></i>
+      </div>
+
+      <div class="container-fluid fixed-top header disable-selection">
+        <div class="row">
+          <div class="col"></div>
+          <div class="col-md-6">
+            <div class="row">
+              <div class="col">
+                <h1><strong>OpenDev Labs</strong></h1>
+                <p class="small">– Back to the red –</p>
+                <div class="hero-ctas interactive" style="margin-top:16px;">
+                  <a href="booking.html" class="btn btn-shadcn-red"><i data-lucide="briefcase" style="width:15px; height:15px;"></i> Book Custom Project (From $150)</a>
+                  <a href="pricing.html" class="btn btn-shadcn-secondary"><i data-lucide="dollar-sign" style="width:15px; height:15px;"></i> View Pricing Packages</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col"></div>
+        </div>
+      </div>
+
+      <p class="hero-subtitle interactive" style="margin-top:20px;">
+        OpenDev Labs builds custom Web Applications, Native Android APKs, OpenRouter AI integrations, and Managed Domain Infrastructure with transparent USD ($) pricing.
+      </p>
+
+      <div class="hero-stats interactive">
+        <div class="stat-card">
+          <div class="stat-number">4.9 ★</div>
+          <div class="stat-label">Client Rating</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">100%</div>
+          <div class="stat-label">Production Quality</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">Free AI</div>
+          <div class="stat-label">OpenRouter API</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">99.99%</div>
+          <div class="stat-label">Vercel Uptime</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Software Development Services Bento Grid Section -->
+    <section id="features" class="section interactive">
+      <div class="section-header">
+        <div class="section-badge">Core Software Services</div>
+        <h2 class="section-title">What We Build For Your Business</h2>
+      </div>
+
+      <div class="bento-grid">
+        <!-- Service 1: Custom Web Apps & Websites -->
+        <div class="bento-card span-2">
+          <div>
+            <div class="bento-icon"><i data-lucide="code"></i></div>
+            <h3>Custom Web Applications & Websites</h3>
+            <p>High-performance web applications and landing pages engineered with Next.js 16 App Router & Actions, React 19, Three.js 3D WebGL, and Shadcn UI dark-mode components.</p>
+          </div>
+          <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-red);">STARTING FROM $150</span>
+            <a href="booking.html" class="btn btn-shadcn-red">Book WebApp Build →</a>
+          </div>
+        </div>
+
+        <!-- Service 2: Native Android Apps -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-cyan);"><i data-lucide="smartphone"></i></div>
+            <h3>Native Android Mobile Apps</h3>
+            <p>Cross-platform mobile applications exported as native Android APKs using Capacitor CLI, Firebase Realtime Database, and Razorpay Mobile SDK.</p>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="booking.html" class="btn btn-shadcn-secondary" style="width:100%; text-align:center;">Book Android App →</a>
+          </div>
+        </div>
+
+        <!-- Service 3: OpenRouter AI Integrations -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-purple);"><i data-lucide="cpu"></i></div>
+            <h3>OpenRouter AI Systems & SaaS</h3>
+            <p>Connect your web apps to free OpenRouter.ai API keys (DeepSeek R1, Meta Llama 3.3, Qwen 2.5) for automated AI chatbots, support desks, and content generators.</p>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="ai-cloud.html" class="btn btn-shadcn-secondary" style="width:100%; text-align:center;">Explore AI Systems →</a>
+          </div>
+        </div>
+
+        <!-- Service 4: Database & Cloud Deployment -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-green);"><i data-lucide="server"></i></div>
+            <h3>Backend, Firebase & Vercel Cloud</h3>
+            <p>Firebase Firestore database setup, Firebase Auth security rules, GitHub CI/CD automation, and Vercel CLI production edge deployments (`npx vercel --prod`).</p>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="ai-cloud.html" class="btn btn-shadcn-secondary" style="width:100%; text-align:center;">Get Cloud Setup →</a>
+          </div>
+        </div>
+
+        <!-- Service 5: Managed Domain Buying & DNS -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-cyan);"><i data-lucide="globe"></i></div>
+            <h3>Managed Domain Buying & DNS</h3>
+            <p>Complete domain registration, WHOIS privacy protection, SSL automation, and Cloudflare Anycast DNS setup for $50/yr.</p>
+          </div>
+          <div style="margin-top:20px;">
+            <a href="domains.html" class="btn btn-shadcn-secondary" style="width:100%; text-align:center;">Search Domains →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Code Editor Playground -->
+    <section id="playground" class="section interactive">
+      <div class="section-header">
+        <div class="section-badge">Production Code Stack</div>
+        <h2 class="section-title">Next.js 16 + OpenRouter AI + Razorpay</h2>
+        <p class="section-desc">See real production code integrating OpenRouter free AI keys with Next.js 16 Server Actions and Razorpay payments.</p>
+      </div>
+
+      <div class="editor-wrapper">
+        <div class="editor-topbar">
+          <div class="editor-tabs">
+            <button class="tab-trigger active" onclick="switchTab('ts')">TypeScript</button>
+            <button class="tab-trigger" onclick="switchTab('py')">Python</button>
+            <button class="tab-trigger" onclick="switchTab('rs')">Rust</button>
+            <button class="tab-trigger" onclick="switchTab('go')">Go</button>
+          </div>
+        </div>
+
+        <div class="editor-body">
+          <button class="copy-btn" onclick="copyCode()"><i data-lucide="copy" style="width:12px; height:12px; vertical-align:middle;"></i> Copy</button>
+          <pre id="code-snippet"><code><span class="syntax-keyword">import</span> { NextRequest, NextResponse } <span class="syntax-keyword">from</span> <span class="syntax-str">'next/server'</span>;
+<span class="syntax-keyword">import</span> Razorpay <span class="syntax-keyword">from</span> <span class="syntax-str">'razorpay'</span>;
+
+<span class="syntax-comment">// Next.js 16 Server Action with OpenRouter API + Razorpay</span>
+<span class="syntax-keyword">export async function</span> <span class="syntax-fn">POST</span>(req: NextRequest) {
+  <span class="syntax-keyword">const</span> { prompt } = <span class="syntax-keyword">await</span> req.<span class="syntax-fn">json</span>();
+  
+  <span class="syntax-comment">// Call Free OpenRouter AI API (DeepSeek R1 / Llama 3)</span>
+  <span class="syntax-keyword">const</span> aiRes = <span class="syntax-keyword">await</span> <span class="syntax-fn">fetch</span>(<span class="syntax-str">'https://openrouter.ai/api/v1/chat/completions'</span>, {
+    method: <span class="syntax-str">'POST'</span>,
+    headers: {
+      <span class="syntax-str">'Authorization'</span>: <span class="syntax-str">\`Bearer \${process.env.OPENROUTER_API_KEY}\`</span>,
+      <span class="syntax-str">'Content-Type'</span>: <span class="syntax-str">'application/json'</span>
+    },
+    body: JSON.<span class="syntax-fn">stringify</span>({
+      model: <span class="syntax-str">'deepseek/deepseek-r1:free'</span>,
+      messages: [{ role: <span class="syntax-str">'user'</span>, content: prompt }]
+    })
+  });
+
+  <span class="syntax-keyword">return</span> NextResponse.<span class="syntax-fn">json</span>(<span class="syntax-keyword">await</span> aiRes.<span class="syntax-fn">json</span>());
+}</code></pre>
+        </div>
+
+        <div class="terminal-view">
+          <div class="terminal-output" id="console-output">[OPENDEV CLI]: Connected to OpenDev Edge Network (*.opendev.app)
+[AUTH]: Run 'open login' to authenticate via device authorization (ZFKZ-ZGFN).
+[DEPLOY]: Run 'open --prod' to deploy project to https://ebookstall.opendev.app
+> open --prod
+  - LIVE URL: https://ebookstall.opendev.app
+  - ANDROID APK: https://ebookstall.opendev.app/download/ebookstall.apk</div>
+          
+          <div class="terminal-prompt">
+            <span>opendev-labs$&nbsp;</span>
+            <input type="text" id="terminal-input" placeholder="Type 'open login', 'open --prod', or 'help'..." onkeydown="handleTerminalKey(event)">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clean $1M Uncluttered Pricing Teaser Banner -->
+    <section id="pricing" class="section interactive">
+      <div style="background:linear-gradient(135deg, rgba(24,24,27,0.85), rgba(9,9,11,0.95)); border:1px solid var(--border); border-radius:var(--radius-xl); padding:48px 36px; text-align:center; position:relative; overflow:hidden;">
+        <div class="section-badge" style="margin-bottom:16px;">Transparent USD ($) Packages</div>
+        <h2 class="section-title" style="margin-bottom:12px;">Predictable Pricing For Every Project</h2>
+        <p style="color:var(--muted-foreground); max-width:620px; margin:0 auto 28px; font-size:1.05rem;">
+          From basic static websites ($150) to full-stack AI SaaS platforms ($3,500+), every project comes with a value-anchored <strong>Without AI</strong> base tier and a premium <strong>With AI ✨</strong> upgrade.
+        </p>
+
+        <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:32px;">
+          <div style="padding:14px 24px; background:#050507; border:1px solid var(--border); border-radius:12px; font-family:var(--font-mono); font-size:0.9rem;">
+            <span style="color:var(--muted-foreground);">Without AI (Base):</span> <strong style="color:var(--foreground);">$150 – $2,500</strong>
+          </div>
+          <div style="padding:14px 24px; background:#050507; border:1px solid var(--accent-purple); border-radius:12px; font-family:var(--font-mono); font-size:0.9rem;">
+            <span style="color:var(--accent-purple);">With AI Upgrade ✨:</span> <strong style="color:var(--accent-purple);">$300 – $3,500+</strong>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+          <a href="pricing.html" class="btn btn-shadcn-red" style="padding:12px 28px; font-size:1rem;">View Full Pricing Breakdown →</a>
+          <a href="booking.html" class="btn btn-shadcn-secondary" style="padding:12px 24px; font-size:1rem;">Book Scope Call</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer interactive disable-selection">
+      <div class="footer-grid">
+        <div>
+          <a href="#" class="brand-logo" style="margin-bottom:16px;">
+            <div class="logo-box">
+              <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+            </div>
+            <span>opendev<span class="highlight">-labs</span></span>
+          </a>
+          <p style="color:var(--muted-foreground); font-size:0.88rem; line-height:1.6; max-width:300px;">
+            OpenDev Labs is a software development company building custom WebApps, Android APKs, OpenRouter AI integrations & Managed Domains.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Services & Pricing</h4>
+          <ul>
+            <li><a href="pricing.html">Pricing Packages ($)</a></li>
+            <li><a href="booking.html">Custom Web Apps & Websites</a></li>
+            <li><a href="booking.html">Native Android Mobile Apps</a></li>
+            <li><a href="ai-cloud.html">OpenRouter AI Integrations</a></li>
+            <li><a href="domains.html">Managed Domain Registration</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="#playground">Interactive Sandbox</a></li>
+            <li><a href="marketplace.html">Templates Marketplace</a></li>
+            <li><a href="#">GitHub Repo</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="booking.html">Book Discovery Call</a></li>
+            <li><a href="domains.html">Search Domains</a></li>
+            <li><a href="#">Status</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          <h4 style="display:inline; font-size:0.95rem; font-weight:700; margin-right:10px;">OpenDev Labs</h4>
+          <small>
+            Design concept reference <a href="https://dribbble.com/victorvergara" target="_blank" rel="noopener noreferrer">dribbble.com/victorvergara</a>
+          </small>
+        </div>
+        <div>
+          &copy; 2026 OpenDev Labs Inc. All rights reserved.
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
 </body>
-
 </html>

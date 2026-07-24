@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Managed Domain & DNS Infrastructure | OpenDev Labs</title>
+  <meta name="description" content="Register and manage domain names with WHOIS privacy, Cloudflare Anycast DNS, SSL automation, and free domain bonus packages by OpenDev Labs.">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background:#09090b; overflow-y:auto;">
+
+  <!-- WebGL 3D Canvas Background -->
+  <div id="canvas-container"></div>
+
+  <!-- Single Floating Bottom-Right 3D Settings Action Button -->
+  <button class="floating-settings-btn interactive" onclick="toggleSettingsDrawer()" title="3D Lab Matrix Settings">
+    <i data-lucide="settings" style="width:22px; height:22px;"></i>
+  </button>
+
+  <!-- Settings Slide-Over Drawer Modal -->
+  <div class="settings-drawer-backdrop interactive" id="settings-drawer-backdrop">
+    <div class="settings-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="sliders" style="color:var(--accent-red); width:18px; height:18px;"></i>
+          <h3>3D LAB MATRIX CONTROLS</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="toggleSettingsDrawer()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; flex:1;">
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Fog Color Theme Palette</label>
+          <div class="theme-presets" style="gap:10px;">
+            <div class="theme-dot active" style="background:#F02050; width:28px; height:28px;" onclick="setTheme('red')" title="Cyber Red"></div>
+            <div class="theme-dot" style="background:#00F2FE; width:28px; height:28px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+            <div class="theme-dot" style="background:#7928CA; width:28px; height:28px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+            <div class="theme-dot" style="background:#00FF88; width:28px; height:28px;" onclick="setTheme('green')" title="Matrix Green"></div>
+            <div class="theme-dot" style="background:#FF9900; width:28px; height:28px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div class="control-row">
+          <span>Wireframe Mesh</span>
+          <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Camera Angle View</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('default')">Orbit</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('top')">Top</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('close')">Street</button>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem;">
+            <span style="color:var(--muted-foreground);">Traffic Speed</span>
+            <span id="speed-val" style="font-family:var(--font-mono); color:var(--accent-green);">0.001</span>
+          </div>
+          <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-shadcn-red" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar interactive" style="background:rgba(9, 9, 11, 0.85);">
+    <a href="index.html" class="brand-logo">
+      <div class="logo-box">
+        <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+      </div>
+      <span>opendev<span class="highlight">-labs</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html">Software Services</a></li>
+      <li><a href="marketplace.html">Templates</a></li>
+      <li><a href="ai-cloud.html">Web-AI & Vercel</a></li>
+      <li><a href="domains.html" style="color:var(--foreground);">Managed Domains</a></li>
+      <li><a href="pricing.html">Pricing (INR)</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="booking.html" class="btn btn-shadcn-red">Book Project</a>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <main class="section interactive" style="padding-top:120px;">
+      <div class="section-header">
+        <div class="section-badge">Managed Domain Infrastructure</div>
+        <h1 class="section-title">Search, Buying & Managed DNS Infrastructure</h1>
+        <p class="section-desc">We register, configure, and manage your domain names with WHOIS privacy protection, Cloudflare Anycast DNS, auto-renewals, and SSL certificates.</p>
+      </div>
+
+      <!-- Domain Search Bar Widget -->
+      <div style="max-width:700px; margin:0 auto 60px; padding:8px; background:#050507; border:1px solid var(--border); border-radius:100px; display:flex; gap:10px;" class="interactive">
+        <div style="display:flex; align-items:center; padding-left:16px; flex:1;">
+          <i data-lucide="search" style="width:18px; height:18px; color:var(--muted-foreground); margin-right:10px;"></i>
+          <input type="text" id="domain-search-input" placeholder="Type desired domain (e.g. mycompany.com)..." style="background:transparent; border:none; color:#FFF; outline:none; font-size:1rem; width:100%;">
+        </div>
+        <button class="btn btn-shadcn-red" style="border-radius:100px; padding:12px 28px;" onclick="searchDomain()">Check Availability</button>
+      </div>
+
+      <div id="domain-results" style="max-width:700px; margin:0 auto 60px; display:none;">
+        <div class="bento-card" style="border-color:var(--accent-green);">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span class="section-badge" style="margin:0; background:rgba(0,255,136,0.15); color:var(--accent-green); border-color:var(--accent-green);">AVAILABLE FOR REGISTRATION</span>
+              <h3 style="font-size:1.4rem; margin-top:8px;" id="searched-name">mycompany.com</h3>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:1.5rem; font-weight:800;" id="searched-price">₹4,000 / yr</div>
+              <span style="font-size:0.75rem; color:var(--muted-foreground);">Includes Managed Setup</span>
+            </div>
+          </div>
+          <div style="margin-top:16px; display:flex; gap:10px;">
+            <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyDomain()">Register & Manage Now →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domain Service Bento Grid -->
+      <div class="bento-grid">
+        <!-- Managed Package -->
+        <div class="bento-card span-2">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-cyan);"><i data-lucide="shield-check"></i></div>
+            <h3>Managed Domain & DNS Package ($50 – $100 / year)</h3>
+            <p>Don't worry about DNS records, WHOIS verification emails, or renewal deadlines. OpenDev Labs handles complete domain purchasing, Cloudflare global Anycast DNS routing, and automatic SSL renewal.</p>
+          </div>
+          <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-cyan);">FREE 1ST YEAR BONUS WITH CUSTOM WEBAPP BUILDS</span>
+            <a href="booking.html" class="btn btn-shadcn-secondary">Book Custom Build Bonus →</a>
+          </div>
+        </div>
+
+        <!-- WHOIS & Security -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-green);"><i data-lucide="lock"></i></div>
+            <h3>WHOIS Privacy & 2FA Enforcement</h3>
+            <p>Your personal address and phone details are masked behind WHOIS Privacy Protection with enterprise multi-factor authentication locks.</p>
+          </div>
+        </div>
+
+        <!-- Cloudflare Anycast -->
+        <div class="bento-card">
+          <div>
+            <div class="bento-icon" style="color:var(--accent-purple);"><i data-lucide="zap"></i></div>
+            <h3>Cloudflare Anycast Global DNS</h3>
+            <p>Ultra-low latency DNS resolution across 300+ edge data centers worldwide with DDoS protection and DNSSEC encryption.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    function searchDomain() {
+      const input = document.getElementById('domain-search-input').value.trim();
+      if (!input) {
+        alert('Please type a domain name to check availability!');
+        return;
+      }
+      document.getElementById('searched-name').innerText = input.includes('.') ? input : `${input}.com`;
+      document.getElementById('domain-results').style.display = 'block';
+    }
+    function buyDomain() {
+      const domain = document.getElementById('searched-name').innerText;
+      alert(`Domain '${domain}' added to your OpenDev Labs Managed Infrastructure plan!`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Custom Software Development | OpenDev Labs</title>
+  <meta name="description" content="Calculate custom WebApp, Android App, and OpenRouter AI project costs in USD ($) with OpenDev Labs.">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background:#09090b; overflow-y:auto;">
+
+  <!-- WebGL 3D Canvas Background -->
+  <div id="canvas-container"></div>
+
+  <!-- Single Floating Bottom-Right 3D Settings Action Button -->
+  <button class="floating-settings-btn interactive" onclick="toggleSettingsDrawer()" title="3D Lab Matrix Settings">
+    <i data-lucide="settings" style="width:22px; height:22px;"></i>
+  </button>
+
+  <!-- Settings Slide-Over Drawer Modal -->
+  <div class="settings-drawer-backdrop interactive" id="settings-drawer-backdrop">
+    <div class="settings-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="sliders" style="color:var(--accent-red); width:18px; height:18px;"></i>
+          <h3>3D LAB MATRIX CONTROLS</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="toggleSettingsDrawer()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; flex:1;">
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Fog Color Theme Palette</label>
+          <div class="theme-presets" style="gap:10px;">
+            <div class="theme-dot active" style="background:#F02050; width:28px; height:28px;" onclick="setTheme('red')" title="Cyber Red"></div>
+            <div class="theme-dot" style="background:#00F2FE; width:28px; height:28px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+            <div class="theme-dot" style="background:#7928CA; width:28px; height:28px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+            <div class="theme-dot" style="background:#00FF88; width:28px; height:28px;" onclick="setTheme('green')" title="Matrix Green"></div>
+            <div class="theme-dot" style="background:#FF9900; width:28px; height:28px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div class="control-row">
+          <span>Wireframe Mesh</span>
+          <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Camera Angle View</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('default')">Orbit</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('top')">Top</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('close')">Street</button>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem;">
+            <span style="color:var(--muted-foreground);">Traffic Speed</span>
+            <span id="speed-val" style="font-family:var(--font-mono); color:var(--accent-green);">0.001</span>
+          </div>
+          <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-shadcn-red" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar interactive" style="background:rgba(9, 9, 11, 0.85);">
+    <a href="index.html" class="brand-logo">
+      <div class="logo-box">
+        <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+      </div>
+      <span>opendev<span class="highlight">-labs</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html" style="color:var(--foreground);">Software Services</a></li>
+      <li><a href="marketplace.html">Templates</a></li>
+      <li><a href="ai-cloud.html">Web-AI & Vercel</a></li>
+      <li><a href="domains.html">Managed Domains</a></li>
+      <li><a href="pricing.html">Pricing ($)</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="index.html" class="btn btn-shadcn-secondary">Back to Platform</a>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <main class="section interactive" style="padding-top:120px;">
+      <div class="section-header">
+        <div class="section-badge">Transparent USD ($) Estimator</div>
+        <h1 class="section-title">Book Custom Web App & Native Android Development</h1>
+        <p class="section-desc">Select your project requirements and toggle between <strong>Without AI</strong> and <strong>With AI</strong> tiers to calculate instant project costs in USD ($).</p>
+      </div>
+
+      <!-- 2-Column Booking Calculator & Form -->
+      <div style="display:grid; grid-template-columns: 1.2fr 0.8fr; gap:32px;" class="booking-wrapper">
+        
+        <!-- Scope Builder Form -->
+        <div class="bento-card" style="gap:24px;">
+          <h3 style="font-size:1.3rem; display:flex; align-items:center; gap:10px;">
+            <i data-lucide="layers" style="color:var(--accent-red);"></i> Project Scope & AI Upgrade Selector
+          </h3>
+
+          <!-- AI Upgrade Toggle Bar -->
+          <div style="padding:16px; background:#050507; border:1px solid var(--border); border-radius:var(--radius); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="font-weight:700; font-size:0.95rem;">AI Integration Package</div>
+              <div style="font-size:0.8rem; color:var(--muted-foreground);" id="ai-toggle-desc">Currently: Standard Package (Without AI)</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="font-size:0.85rem; font-weight:600;" id="label-no-ai">Without AI</span>
+              <div class="toggle-switch" id="ai-mode-switch" onclick="toggleAiMode()"></div>
+              <span style="font-size:0.85rem; font-weight:700; color:var(--accent-purple);" id="label-with-ai">With AI ✨</span>
+            </div>
+          </div>
+
+          <!-- Step 1: Project Type Selector -->
+          <div>
+            <label class="form-label">1. Select Project Type</label>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-top:8px;">
+              <div class="scope-option active" onclick="selectType('static')" data-type="static">
+                <i data-lucide="layout" style="color:var(--accent-cyan);"></i>
+                <div style="font-weight:700; margin-top:6px;">Basic Static Website</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">Landing Page / Portfolio</div>
+              </div>
+
+              <div class="scope-option" onclick="selectType('3d')" data-type="3d">
+                <i data-lucide="box" style="color:var(--accent-red);"></i>
+                <div style="font-weight:700; margin-top:6px;">3D Interactive Website</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">Three.js 3D WebGL Engine</div>
+              </div>
+
+              <div class="scope-option" onclick="selectType('saas')" data-type="saas">
+                <i data-lucide="globe" style="color:var(--accent-green);"></i>
+                <div style="font-weight:700; margin-top:6px;">Dynamic Web App</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">SaaS / Dashboard / Firebase</div>
+              </div>
+
+              <div class="scope-option" onclick="selectType('ecom')" data-type="ecom">
+                <i data-lucide="shopping-cart" style="color:var(--accent-purple);"></i>
+                <div style="font-weight:700; margin-top:6px;">E-Commerce WebApp</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">Razorpay + Firestore</div>
+              </div>
+
+              <div class="scope-option" onclick="selectType('apk')" data-type="apk">
+                <i data-lucide="smartphone" style="color:var(--accent-cyan);"></i>
+                <div style="font-weight:700; margin-top:6px;">Android Mobile App</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">Capacitor Native APK</div>
+              </div>
+
+              <div class="scope-option" onclick="selectType('full')" data-type="full">
+                <i data-lucide="layers" style="color:var(--accent-red);"></i>
+                <div style="font-weight:700; margin-top:6px;">Full-Stack All-in-One</div>
+                <div style="font-size:0.75rem; color:var(--muted-foreground);">3D + App + APK + Payment</div>
+              </div>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border);">
+
+          <!-- Step 2: Add-on Upgrades -->
+          <div>
+            <label class="form-label">2. Optional Upgrades & Add-ons</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:8px;">
+              <label class="checkbox-option"><input type="checkbox" onchange="toggleAddOn(250, 'Capacitor Android APK Export Add-on')" id="addon-apk"> Capacitor Android APK (+ $250)</label>
+              <label class="checkbox-option"><input type="checkbox" onchange="toggleAddOn(100, 'Monthly Maintenance Add-on')" id="addon-maint"> Monthly Support (+ $100/mo)</label>
+              <label class="checkbox-option" style="border-color:var(--accent-green);"><input type="checkbox" checked disabled> 🎁 Free 1st Year Domain & DNS (Bonus $0)</label>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border);">
+
+          <!-- Step 3: Contact & Details -->
+          <div>
+            <label class="form-label">3. Your Contact Details</label>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-top:8px;">
+              <input type="text" class="input-field" placeholder="Your Name" id="client-name" required>
+              <input type="email" class="input-field" placeholder="Your Email Address" id="client-email" required>
+            </div>
+            <textarea class="input-field" style="margin-top:12px; height:100px; resize:none;" placeholder="Briefly describe your project requirements..." id="client-desc"></textarea>
+          </div>
+        </div>
+
+        <!-- Estimate Summary Card -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div class="bento-card" style="position:sticky; top:100px; border-color:var(--accent-red); box-shadow:0 0 30px var(--accent-red-glow);">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="section-badge" style="margin:0;">Project Summary</span>
+              <span style="font-family:var(--font-mono); font-size:0.75rem; color:var(--accent-green);" id="summary-badge">WITHOUT AI TIER</span>
+            </div>
+
+            <div style="margin:20px 0;">
+              <div style="font-size:0.85rem; color:var(--muted-foreground);">Estimated Investment (USD):</div>
+              <div style="font-size:2.6rem; font-weight:800; color:var(--foreground);" id="estimate-price">$150 – $250</div>
+              <div style="font-size:0.8rem; color:var(--muted-dim); font-family:var(--font-mono);" id="estimate-timeline">Estimated Timeline: 1–2 Weeks</div>
+            </div>
+
+            <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; font-size:0.88rem; color:var(--muted-foreground); margin-bottom:24px;" id="summary-list">
+              <li>✓ Selected: <strong id="summary-type" style="color:#FFF;">Basic Static Website</strong></li>
+              <li>✓ AI Status: <strong id="summary-ai-status" style="color:var(--muted-foreground);">Standard (Without AI)</strong></li>
+              <li>✓ Built with Next.js 16, React 19 & Vercel</li>
+              <li>✓ 🎁 Free 1st-Year Managed Domain & DNS Setup</li>
+            </ul>
+
+            <button class="btn btn-shadcn-red" style="width:100%; padding:14px; font-size:1rem;" onclick="submitBooking()">Book Discovery Call →</button>
+            <p style="font-size:0.75rem; color:var(--muted-dim); text-align:center; margin-top:10px;">Zero commitment. We will send an exact proposal within 12 hours.</p>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <style>
+    @media (max-width: 900px) {
+      .booking-wrapper { grid-template-columns: 1fr !important; }
+    }
+  </style>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+
+    let isAiMode = false;
+    let selectedTypeKey = 'static';
+
+    const pricingData = {
+      static: {
+        title: 'Basic Static Website',
+        noAi: '$150 – $250',
+        withAi: '$300 – $450',
+        timeline: '1–2 Weeks'
+      },
+      '3d': {
+        title: '3D Interactive Website',
+        noAi: '$400 – $750',
+        withAi: '$600 – $1,000',
+        timeline: '2–3 Weeks'
+      },
+      saas: {
+        title: 'Dynamic Web Application',
+        noAi: '$500 – $1,000',
+        withAi: '$900 – $1,500',
+        timeline: '2–4 Weeks'
+      },
+      ecom: {
+        title: 'E-Commerce WebApp',
+        noAi: '$750 – $1,500',
+        withAi: '$1,100 – $1,800',
+        timeline: '3–4 Weeks'
+      },
+      apk: {
+        title: 'Android Mobile App (Capacitor)',
+        noAi: '$600 – $1,100',
+        withAi: '$900 – $1,500',
+        timeline: '3–4 Weeks'
+      },
+      full: {
+        title: 'Full-Stack All-in-One Solution',
+        noAi: '$1,500 – $2,500',
+        withAi: '$2,200 – $3,500+',
+        timeline: '4–6 Weeks'
+      }
+    };
+
+    function toggleAiMode() {
+      isAiMode = !isAiMode;
+      document.getElementById('ai-mode-switch').classList.toggle('active', isAiMode);
+      document.getElementById('ai-toggle-desc').innerText = isAiMode ? 'Currently: Premium Package (With AI ✨)' : 'Currently: Standard Package (Without AI)';
+      document.getElementById('summary-badge').innerText = isAiMode ? 'WITH AI PREMIUM TIER' : 'WITHOUT AI TIER';
+      document.getElementById('summary-badge').style.color = isAiMode ? 'var(--accent-purple)' : 'var(--accent-green)';
+      document.getElementById('summary-ai-status').innerText = isAiMode ? 'Premium OpenRouter AI Integrated ✨' : 'Standard (Without AI)';
+      document.getElementById('summary-ai-status').style.color = isAiMode ? 'var(--accent-purple)' : 'var(--muted-foreground)';
+      updateEstimate();
+    }
+
+    function selectType(key) {
+      document.querySelectorAll('.scope-option').forEach(o => o.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      selectedTypeKey = key;
+      document.getElementById('summary-type').innerText = pricingData[key].title;
+      document.getElementById('estimate-timeline').innerText = `Estimated Timeline: ${pricingData[key].timeline}`;
+      updateEstimate();
+    }
+
+    function toggleAddOn(price, name) {
+      updateEstimate();
+    }
+
+    function updateEstimate() {
+      const data = pricingData[selectedTypeKey];
+      const priceText = isAiMode ? data.withAi : data.noAi;
+      document.getElementById('estimate-price').innerText = priceText;
+    }
+
+    function submitBooking() {
+      const name = document.getElementById('client-name').value;
+      const email = document.getElementById('client-email').value;
+      if (!name || !email) {
+        alert('Please provide your name and email address so we can reach back out to you!');
+        return;
+      }
+      alert(`Thank you ${name}! Your booking request for '${pricingData[selectedTypeKey].title}' (${isAiMode ? 'With AI' : 'Without AI'} - Estimated: ${document.getElementById('estimate-price').innerText}) has been received. OpenDev Labs will contact you at ${email} within 12 hours.`);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenRouter AI & Vercel Cloud | OpenDev Labs</title>
+  <meta name="description" content="OpenRouter AI free API integrations, hosted DeepSeek/Llama models, Resend emails, and Vercel production cloud setups by OpenDev Labs.">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background:#09090b; overflow-y:auto;">
+
+  <!-- WebGL 3D Canvas Background -->
+  <div id="canvas-container"></div>
+
+  <!-- Single Floating Bottom-Right 3D Settings Action Button -->
+  <button class="floating-settings-btn interactive" onclick="toggleSettingsDrawer()" title="3D Lab Matrix Settings">
+    <i data-lucide="settings" style="width:22px; height:22px;"></i>
+  </button>
+
+  <!-- Settings Slide-Over Drawer Modal -->
+  <div class="settings-drawer-backdrop interactive" id="settings-drawer-backdrop">
+    <div class="settings-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="sliders" style="color:var(--accent-red); width:18px; height:18px;"></i>
+          <h3>3D LAB MATRIX CONTROLS</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="toggleSettingsDrawer()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; flex:1;">
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Fog Color Theme Palette</label>
+          <div class="theme-presets" style="gap:10px;">
+            <div class="theme-dot active" style="background:#F02050; width:28px; height:28px;" onclick="setTheme('red')" title="Cyber Red"></div>
+            <div class="theme-dot" style="background:#00F2FE; width:28px; height:28px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+            <div class="theme-dot" style="background:#7928CA; width:28px; height:28px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+            <div class="theme-dot" style="background:#00FF88; width:28px; height:28px;" onclick="setTheme('green')" title="Matrix Green"></div>
+            <div class="theme-dot" style="background:#FF9900; width:28px; height:28px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div class="control-row">
+          <span>Wireframe Mesh</span>
+          <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Camera Angle View</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('default')">Orbit</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('top')">Top</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('close')">Street</button>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem;">
+            <span style="color:var(--muted-foreground);">Traffic Speed</span>
+            <span id="speed-val" style="font-family:var(--font-mono); color:var(--accent-green);">0.001</span>
+          </div>
+          <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-shadcn-red" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar interactive" style="background:rgba(9, 9, 11, 0.85);">
+    <a href="index.html" class="brand-logo">
+      <div class="logo-box">
+        <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+      </div>
+      <span>opendev<span class="highlight">-labs</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html">Software Services</a></li>
+      <li><a href="marketplace.html">Templates</a></li>
+      <li><a href="ai-cloud.html" style="color:var(--foreground);">Web-AI & Vercel</a></li>
+      <li><a href="domains.html">Managed Domains</a></li>
+      <li><a href="pricing.html">Pricing ($)</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <a href="booking.html" class="btn btn-shadcn-red">Book Project</a>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <main class="section interactive" style="padding-top:120px;">
+      <div class="section-header">
+        <div class="section-badge">OpenRouter AI & Cloud Integration</div>
+        <h1 class="section-title">OpenRouter.ai AI Systems & Vercel Cloud Infrastructure</h1>
+        <p class="section-desc">We connect your web applications to free OpenRouter.ai API keys (DeepSeek R1, Meta Llama 3.3, Qwen 2.5), Firebase Firestore, Resend email automation, and Vercel CLI production environments.</p>
+      </div>
+
+      <!-- Section 1: OpenRouter AI Integrations -->
+      <div style="margin-bottom:60px;">
+        <h2 style="font-size:1.6rem; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+          <i data-lucide="cpu" style="color:var(--accent-red);"></i> OpenRouter.ai Free API Key AI Solutions
+        </h2>
+
+        <div class="bento-grid">
+          <!-- Tool 1: DeepSeek R1 AI Chatbot -->
+          <div class="bento-card">
+            <div>
+              <div class="bento-icon" style="color:var(--accent-cyan);"><i data-lucide="bot"></i></div>
+              <h3>DeepSeek R1 AI Customer Support Bot</h3>
+              <p>Next.js 16 chatbot powered by free OpenRouter API key. Answers client FAQs, saves leads to Firebase Firestore, and emails summaries via Resend.</p>
+            </div>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:1.4rem; font-weight:800;">$29 <span style="font-size:0.8rem; color:var(--muted-dim);">/ mo</span></span>
+              <button class="btn btn-shadcn-primary" onclick="subscribeAiTool('DeepSeek R1 Bot', '$29')">Subscribe</button>
+            </div>
+          </div>
+
+          <!-- Tool 2: Llama 3.3 Code Reviewer -->
+          <div class="bento-card">
+            <div>
+              <div class="bento-icon" style="color:var(--accent-purple);"><i data-lucide="code"></i></div>
+              <h3>Llama 3.3 Code Reviewer Gateway</h3>
+              <p>Connects your GitHub repository to OpenRouter's Llama 3.3 model for automated PR code reviews, security checks, and optimization.</p>
+            </div>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:1.4rem; font-weight:800;">$39 <span style="font-size:0.8rem; color:var(--muted-dim);">/ mo</span></span>
+              <button class="btn btn-shadcn-primary" onclick="subscribeAiTool('Llama 3.3 Code Reviewer', '$39')">Subscribe</button>
+            </div>
+          </div>
+
+          <!-- Tool 3: Qwen 2.5 Multi-Lingual AI -->
+          <div class="bento-card">
+            <div>
+              <div class="bento-icon" style="color:var(--accent-green);"><i data-lucide="languages"></i></div>
+              <h3>Qwen 2.5 Translation & Content API</h3>
+              <p>Ultra-fast multi-lingual text synthesizer and automated translator powered by OpenRouter free key tier.</p>
+            </div>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:1.4rem; font-weight:800;">$25 <span style="font-size:0.8rem; color:var(--muted-dim);">/ mo</span></span>
+              <button class="btn btn-shadcn-primary" onclick="subscribeAiTool('Qwen 2.5 AI Gateway', '$25')">Subscribe</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border-color:var(--border); margin-bottom:60px;">
+
+      <!-- Section 2: Monthly Maintenance & Support Tiers -->
+      <div>
+        <h2 style="font-size:1.6rem; margin-bottom:12px; display:flex; align-items:center; gap:10px;">
+          <i data-lucide="shield-check" style="color:var(--accent-cyan);"></i> Monthly Maintenance & Support Add-ons
+        </h2>
+        <p style="color:var(--muted-foreground); margin-bottom:32px;">Ongoing technical support, Vercel/Firebase health checks, UI tweaks, bug fixes, and OpenRouter API prompt cost optimization.</p>
+
+        <div class="bento-grid">
+          <!-- Standard Support -->
+          <div class="bento-card">
+            <div>
+              <div class="bento-icon" style="color:var(--accent-green);"><i data-lucide="activity"></i></div>
+              <h3>Standard Maintenance (Without AI Monitoring)</h3>
+              <p>Vercel/Firebase health checks, minor UI tweaks, bug fixes, automated SSL monitoring, and security patch updates.</p>
+            </div>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:1.4rem; font-weight:800;">$65 – $125 <span style="font-size:0.8rem; color:var(--muted-dim);">/ mo</span></span>
+              <button class="btn btn-shadcn-secondary" onclick="bookCloud('Standard Maintenance', '$65 - $125')">Enroll Now</button>
+            </div>
+          </div>
+
+          <!-- AI Support -->
+          <div class="bento-card span-2" style="border-color:var(--accent-purple);">
+            <div>
+              <div class="bento-icon" style="color:var(--accent-purple);"><i data-lucide="zap"></i></div>
+              <h3>Premium AI Maintenance (With AI Monitoring ✨)</h3>
+              <p>Includes standard health checks + continuous OpenRouter API prompt optimization, AI cost controls, model updates (DeepSeek/Llama 3), and LLM latency tuning.</p>
+            </div>
+            <div style="margin-top:24px; padding:16px; background:#050507; border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-family:var(--font-mono); font-size:0.95rem; color:var(--accent-purple); font-weight:800;">
+                $125 – $250 / month
+              </div>
+              <button class="btn btn-shadcn-red" onclick="bookCloud('Premium AI Maintenance', '$125 - $250')">Enroll Premium AI Support →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    function subscribeAiTool(title, price) {
+      alert(`Subscribing to '${title}' for ${price}/month. Powered by free OpenRouter.ai API keys.`);
+    }
+    function bookCloud(service, price) {
+      alert(`Enrolling in '${service}' (${price}/month). OpenDev Labs will manage your Vercel and Firebase infrastructure.`);
+    }
+  </script>
+</body>
+</html>

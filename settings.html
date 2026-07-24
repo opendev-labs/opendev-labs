@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Lab Matrix Settings | OpenDev Labs</title>
+  <meta name="description" content="Configure 3D WebGL Engine parameters, fog themes, wireframes, camera presets, and traffic speed for OpenDev Labs.">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- CDNs for Three.js, GSAP & Lucide Icons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background:#09090b; overflow-y:auto;">
+
+  <!-- Main Settings Layout -->
+  <div style="min-height:100vh; display:flex; flex-direction:column;">
+    
+    <!-- Top Header -->
+    <header class="navbar" style="position:relative; background:#0c0c0e;">
+      <a href="index.html" class="brand-logo">
+        <div class="logo-box">
+          <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+        </div>
+        <span>opendev<span class="highlight">-labs</span></span>
+      </a>
+
+      <div style="display:flex; align-items:center; gap:16px;">
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--muted-foreground);">
+          <i data-lucide="sliders" style="width:14px; height:14px; vertical-align:middle;"></i> 3D ENGINE CONFIGURATION
+        </span>
+        <a href="index.html" class="btn btn-shadcn-secondary" style="font-size:0.82rem;">
+          <i data-lucide="arrow-left" style="width:14px; height:14px;"></i> Back to Platform
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="section" style="padding-top:40px; flex:1;">
+      <div style="margin-bottom:32px;">
+        <div class="section-badge">Matrix Controls</div>
+        <h1 class="section-title">3D Engine & Environment Settings</h1>
+        <p class="section-desc">Customize global WebGL spatial parameters, camera behaviors, wireframe shaders, and rendering performance.</p>
+      </div>
+
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:32px;" class="settings-grid-wrapper">
+        
+        <!-- Left Column: Controls Form -->
+        <div class="bento-card" style="gap:24px;">
+          <div>
+            <h3 style="font-size:1.15rem; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="palette" style="color:var(--accent-red); width:18px; height:18px;"></i> Fog Color Palette Theme
+            </h3>
+            <p style="font-size:0.88rem; color:var(--muted-foreground); margin-bottom:14px;">Select background fog hue for the 3D spatial city scene.</p>
+            <div class="theme-presets" style="gap:12px;">
+              <div class="theme-dot active" style="background:#F02050; width:32px; height:32px;" onclick="setTheme('red')" title="Cyber Red"></div>
+              <div class="theme-dot" style="background:#00F2FE; width:32px; height:32px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+              <div class="theme-dot" style="background:#7928CA; width:32px; height:32px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+              <div class="theme-dot" style="background:#00FF88; width:32px; height:32px;" onclick="setTheme('green')" title="Matrix Green"></div>
+              <div class="theme-dot" style="background:#FF9900; width:32px; height:32px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border);">
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+                <i data-lucide="grid" style="color:var(--accent-cyan); width:18px; height:18px;"></i> Wireframe Mesh Shader
+              </h3>
+              <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+            </div>
+            <p style="font-size:0.88rem; color:var(--muted-foreground);">Toggle structural 3D building polygon wireframe rendering.</p>
+          </div>
+
+          <hr style="border-color:var(--border);">
+
+          <div>
+            <h3 style="font-size:1.15rem; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="video" style="color:var(--accent-purple); width:18px; height:18px;"></i> Camera Angle Presets
+            </h3>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <button class="btn btn-shadcn-secondary" style="flex:1;" onclick="setCameraPreset('default')">Orbit View</button>
+              <button class="btn btn-shadcn-secondary" style="flex:1;" onclick="setCameraPreset('top')">Top-Down View</button>
+              <button class="btn btn-shadcn-secondary" style="flex:1;" onclick="setCameraPreset('close')">Street Level</button>
+            </div>
+          </div>
+
+          <hr style="border-color:var(--border);">
+
+          <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="font-size:1.15rem; display:flex; align-items:center; gap:8px;">
+                <i data-lucide="activity" style="color:var(--accent-green); width:18px; height:18px;"></i> Traffic Light Velocity
+              </h3>
+              <span id="speed-val" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--accent-green);">0.001</span>
+            </div>
+            <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:16px;">
+            <button class="btn btn-shadcn-red" style="flex:1;" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+            <button class="btn btn-shadcn-secondary" onclick="resetSettings()">Reset Defaults</button>
+          </div>
+        </div>
+
+        <!-- Right Column: Live WebGL Preview Card -->
+        <div class="bento-card" style="padding:0; overflow:hidden; display:flex; flex-direction:column; position:relative; min-height:500px;">
+          <div style="padding:16px 20px; background:#121215; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--foreground);">
+              <i data-lucide="eye" style="width:14px; height:14px; vertical-align:middle; margin-right:6px;"></i> LIVE 3D PREVIEW VIEWPORT
+            </span>
+            <span class="launch-badge" style="margin:0; padding:2px 8px; font-size:0.7rem; color:var(--accent-green);">60 FPS</span>
+          </div>
+
+          <!-- WebGL Preview Box -->
+          <div id="canvas-container" style="position:relative; width:100%; height:100%; flex:1; min-height:440px;"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <style>
+    @media (max-width: 900px) {
+      .settings-grid-wrapper { grid-template-columns: 1fr !important; }
+    }
+  </style>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

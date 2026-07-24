@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vercel & OpenRouter Templates Marketplace | OpenDev Labs</title>
+  <meta name="description" content="Buy pre-built Next.js 16, OpenRouter AI, Three.js, Firebase, and Shadcn UI website templates pre-configured by OpenDev Labs.">
+  
+  <link rel="stylesheet" href="styles.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body style="background:#09090b; overflow-y:auto;">
+
+  <!-- WebGL 3D Canvas Background -->
+  <div id="canvas-container"></div>
+
+  <!-- Single Floating Bottom-Right 3D Settings Action Button -->
+  <button class="floating-settings-btn interactive" onclick="toggleSettingsDrawer()" title="3D Lab Matrix Settings">
+    <i data-lucide="settings" style="width:22px; height:22px;"></i>
+  </button>
+
+  <!-- Settings Slide-Over Drawer Modal -->
+  <div class="settings-drawer-backdrop interactive" id="settings-drawer-backdrop">
+    <div class="settings-drawer">
+      <div class="drawer-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <i data-lucide="sliders" style="color:var(--accent-red); width:18px; height:18px;"></i>
+          <h3>3D LAB MATRIX CONTROLS</h3>
+        </div>
+        <button class="nav-icon-btn" onclick="toggleSettingsDrawer()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:20px; flex:1;">
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Fog Color Theme Palette</label>
+          <div class="theme-presets" style="gap:10px;">
+            <div class="theme-dot active" style="background:#F02050; width:28px; height:28px;" onclick="setTheme('red')" title="Cyber Red"></div>
+            <div class="theme-dot" style="background:#00F2FE; width:28px; height:28px;" onclick="setTheme('cyan')" title="Neon Cyan"></div>
+            <div class="theme-dot" style="background:#7928CA; width:28px; height:28px;" onclick="setTheme('purple')" title="Deep Violet"></div>
+            <div class="theme-dot" style="background:#00FF88; width:28px; height:28px;" onclick="setTheme('green')" title="Matrix Green"></div>
+            <div class="theme-dot" style="background:#FF9900; width:28px; height:28px;" onclick="setTheme('gold')" title="Golden Amber"></div>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div class="control-row">
+          <span>Wireframe Mesh</span>
+          <div class="toggle-switch" id="wireframe-toggle" onclick="toggleWireframe()"></div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <label style="font-size:0.82rem; font-weight:600; color:var(--muted-foreground); display:block; margin-bottom:10px;">Camera Angle View</label>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('default')">Orbit</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('top')">Top</button>
+            <button class="btn btn-shadcn-secondary" style="flex:1; font-size:0.78rem;" onclick="setCameraPreset('close')">Street</button>
+          </div>
+        </div>
+
+        <hr style="border-color:var(--border);">
+
+        <div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-size:0.82rem;">
+            <span style="color:var(--muted-foreground);">Traffic Speed</span>
+            <span id="speed-val" style="font-family:var(--font-mono); color:var(--accent-green);">0.001</span>
+          </div>
+          <input type="range" id="speed-range" min="0.0005" max="0.005" step="0.0005" value="0.001" style="width:100%; accent-color: var(--accent-red);" oninput="updateSpeed(this.value)">
+        </div>
+
+        <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-shadcn-red" onclick="cameraSet()">+ Trigger Flyover (+ ADD LINE)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Navbar -->
+  <header class="navbar interactive" style="background:rgba(9, 9, 11, 0.85);">
+    <a href="index.html" class="brand-logo">
+      <div class="logo-box">
+        <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+      </div>
+      <span>opendev<span class="highlight">-labs</span></span>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="booking.html">Software Services</a></li>
+      <li><a href="marketplace.html" style="color:var(--foreground);">Templates</a></li>
+      <li><a href="ai-cloud.html">Web-AI & Vercel</a></li>
+      <li><a href="domains.html">Managed Domains</a></li>
+      <li><a href="pricing.html">Pricing ($)</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <div class="cmd-k-trigger" onclick="openCmdModal()">
+        <i data-lucide="search" style="width:14px; height:14px;"></i>
+        <span>Search...</span>
+        <span class="kbd-shortcut">⌘K</span>
+      </div>
+      <a href="booking.html" class="btn btn-shadcn-red">Book Project</a>
+    </div>
+  </header>
+
+  <div class="content-wrapper">
+    <main class="section interactive" style="padding-top:120px;">
+      <div class="section-header">
+        <div class="section-badge">Vercel & OpenRouter Templates Hub</div>
+        <h1 class="section-title">Production Next.js 16 & AI Templates Marketplace</h1>
+        <p class="section-desc">100+ MIT Open-Source Next.js templates pre-configured with Next.js 16, React 19, OpenRouter free AI keys (DeepSeek/Llama 3), Firebase Auth, Razorpay payments, and Capacitor Android app export.</p>
+      </div>
+
+      <!-- Filter Category Tabs -->
+      <div style="display:flex; justify-content:center; gap:10px; margin-bottom:40px; flex-wrap:wrap;">
+        <button class="btn btn-shadcn-primary" onclick="filterMarketplace('all')" id="filter-all">All Templates</button>
+        <button class="btn btn-shadcn-secondary" onclick="filterMarketplace('ai')" id="filter-ai">OpenRouter AI Starters</button>
+        <button class="btn btn-shadcn-secondary" onclick="filterMarketplace('3d')" id="filter-3d">3D WebGL & Portfolios</button>
+        <button class="btn btn-shadcn-secondary" onclick="filterMarketplace('saas')" id="filter-saas">Next.js SaaS & Razorpay</button>
+        <button class="btn btn-shadcn-secondary" onclick="filterMarketplace('mobile')" id="filter-mobile">Capacitor Mobile APK</button>
+      </div>
+
+      <!-- Template Catalog Grid -->
+      <div class="bento-grid" id="marketplace-grid">
+        
+        <!-- Template 0: EBookStall E-Commerce Store -->
+        <div class="bento-card template-card saas">
+          <div class="template-badge" style="background:var(--accent-red); color:#fff;">FEATURED STORE</div>
+          <div class="template-preview-box" style="background:linear-gradient(135deg, rgba(240,32,80,0.2), #000);">
+            <i data-lucide="shopping-cart" style="width:48px; height:48px; color:var(--accent-red);"></i>
+          </div>
+          <div style="padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3>EBookStall E-Commerce Store</h3>
+              <span class="price-tag">$149</span>
+            </div>
+            <p>Full-stack digital book store built with Next.js 16, Razorpay payments, Firestore tracking, and native Android APK export.</p>
+            <div class="tech-stack-row">
+              <span class="tech-pill" style="color:var(--accent-red);">ebookstall.opendev.app</span>
+              <span class="tech-pill">Next.js 16</span>
+              <span class="tech-pill">Razorpay</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <a href="index.html#playground" class="btn btn-shadcn-secondary" style="flex:1;">View Live App</a>
+              <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyTemplate('EBookStall Store', '$149')">Buy $149</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 1: OpenRouter AI SaaS Starter -->
+        <div class="bento-card template-card ai saas">
+          <div class="template-badge" style="background:var(--accent-purple);">OPENROUTER AI</div>
+          <div class="template-preview-box" style="background:linear-gradient(135deg, rgba(121,40,202,0.2), #000);">
+            <i data-lucide="cpu" style="width:48px; height:48px; color:var(--accent-purple);"></i>
+          </div>
+          <div style="padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3>Nexus OpenRouter AI SaaS Starter</h3>
+              <span class="price-tag">$99</span>
+            </div>
+            <p>Next.js 16 AI boilerplate powered by free OpenRouter API keys (DeepSeek R1, Llama 3.3). Includes Firebase Auth, Razorpay, and Resend emails.</p>
+            <div class="tech-stack-row">
+              <span class="tech-pill">OpenRouter.ai</span>
+              <span class="tech-pill">Next.js 16</span>
+              <span class="tech-pill">Firebase</span>
+              <span class="tech-pill">Razorpay</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <a href="index.html" class="btn btn-shadcn-secondary" style="flex:1;">Live Demo</a>
+              <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyTemplate('Nexus OpenRouter AI SaaS', '$99')">Buy $99</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 2: CyberCity 3D Spatial Template -->
+        <div class="bento-card template-card 3d">
+          <div class="template-badge">BESTSELLER</div>
+          <div class="template-preview-box" style="background:linear-gradient(135deg, rgba(240,32,80,0.2), #000);">
+            <i data-lucide="box" style="width:48px; height:48px; color:var(--accent-red);"></i>
+          </div>
+          <div style="padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3>CyberCity 3D Spatial Template</h3>
+              <span class="price-tag">$149</span>
+            </div>
+            <p>Interactive 3D WebGL city background with Shadcn UI dark-mode components, Cmd+K palette, and live telemetry charts.</p>
+            <div class="tech-stack-row">
+              <span class="tech-pill">Three.js</span>
+              <span class="tech-pill">Next.js 16</span>
+              <span class="tech-pill">Shadcn UI</span>
+              <span class="tech-pill" style="color:var(--accent-green);">🎁 Free Domain</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <a href="index.html" class="btn btn-shadcn-secondary" style="flex:1;">Live Demo</a>
+              <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyTemplate('CyberCity 3D', '$149')">Buy $149</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 3: Capacitor Android Mobile + Web App Bundle -->
+        <div class="bento-card template-card mobile saas">
+          <div class="template-badge" style="background:var(--accent-cyan); color:#000;">ANDROID READY</div>
+          <div class="template-preview-box" style="background:linear-gradient(135deg, rgba(0,242,254,0.2), #000);">
+            <i data-lucide="smartphone" style="width:48px; height:48px; color:var(--accent-cyan);"></i>
+          </div>
+          <div style="padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3>Capacitor Android Mobile + Web App</h3>
+              <span class="price-tag">$129</span>
+            </div>
+            <p>Next.js 16 web app bundled with Capacitor CLI for instant Android APK export. Features Firebase Realtime DB and Razorpay checkout.</p>
+            <div class="tech-stack-row">
+              <span class="tech-pill">Capacitor</span>
+              <span class="tech-pill">Android APK</span>
+              <span class="tech-pill">Firebase</span>
+              <span class="tech-pill">Razorpay</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <a href="#" class="btn btn-shadcn-secondary" style="flex:1;">Live Demo</a>
+              <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyTemplate('Capacitor Mobile Bundle', '$129')">Buy $129</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Template 4: Vercel Commerce + Razorpay Storefront -->
+        <div class="bento-card template-card saas">
+          <div class="template-badge" style="background:var(--accent-green); color:#000;">COMMERCE</div>
+          <div class="template-preview-box" style="background:linear-gradient(135deg, rgba(0,255,136,0.2), #000);">
+            <i data-lucide="shopping-cart" style="width:48px; height:48px; color:var(--accent-green);"></i>
+          </div>
+          <div style="padding-top:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3>Vercel Commerce + Razorpay Storefront</h3>
+              <span class="price-tag">$99</span>
+            </div>
+            <p>Vercel official e-commerce starter integrated with Razorpay gateway, product search, cart, and Resend email order receipts.</p>
+            <div class="tech-stack-row">
+              <span class="tech-pill">Vercel CLI</span>
+              <span class="tech-pill">Razorpay</span>
+              <span class="tech-pill">Resend</span>
+              <span class="tech-pill">Next.js 16</span>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+              <a href="#" class="btn btn-shadcn-secondary" style="flex:1;">Live Demo</a>
+              <button class="btn btn-shadcn-red" style="flex:1;" onclick="buyTemplate('Vercel Commerce Storefront', '$99')">Buy $99</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="margin-top:60px; padding:40px; background:var(--card); border:1px solid var(--border); border-radius:var(--radius-xl); text-align:center;">
+        <h2 style="font-size:1.8rem; margin-bottom:12px;">Need a custom web app or native Android app built with your stack?</h2>
+        <p style="color:var(--muted-foreground); max-width:620px; margin:0 auto 24px;">We build custom web apps and Capacitor Android APKs powered by Next.js 16, OpenRouter free AI keys, Firebase, and Razorpay starting from $150.</p>
+        <a href="booking.html" class="btn btn-shadcn-red" style="padding:12px 28px; font-size:1rem;">Book Custom Project Development →</a>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    function filterMarketplace(category) {
+      const cards = document.querySelectorAll('.template-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.classList.contains(category)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+    function buyTemplate(title, price) {
+      alert(`Thank you for selecting '${title}' (${price})! You will be redirected to the secure OpenDev Labs checkout portal.`);
+    }
+  </script>
+</body>
+</html>
