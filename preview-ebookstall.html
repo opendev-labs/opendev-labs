@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EBookStall - Digital Book Store & Reader</title>
+  <meta name="description" content="Discover, purchase, and read premium tech ebooks instantly on EBookStall. Hosted on opendev.app Edge Network.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .top-banner {
+      background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+      color: #fff;
+      text-align: center;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    .top-banner span.badge {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+    }
+    .store-header {
+      padding: 20px 40px;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.25rem;
+    }
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+    .search-box {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 340px;
+    }
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: #fff;
+      outline: none;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+    .grid-container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .hero-banner {
+      background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.15), transparent 60%), #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hero-banner h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin: 0 0 12px 0;
+      background: linear-gradient(135deg, #ffffff, #a1a1aa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-banner p {
+      color: #a1a1aa;
+      margin: 0 0 24px 0;
+      max-width: 500px;
+      line-height: 1.5;
+    }
+    .book-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+    .book-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .book-card:hover {
+      border-color: #f43f5e;
+      transform: translateY(-4px);
+    }
+    .book-cover {
+      height: 180px;
+      background: linear-gradient(135deg, #27272a, #09090b);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      border: 1px solid #3f3f46;
+      text-align: center;
+      padding: 12px;
+    }
+    .book-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #f4f4f5;
+    }
+    .book-author {
+      font-size: 0.85rem;
+      color: #a1a1aa;
+      margin-bottom: 12px;
+    }
+    .book-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #27272a;
+    }
+    .book-price {
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: #10b981;
+    }
+    .buy-btn {
+      background: #f43f5e;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .buy-btn:hover {
+      background: #e11d48;
+    }
+    .reader-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .reader-content {
+      background: #18181b;
+      border: 1px solid #3f3f46;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .reader-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #27272a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .reader-body {
+      padding: 32px;
+      overflow-y: auto;
+      line-height: 1.8;
+      color: #d4d4d8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Live Deployment Indicator Header -->
+  <div class="top-banner">
+    <span class="badge">● LIVE DEMO DEPLOYMENT</span>
+    <span>Hosted on OpenDev Edge Network</span>
+    <span style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">https://ebookstall.opendev.app</span>
+  </div>
+
+  <!-- Main Store Header -->
+  <header class="store-header">
+    <div class="brand">
+      <div class="brand-icon">
+        <i data-lucide="book-open" style="width:20px; height:20px;"></i>
+      </div>
+      <span>EBookStall<span style="color:#f43f5e;">.app</span></span>
+    </div>
+
+    <div class="search-box">
+      <i data-lucide="search" style="width:16px; height:16px; color:#71717a;"></i>
+      <input type="text" placeholder="Search tech books, tutorials, guides..." onkeyup="filterBooks(this.value)">
+    </div>
+
+    <div style="display:flex; gap:12px; align-items:center;">
+      <button class="buy-btn" style="background:#27272a; color:#f4f4f5;" onclick="alert('Cart is empty. Click any book to read sample!')">
+        <i data-lucide="shopping-cart" style="width:16px; height:16px;"></i> Cart (0)
+      </button>
+    </div>
+  </header>
+
+  <div class="grid-container">
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <div>
+        <h1>Master Full-Stack Engineering & AI</h1>
+        <p>Explore instant-access e-books written by Senior Architects. Read interactive chapters right inside your browser.</p>
+        <button class="buy-btn" style="padding:12px 24px; font-size:1rem;" onclick="openReader('Next.js 16 Edge Architecture')">
+          <i data-lucide="sparkles" style="width:18px; height:18px;"></i> Read Free Sample Chapter
+        </button>
+      </div>
+      <div style="font-size:4rem; opacity:0.8;">📚⚡</div>
+    </div>
+
+    <h2 style="font-size:1.4rem; font-weight:700; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+      <i data-lucide="flame" style="color:#f43f5e; width:20px; height:20px;"></i> Featured E-Books
+    </h2>
+
+    <!-- Book Grid -->
+    <div class="book-cards" id="book-grid">
+      <!-- Book 1 -->
+      <div class="book-card">
+        <div class="book-cover">
+          <i data-lucide="code" style="width:36px; height:36px; color:#3b82f6; margin-bottom:10px;"></i>
+          <span style="font-weight:700; font-size:0.95rem;">Next.js 16 & Server Actions</span>
+        </div>
+        <div class="book-title">Next.js 16 Edge Architecture</div>
+        <div class="book-author">By Alex Vance • 240 Pages</div>
+        <div style="font-size:0.82rem; color:#a1a1aa;">Master App Router, React 19, Server Components, and Vercel edge deployment patterns.</div>
+        <div class="book-footer">
+          <span class="book-price">$29.99</span>
+          <button class="buy-btn" onclick="openReader('Next.js 16 Edge Architecture')">Read Sample</button>
+        </div>
+      </div>
+
+      <!-- Book 2 -->
+      <div class="book-card">
+        <div class="book-cover">
+          <i data-lucide="cpu" style="width:36px; height:36px; color:#8b5cf6; margin-bottom:10px;"></i>
+          <span style="font-weight:700; font-size:0.95rem;">OpenRouter AI Integration</span>
+        </div>
+        <div class="book-title">Building LLM SaaS Apps</div>
+        <div class="book-author">By Dr. Elena Rostova • 310 Pages</div>
+        <div style="font-size:0.82rem; color:#a1a1aa;">Connect DeepSeek R1 and Llama 3 models to full-stack applications with streaming UI.</div>
+        <div class="book-footer">
+          <span class="book-price">$34.99</span>
+          <button class="buy-btn" onclick="openReader('Building LLM SaaS Apps')">Read Sample</button>
+        </div>
+      </div>
+
+      <!-- Book 3 -->
+      <div class="book-card">
+        <div class="book-cover">
+          <i data-lucide="shield" style="width:36px; height:36px; color:#10b981; margin-bottom:10px;"></i>
+          <span style="font-weight:700; font-size:0.95rem;">Cloudflare & Vercel DNS</span>
+        </div>
+        <div class="book-title">Custom Domain Mastery</div>
+        <div class="book-author">By Marcus Sterling • 180 Pages</div>
+        <div style="font-size:0.82rem; color:#a1a1aa;">A comprehensive guide to SSL certificates, CNAME routing, and multi-tenant subdomains.</div>
+        <div class="book-footer">
+          <span class="book-price">$19.99</span>
+          <button class="buy-btn" onclick="openReader('Custom Domain Mastery')">Read Sample</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reader Modal -->
+  <div class="reader-modal" id="reader-modal">
+    <div class="reader-content">
+      <div class="reader-header">
+        <div>
+          <h3 id="reader-title" style="margin:0; font-size:1.1rem; font-weight:700;">Book Reader</h3>
+          <small style="color:#a1a1aa;">Sample Reader Mode • Hosted on opendev.app</small>
+        </div>
+        <button class="buy-btn" style="background:#27272a; padding:6px 12px;" onclick="closeReader()">✕ Close</button>
+      </div>
+      <div class="reader-body" id="reader-text">
+        <h4>Chapter 1: The Modern Edge Stack</h4>
+        <p>In modern web development, deployment is no longer about configuring complex Linux servers or manually FTPing files. Platforms like OpenDev Labs and Vercel leverage global edge locations to route user traffic to the nearest serverless runtime in under 5 milliseconds.</p>
+        <p>When you connect your GitHub repository or upload a local project build folder, the CI/CD pipeline triggers an automated container build, generates SSL certificates for <code>ebookstall.opendev.app</code>, and distributes static assets worldwide.</p>
+        <div style="background:#09090b; border:1px solid #27272a; border-radius:8px; padding:16px; font-family:monospace; margin:20px 0; color:#10b981;">
+          // Sample Edge Middleware Routing<br>
+          export function middleware(request) {<br>
+          &nbsp;&nbsp;const host = request.headers.get('host');<br>
+          &nbsp;&nbsp;if (host.endsWith('.opendev.app')) {<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;return NextResponse.rewrite(new URL(`/subdomains/${host}`, request.url));<br>
+          &nbsp;&nbsp;}<br>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+    function openReader(title) {
+      document.getElementById('reader-title').innerText = title + ' (Sample Reader)';
+      document.getElementById('reader-modal').style.display = 'flex';
+    }
+    function closeReader() {
+      document.getElementById('reader-modal').style.display = 'none';
+    }
+    function filterBooks(query) {
+      const q = query.toLowerCase();
+      const cards = document.querySelectorAll('.book-card');
+      cards.forEach(card => {
+        const text = card.innerText.toLowerCase();
+        card.style.display = text.includes(q) ? 'flex' : 'none';
+      });
+    }
+  </script>
+</body>
+</html>

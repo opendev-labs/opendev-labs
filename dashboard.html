@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard – OpenDev Developer Console</title>
+  <meta name="description" content="Manage your deployed projects, subdomains, build logs, and edge infrastructure on the OpenDev Platform dashboard.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .dash-topbar {
+      background: #000000;
+      border-bottom: 1px solid #27272a;
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .team-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .team-switcher:hover {
+      border-color: #3f3f46;
+    }
+    .dash-nav {
+      background: #09090b;
+      border-bottom: 1px solid #27272a;
+      padding: 0 32px;
+      display: flex;
+      gap: 24px;
+      overflow-x: auto;
+    }
+    .dash-nav-item {
+      color: #a1a1aa;
+      padding: 14px 4px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .dash-nav-item:hover {
+      color: #fff;
+    }
+    .dash-nav-item.active {
+      color: #fff;
+      border-bottom-color: #f42050;
+    }
+    .dash-content {
+      max-width: 1280px;
+      margin: 36px auto;
+      padding: 0 32px;
+    }
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .search-filter-bar {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+      max-width: 500px;
+    }
+    .search-input {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 8px 14px;
+      color: #fff;
+      font-size: 0.88rem;
+      width: 100%;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: #f42050;
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+    .project-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s;
+    }
+    .project-card:hover {
+      border-color: #f42050;
+      box-shadow: 0 8px 24px rgba(244, 32, 80, 0.15);
+      transform: translateY(-2px);
+    }
+    .project-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .project-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .project-subdomain {
+      font-family: monospace;
+      font-size: 0.82rem;
+      color: #00f2fe;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+    }
+    .project-subdomain:hover {
+      text-decoration: underline;
+    }
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: monospace;
+    }
+    .status-pill.live {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    .git-info-box {
+      background: #050507;
+      border: 1px solid #27272a;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: #a1a1aa;
+      margin-top: 16px;
+      line-height: 1.5;
+    }
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid #27272a;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Dashboard Bar -->
+  <header class="dash-topbar">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <a href="index.html" class="brand-logo" style="text-decoration:none;">
+        <div class="logo-box">
+          <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+        </div>
+        <span style="font-weight:800; font-size:1.1rem; color:#fff;">opendev<span style="color:#f42050;">-labs</span></span>
+      </a>
+
+      <span style="color:#3f3f46; font-size:1.2rem;">/</span>
+
+      <!-- Team Switcher -->
+      <div class="team-switcher" onclick="alert('Workspace Switcher: black spase (Personal) / OpenDev Team')">
+        <div style="width:20px; height:20px; border-radius:50%; background:#f02050; display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#fff;">B</div>
+        <span id="user-team-name">black spase (Personal)</span>
+        <i data-lucide="chevron-down" style="width:14px; height:14px; color:#a1a1aa;"></i>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div class="cmd-k-trigger" onclick="openCmdModal()">
+        <i data-lucide="search" style="width:14px; height:14px;"></i>
+        <span>Search console...</span>
+        <span class="kbd-shortcut">⌘K</span>
+      </div>
+
+      <a href="new" class="btn btn-shadcn-red" style="font-size:0.85rem; padding:8px 16px; text-decoration:none;">
+        + Add New... Project
+      </a>
+
+      <div style="width:32px; height:32px; border-radius:50%; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer;" onclick="location.href='login'" title="User Settings & Logout">
+        Y
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Navigation Tabs -->
+  <nav class="dash-nav">
+    <a href="dashboard" class="dash-nav-item active">Overview</a>
+    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Integrations: GitHub Actions, OpenRouter AI, Cloudflare DNS active.')">Integrations</a>
+    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Activity Log: Production build ebookstall.opendev.app deployed 2 hours ago.')">Activity</a>
+    <a href="domains" class="dash-nav-item">Domains & DNS</a>
+    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Usage: 4.2GB Edge Bandwidth / 100GB Free Tier.')">Usage & Analytics</a>
+    <a href="booking" class="dash-nav-item" style="color:#f42050;">Book Custom Work</a>
+  </nav>
+
+  <!-- Main Console Content -->
+  <div class="dash-content">
+    <div class="dash-header">
+      <div>
+        <h1 style="font-size:1.6rem; font-weight:800; margin:0 0 4px 0;">Projects</h1>
+        <p style="color:#a1a1aa; margin:0; font-size:0.88rem;">Manage your live apps deployed on the OpenDev Edge Network (*.opendev.app).</p>
+      </div>
+
+      <div class="search-filter-bar">
+        <input type="text" class="search-input" placeholder="Filter projects by name or domain..." onkeyup="filterProjects(this.value)">
+        <a href="new" class="btn btn-shadcn-red" style="text-decoration:none; white-space:nowrap; padding:8px 18px;">
+          + New Project
+        </a>
+      </div>
+    </div>
+
+    <!-- Projects Grid -->
+    <div class="projects-grid" id="dashboard-projects-grid">
+      <!-- Card 1: ebookstall -->
+      <div class="project-card">
+        <div>
+          <div class="project-card-header">
+            <div>
+              <div class="project-name">
+                <i data-lucide="book-open" style="color:#f42050; width:20px; height:20px;"></i> ebookstall
+              </div>
+              <a href="javascript:void(0)" class="project-subdomain" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
+                ebookstall.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+              </a>
+            </div>
+            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
+          </div>
+
+          <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">
+            Digital E-Book Store & Reader WebApp • Next.js 16 Edge Router
+          </div>
+
+          <div class="git-info-box">
+            <div>Branch: <strong style="color:#fff;">main</strong></div>
+            <div>Commit: <strong style="color:#00f2fe;">a3f9e1c (Add EBookStall store catalog)</strong></div>
+            <div>Build Time: <strong style="color:#10b981;">2.1s (singapore edge)</strong></div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-shadcn-red" style="padding:6px 14px; font-size:0.8rem;" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
+            <i data-lucide="eye" style="width:13px; height:13px;"></i> View Live Sandbox
+          </button>
+          <a href="project?p=ebookstall" class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">
+            Project Details →
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: ai-saas -->
+      <div class="project-card">
+        <div>
+          <div class="project-card-header">
+            <div>
+              <div class="project-name">
+                <i data-lucide="cpu" style="color:#a855f7; width:20px; height:20px;"></i> ai-saas
+              </div>
+              <a href="ai-cloud.html" class="project-subdomain">
+                ai-saas.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+              </a>
+            </div>
+            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
+          </div>
+
+          <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">
+            OpenRouter DeepSeek R1 Chatbot Gateway • React 19
+          </div>
+
+          <div class="git-info-box">
+            <div>Branch: <strong style="color:#fff;">main</strong></div>
+            <div>Commit: <strong style="color:#00f2fe;">b981f4a (OpenRouter streaming)</strong></div>
+            <div>Build Time: <strong style="color:#10b981;">1.8s</strong></div>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <a href="ai-cloud.html" class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem; text-decoration:none;">
+            <i data-lucide="external-link" style="width:13px; height:13px;"></i> Open Project
+          </a>
+          <a href="project-detail.html?p=ai-saas" class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">
+            Project Details →
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Sandbox Modal Container -->
+  <div class="sandbox-modal-backdrop" id="sandbox-modal">
+    <div class="sandbox-modal-dialog">
+      <div class="sandbox-modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-pill live"><span class="status-dot"></span> LIVE DEPLOYMENT</span>
+          <span style="font-weight:700; font-size:0.95rem; color:#fff;" id="sandbox-title">ebookstall.opendev.app</span>
+        </div>
+        
+        <div class="sandbox-address-bar">
+          <i data-lucide="lock" style="width:13px; height:13px; color:#10b981;"></i>
+          <span id="sandbox-address-text">https://ebookstall.opendev.app</span>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <a href="preview-ebookstall.html" target="_blank" class="btn btn-shadcn-secondary" style="padding:4px 10px; font-size:0.78rem; text-decoration:none;">Open in New Tab ↗</a>
+          <button class="nav-icon-btn" onclick="closeSandboxModal()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+        </div>
+      </div>
+      <div class="sandbox-iframe-container">
+        <iframe src="preview-ebookstall.html" class="sandbox-iframe" id="sandbox-frame"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    // Load logged in user
+    const user = JSON.parse(localStorage.getItem('opendev_user') || '{}');
+    if (user.team) {
+      const el = document.getElementById('user-team-name');
+      if (el) el.innerText = user.team;
+    }
+  </script>
+</body>
+</html>
