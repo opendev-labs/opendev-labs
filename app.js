@@ -501,7 +501,7 @@ function handleTerminalKey(event) {
   To deploy something, run \`open --prod\`.`);
     } else if (cmd === 'open' || cmd === 'open --prod' || cmd === 'npx open') {
       appendConsole(`OpenDev CLI v1.0.0
-> Inspecting project directory: ~/Projects/ebookstall
+> Inspecting project directory: ~/Projects/digital-store
 > Detected Next.js 16 E-Commerce WebApp (Razorpay + Firestore)
 > Building production edge bundle...
 > Deploying to OpenDev Global Edge Network...
@@ -509,17 +509,17 @@ function handleTerminalKey(event) {
 ✓ Production Deployment Live!
 
 🌐 Web Application URL:
-   https://ebookstall.opendev.app
+   https://digital-store.opendev.app
 
 📱 Android Mobile APK Download:
-   https://ebookstall.opendev.app/download/ebookstall.apk`);
+   https://digital-store.opendev.app/download/app.apk`);
     } else if (cmd === 'open android') {
       appendConsole(`> Running Capacitor CLI Android APK Build...
 > Compiling release APK bundle...
-✓ Android APK Export Complete: https://ebookstall.opendev.app/download/ebookstall.apk`);
+✓ Android APK Export Complete: https://digital-store.opendev.app/download/app.apk`);
     } else if (cmd.startsWith('open domain') || cmd.startsWith('open domains')) {
       appendConsole(`> Provisioning Cloudflare Anycast DNS & SSL Certificate...
-✓ Custom Domain bound to https://ebookstall.opendev.app (SSL Active)`);
+✓ Custom Domain bound to https://digital-store.opendev.app (SSL Active)`);
     } else if (cmd === 'run') {
       appendConsole(`[OPENROUTER AI]: Dispatching DeepSeek R1 model via free API key...
 [VERCEL EDGE]: Synthesizing Next.js 16 response...
@@ -528,7 +528,7 @@ function handleTerminalKey(event) {
       appendConsole(`[STATUS]: OpenDev Cluster 'opendev-edge-01'
   - OpenRouter Models: DeepSeek R1, Llama 3.3, Qwen 2.5
   - Stack: Next.js 16 | React 19 | Firebase | Razorpay | Capacitor
-  - Primary Deployment Domain: *.opendev.app (e.g. ebookstall.opendev.app)
+  - Primary Deployment Domain: *.opendev.app (e.g. digital-store.opendev.app)
   - Vercel Edge Latency: 3.2ms (p99)`);
     } else if (cmd === 'add line') {
       cameraSet();

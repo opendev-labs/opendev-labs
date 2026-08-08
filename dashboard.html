@@ -191,7 +191,7 @@
 
   <!-- Top Dashboard Bar -->
   <header class="dash-topbar">
-    <div style="display:flex; align-items:center; gap:20px;">
+    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
       <a href="index.html" class="brand-logo" style="text-decoration:none;">
         <div class="logo-box">
           <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
@@ -201,11 +201,14 @@
 
       <span style="color:#3f3f46; font-size:1.2rem;">/</span>
 
-      <!-- Team Switcher -->
-      <div class="team-switcher" onclick="alert('Workspace Switcher: black spase (Personal) / OpenDev Team')">
-        <div style="width:20px; height:20px; border-radius:50%; background:#f02050; display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:#fff;">B</div>
-        <span id="user-team-name">black spase (Personal)</span>
-        <i data-lucide="chevron-down" style="width:14px; height:14px; color:#a1a1aa;"></i>
+      <!-- Role Mode Badge & Switcher (Admin Owner vs Client Member) -->
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span id="role-badge" class="status-pill live" style="background:rgba(244,32,80,0.15); color:#f42050; border-color:rgba(244,32,80,0.3); font-size:0.75rem;">
+          <span class="status-dot"></span> <span id="role-badge-text">ADMIN / OWNER CONSOLE</span>
+        </span>
+        <button onclick="toggleDashboardRoleView()" class="btn btn-shadcn-secondary" style="font-size:0.78rem; padding:6px 12px; display:inline-flex; align-items:center; gap:6px;">
+          <i data-lucide="refresh-cw" style="width:13px; height:13px;"></i> Switch View: <strong id="switch-view-target" style="color:#00f2fe;">Client Portal</strong>
+        </button>
       </div>
     </div>
 
@@ -216,11 +219,11 @@
         <span class="kbd-shortcut">⌘K</span>
       </div>
 
-      <a href="new" class="btn btn-shadcn-red" style="font-size:0.85rem; padding:8px 16px; text-decoration:none;">
-        + Add New... Project
+      <a href="login.html" class="btn btn-shadcn-secondary" style="font-size:0.85rem; padding:8px 16px; text-decoration:none;">
+        Sign In / Account
       </a>
 
-      <div style="width:32px; height:32px; border-radius:50%; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer;" onclick="location.href='login'" title="User Settings & Logout">
+      <div style="width:32px; height:32px; border-radius:50%; background:#27272a; border:1px solid #3f3f46; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.85rem; cursor:pointer;" onclick="location.href='login.html'" title="User Settings & Logout">
         Y
       </div>
     </div>
@@ -228,103 +231,39 @@
 
   <!-- Secondary Navigation Tabs -->
   <nav class="dash-nav">
-    <a href="dashboard" class="dash-nav-item active">Overview</a>
-    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Integrations: GitHub Actions, OpenRouter AI, Cloudflare DNS active.')">Integrations</a>
-    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Activity Log: Production build ebookstall.opendev.app deployed 2 hours ago.')">Activity</a>
-    <a href="domains" class="dash-nav-item">Domains & DNS</a>
-    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Usage: 4.2GB Edge Bandwidth / 100GB Free Tier.')">Usage & Analytics</a>
-    <a href="booking" class="dash-nav-item" style="color:#f42050;">Book Custom Work</a>
+    <a href="dashboard.html" class="dash-nav-item active" id="tab-overview">Overview</a>
+    <a href="javascript:void(0)" class="dash-nav-item" id="tab-clients" onclick="switchDashboardTab('clients')">My Clients & Apps</a>
+    <a href="domains.html" class="dash-nav-item">Domains & DNS</a>
+    <a href="javascript:void(0)" class="dash-nav-item" onclick="alert('Usage: 4.2GB Edge Bandwidth / Unlimited tier active.')">Analytics</a>
+    <a href="login.html" class="dash-nav-item" style="color:#00f2fe;">Account & API Keys</a>
   </nav>
 
   <!-- Main Console Content -->
   <div class="dash-content">
+    
+    <!-- Top Role Banner / Header -->
     <div class="dash-header">
       <div>
-        <h1 style="font-size:1.6rem; font-weight:800; margin:0 0 4px 0;">Projects</h1>
-        <p style="color:#a1a1aa; margin:0; font-size:0.88rem;">Manage your live apps deployed on the OpenDev Edge Network (*.opendev.app).</p>
+        <h1 style="font-size:1.6rem; font-weight:800; margin:0 0 4px 0;" id="dash-title">Owner & Admin Control Center</h1>
+        <p style="color:#a1a1aa; margin:0; font-size:0.88rem;" id="dash-subtitle">Manage client accounts, live deployed web applications, edge routing, and cloud infrastructure.</p>
       </div>
 
       <div class="search-filter-bar">
-        <input type="text" class="search-input" placeholder="Filter projects by name or domain..." onkeyup="filterProjects(this.value)">
-        <a href="new" class="btn btn-shadcn-red" style="text-decoration:none; white-space:nowrap; padding:8px 18px;">
-          + New Project
-        </a>
+        <input type="text" class="search-input" placeholder="Filter apps by name, client or domain..." onkeyup="filterProjects(this.value)">
+        <button id="header-action-btn" class="btn btn-shadcn-red" onclick="handleHeaderAction()" style="white-space:nowrap; padding:8px 18px;">
+          + Add New Client App
+        </button>
       </div>
     </div>
 
-    <!-- Projects Grid -->
-    <div class="projects-grid" id="dashboard-projects-grid">
-      <!-- Card 1: ebookstall -->
-      <div class="project-card">
-        <div>
-          <div class="project-card-header">
-            <div>
-              <div class="project-name">
-                <i data-lucide="book-open" style="color:#f42050; width:20px; height:20px;"></i> ebookstall
-              </div>
-              <a href="javascript:void(0)" class="project-subdomain" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
-                ebookstall.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
-              </a>
-            </div>
-            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
-          </div>
+    <!-- Summary Stats Bar -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:28px;" id="stats-container">
+      <!-- Dynamic Stats injected via JS -->
+    </div>
 
-          <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">
-            Digital E-Book Store & Reader WebApp • Next.js 16 Edge Router
-          </div>
-
-          <div class="git-info-box">
-            <div>Branch: <strong style="color:#fff;">main</strong></div>
-            <div>Commit: <strong style="color:#00f2fe;">a3f9e1c (Add EBookStall store catalog)</strong></div>
-            <div>Build Time: <strong style="color:#10b981;">2.1s (singapore edge)</strong></div>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <button class="btn btn-shadcn-red" style="padding:6px 14px; font-size:0.8rem;" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
-            <i data-lucide="eye" style="width:13px; height:13px;"></i> View Live Sandbox
-          </button>
-          <a href="project?p=ebookstall" class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">
-            Project Details →
-          </a>
-        </div>
-      </div>
-
-      <!-- Card 2: ai-saas -->
-      <div class="project-card">
-        <div>
-          <div class="project-card-header">
-            <div>
-              <div class="project-name">
-                <i data-lucide="cpu" style="color:#a855f7; width:20px; height:20px;"></i> ai-saas
-              </div>
-              <a href="ai-cloud.html" class="project-subdomain">
-                ai-saas.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
-              </a>
-            </div>
-            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
-          </div>
-
-          <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">
-            OpenRouter DeepSeek R1 Chatbot Gateway • React 19
-          </div>
-
-          <div class="git-info-box">
-            <div>Branch: <strong style="color:#fff;">main</strong></div>
-            <div>Commit: <strong style="color:#00f2fe;">b981f4a (OpenRouter streaming)</strong></div>
-            <div>Build Time: <strong style="color:#10b981;">1.8s</strong></div>
-          </div>
-        </div>
-
-        <div class="card-actions">
-          <a href="ai-cloud.html" class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem; text-decoration:none;">
-            <i data-lucide="external-link" style="width:13px; height:13px;"></i> Open Project
-          </a>
-          <a href="project-detail.html?p=ai-saas" class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem; text-decoration:none;">
-            Project Details →
-          </a>
-        </div>
-      </div>
+    <!-- Main Content Section: Admin Client List or Client App View -->
+    <div id="main-dash-body">
+      <!-- Dynamic Content injected via renderDashboardByRole() -->
     </div>
   </div>
 
@@ -334,12 +273,12 @@
       <div class="sandbox-modal-header">
         <div style="display:flex; align-items:center; gap:8px;">
           <span class="status-pill live"><span class="status-dot"></span> LIVE DEPLOYMENT</span>
-          <span style="font-weight:700; font-size:0.95rem; color:#fff;" id="sandbox-title">ebookstall.opendev.app</span>
+          <span style="font-weight:700; font-size:0.95rem; color:#fff;" id="sandbox-title">digital-store.opendev.app</span>
         </div>
         
         <div class="sandbox-address-bar">
           <i data-lucide="lock" style="width:13px; height:13px; color:#10b981;"></i>
-          <span id="sandbox-address-text">https://ebookstall.opendev.app</span>
+          <span id="sandbox-address-text">https://digital-store.opendev.app</span>
         </div>
 
         <div style="display:flex; gap:8px;">
@@ -355,13 +294,213 @@
 
   <script type="module" src="app.js"></script>
   <script>
-    lucide.createIcons();
-    // Load logged in user
-    const user = JSON.parse(localStorage.getItem('opendev_user') || '{}');
-    if (user.team) {
-      const el = document.getElementById('user-team-name');
-      if (el) el.innerText = user.team;
+    let currentRole = localStorage.getItem('opendev_user_role') || 'admin';
+
+    function initRoleView() {
+      const badgeText = document.getElementById('role-badge-text');
+      const badgePill = document.getElementById('role-badge');
+      const switchTarget = document.getElementById('switch-view-target');
+      const title = document.getElementById('dash-title');
+      const subtitle = document.getElementById('dash-subtitle');
+      const stats = document.getElementById('stats-container');
+      const body = document.getElementById('main-dash-body');
+      const actionBtn = document.getElementById('header-action-btn');
+
+      if (currentRole === 'admin') {
+        badgeText.innerText = 'ADMIN / OWNER CONSOLE';
+        badgePill.style.background = 'rgba(244, 32, 80, 0.15)';
+        badgePill.style.color = '#f42050';
+        badgePill.style.borderColor = 'rgba(244, 32, 80, 0.3)';
+        switchTarget.innerText = 'Client Portal';
+
+        title.innerText = 'Owner & Admin Control Center';
+        subtitle.innerText = 'Manage client accounts, live deployed web applications, edge routing, and cloud infrastructure.';
+        actionBtn.innerText = '+ Add New Client App';
+
+        stats.innerHTML = `
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Active Clients</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#fff; margin-top:4px;">24 Clients</div>
+            <div style="font-size:0.75rem; color:#10b981; margin-top:2px;">↑ 4 new this month</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Live Deployed WebApps</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#00f2fe; margin-top:4px;">48 WebApps</div>
+            <div style="font-size:0.75rem; color:#a1a1aa; margin-top:2px;">100% Anycast Edge</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Monthly Recurring Revenue</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#f42050; margin-top:4px;">$4,850 / mo</div>
+            <div style="font-size:0.75rem; color:#10b981; margin-top:2px;">+18% growth</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Global Edge Status</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#10b981; margin-top:4px;">99.99% Operational</div>
+            <div style="font-size:0.75rem; color:#a1a1aa; margin-top:2px;">100+ Edge POPs</div>
+          </div>
+        `;
+
+        body.innerHTML = `
+          <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:16px; color:#fff;">Client Accounts & Managed Deployed Apps</h2>
+          <div class="projects-grid">
+            <div class="project-card">
+              <div>
+                <div class="project-card-header">
+                  <div>
+                    <div class="project-name"><i data-lucide="shopping-cart" style="color:#f42050; width:18px; height:18px;"></i> Digital Shop & Online Store</div>
+                    <a href="javascript:void(0)" class="project-subdomain" onclick="openSandboxModal('digital-store.opendev.app', 'preview-ebookstall.html')">
+                      digital-store.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+                    </a>
+                  </div>
+                  <span class="status-pill live"><span class="status-dot"></span> Active Client</span>
+                </div>
+                <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:10px;">Client: Retail Merchant • E-Commerce & Digital Products ($600)</div>
+                <div class="git-info-box">
+                  <div>Owner: <strong style="color:#fff;">client-merchant@store.com</strong></div>
+                  <div>Domain: <strong style="color:#00f2fe;">digital-store.opendev.app</strong></div>
+                  <div>Edge Status: <strong style="color:#10b981;">Online (1.9s latency)</strong></div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-shadcn-red" style="padding:6px 14px; font-size:0.8rem;" onclick="openSandboxModal('digital-store.opendev.app', 'preview-ebookstall.html')">Inspect Live App</button>
+                <button class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="alert('Client Admin Settings: Subscription Active. Managed domain: store.com')">Client Config →</button>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div>
+                <div class="project-card-header">
+                  <div>
+                    <div class="project-name"><i data-lucide="anchor" style="color:#00f2fe; width:18px; height:18px;"></i> Metro Shipping & Logistics</div>
+                    <a href="javascript:void(0)" class="project-subdomain" onclick="alert('Metro Shipping WebApp Live at metro-ship.opendev.app')">
+                      metro-ship.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+                    </a>
+                  </div>
+                  <span class="status-pill live"><span class="status-dot"></span> Enterprise</span>
+                </div>
+                <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:10px;">Client: Metro Shipping Ltd • Custom Enterprise WebApp ($2,500)</div>
+                <div class="git-info-box">
+                  <div>Owner: <strong style="color:#fff;">admin@metroshipping.com</strong></div>
+                  <div>Domain: <strong style="color:#00f2fe;">metro-ship.opendev.app</strong></div>
+                  <div>Edge Status: <strong style="color:#10b981;">Online (1.5s latency)</strong></div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="alert('Opening Metro Shipping Portal')">Open App</button>
+                <button class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="alert('Managing Metro Shipping Client Account')">Client Config →</button>
+              </div>
+            </div>
+
+            <div class="project-card">
+              <div>
+                <div class="project-card-header">
+                  <div>
+                    <div class="project-name"><i data-lucide="cpu" style="color:#a855f7; width:18px; height:18px;"></i> OpenRouter AI SaaS Gateway</div>
+                    <a href="ai-cloud.html" class="project-subdomain">
+                      ai-saas.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+                    </a>
+                  </div>
+                  <span class="status-pill live"><span class="status-dot"></span> Active Client</span>
+                </div>
+                <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:10px;">Client: AI Assistant Startup • DeepSeek R1 & Llama 3 ($1,500)</div>
+                <div class="git-info-box">
+                  <div>Owner: <strong style="color:#fff;">tech@aistartup.io</strong></div>
+                  <div>Domain: <strong style="color:#00f2fe;">ai-saas.opendev.app</strong></div>
+                  <div>Edge Status: <strong style="color:#10b981;">Online (1.8s latency)</strong></div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <a href="ai-cloud.html" class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem; text-decoration:none;">Open Project</a>
+                <button class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="alert('Managing AI Startup Client Account')">Client Config →</button>
+              </div>
+            </div>
+          </div>
+        `;
+      } else {
+        badgeText.innerText = 'MEMBER / CLIENT PORTAL';
+        badgePill.style.background = 'rgba(0, 242, 254, 0.15)';
+        badgePill.style.color = '#00f2fe';
+        badgePill.style.borderColor = 'rgba(0, 242, 254, 0.3)';
+        switchTarget.innerText = 'Admin Console';
+
+        title.innerText = 'Welcome to Your Client Portal';
+        subtitle.innerText = 'Access your live web applications, edge uptime metrics, custom domain settings, and account support.';
+        actionBtn.innerText = '+ Request New Feature';
+
+        stats.innerHTML = `
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Your Live WebApp</div>
+            <div style="font-size:1.2rem; font-weight:800; color:#00f2fe; margin-top:4px; font-family:monospace;">digital-store.opendev.app</div>
+            <div style="font-size:0.75rem; color:#10b981; margin-top:2px;">● Online & Secured SSL</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Edge Uptime Rate</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#10b981; margin-top:4px;">99.99%</div>
+            <div style="font-size:0.75rem; color:#a1a1aa; margin-top:2px;">Optimal Performance</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Monthly Visitors</div>
+            <div style="font-size:1.6rem; font-weight:800; color:#fff; margin-top:4px;">12,480 Visits</div>
+            <div style="font-size:0.75rem; color:#10b981; margin-top:2px;">↑ 12% vs last month</div>
+          </div>
+          <div class="project-card" style="padding:16px 20px;">
+            <div style="font-size:0.8rem; color:#a1a1aa; font-weight:700; text-transform:uppercase;">Support Tier</div>
+            <div style="font-size:1.4rem; font-weight:800; color:#f42050; margin-top:4px;">Dedicated 24/7</div>
+            <div style="font-size:0.75rem; color:#a1a1aa; margin-top:2px;">Direct Engineering Line</div>
+          </div>
+        `;
+
+        body.innerHTML = `
+          <h2 style="font-size:1.2rem; font-weight:800; margin-bottom:16px; color:#fff;">Your Active Software Applications</h2>
+          <div class="projects-grid">
+            <div class="project-card">
+              <div>
+                <div class="project-card-header">
+                  <div>
+                    <div class="project-name"><i data-lucide="shopping-cart" style="color:#00f2fe; width:18px; height:18px;"></i> Digital Shop & Online Store</div>
+                    <a href="javascript:void(0)" class="project-subdomain" onclick="openSandboxModal('digital-store.opendev.app', 'preview-ebookstall.html')">
+                      digital-store.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+                    </a>
+                  </div>
+                  <span class="status-pill live"><span class="status-dot"></span> Ready (Live)</span>
+                </div>
+                <div style="font-size:0.85rem; color:#a1a1aa; margin-bottom:12px;">Digital Product Store & Reader WebApp • Next.js 16 Edge Infrastructure</div>
+                <div class="git-info-box">
+                  <div>Status: <strong style="color:#10b981;">Online & Active</strong></div>
+                  <div>Custom Domain: <strong style="color:#00f2fe;">digital-store.opendev.app</strong></div>
+                  <div>Plan Tier: <strong style="color:#fff;">Pro Managed Store ($600)</strong></div>
+                </div>
+              </div>
+              <div class="card-actions">
+                <button class="btn btn-shadcn-red" style="padding:6px 14px; font-size:0.8rem;" onclick="openSandboxModal('digital-store.opendev.app', 'preview-ebookstall.html')">View Live Store</button>
+                <button class="btn btn-shadcn-secondary" style="padding:6px 12px; font-size:0.8rem;" onclick="alert('App Settings: Custom domains, store inventory, and API keys.')">App Settings →</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      if (window.lucide) lucide.createIcons();
     }
+
+    function toggleDashboardRoleView() {
+      currentRole = (currentRole === 'admin') ? 'member' : 'admin';
+      localStorage.setItem('opendev_user_role', currentRole);
+      initRoleView();
+    }
+
+    function handleHeaderAction() {
+      if (currentRole === 'admin') {
+        alert('Opening Add New Client & App Deployment Wizard...');
+        window.location.href = 'new-project.html';
+      } else {
+        alert('Opening Client Support & Feature Request Console...');
+        window.location.href = 'pricing.html';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initRoleView();
+    });
   </script>
 </body>
 </html>
