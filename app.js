@@ -1,9 +1,9 @@
 // OpenDev Labs - Shadcn UI 3D Engine & Interactive Core
 //----------------------------------------------------------------- BASIC Parameters
 var isMobile = (window.innerWidth <= 800 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-var renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: false, powerPreference: "high-performance" });
+var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
 // Guaranteed DOM Mounting for 3D Background Canvas
 function mountCanvas() {
@@ -20,13 +20,6 @@ function mountCanvas() {
   if (!container.contains(renderer.domElement)) {
     container.appendChild(renderer.domElement);
   }
-  renderer.domElement.style.position = 'fixed';
-  renderer.domElement.style.top = '0';
-  renderer.domElement.style.left = '0';
-  renderer.domElement.style.width = '100vw';
-  renderer.domElement.style.height = '100vh';
-  renderer.domElement.style.zIndex = '0';
-  renderer.domElement.style.pointerEvents = 'none';
 }
 
 if (document.readyState === 'loading') {
@@ -68,7 +61,7 @@ var themeHexMap = {
 var currentThemeColor = themeHexMap[savedTheme] || 0xF02050;
 
 scene.background = new THREE.Color(currentThemeColor);
-scene.fog = new THREE.Fog(currentThemeColor, 10, isMobile ? 20 : 16);
+scene.fog = new THREE.Fog(currentThemeColor, 10, 16);
 
 function mathRandom(num = 8) {
   var numValue = - Math.random() * num + Math.random() * num;
@@ -79,11 +72,12 @@ var setTintNum = true;
 function setTintColor() {
   if (setTintNum) {
     setTintNum = false;
-    return 0x0a0a14;
+    var setColor = 0x000000;
   } else {
     setTintNum = true;
-    return 0x141422;
+    var setColor = 0x000000;
   }
+  return setColor;
 }
 
 var buildingMeshes = [];
@@ -92,12 +86,12 @@ function init() {
   var segments = 2;
   var BoxGeo = THREE.BoxGeometry || THREE.CubeGeometry;
 
-  for (var i = 1; i < (isMobile ? 60 : 100); i++) {
+  for (var i = 1; i < 100; i++) {
     var geometry = new BoxGeo(1, 1, 1, segments, segments, segments);
     var material = new THREE.MeshStandardMaterial({
       color: setTintColor(),
       wireframe: isWireframe,
-      roughness: 0.3,
+      roughness: 0.4,
       metalness: 0.8,
       side: THREE.DoubleSide
     });
@@ -106,7 +100,7 @@ function init() {
       color: 0xFFFFFF,
       wireframe: true,
       transparent: true,
-      opacity: 0.06,
+      opacity: 0.03,
       side: THREE.DoubleSide
     });
 
@@ -115,10 +109,8 @@ function init() {
     var floor = new THREE.Mesh(geometry, material);
 
     cube.add(wire);
-    if (!isMobile) {
-      cube.castShadow = true;
-      cube.receiveShadow = true;
-    }
+    cube.castShadow = true;
+    cube.receiveShadow = true;
     cube.rotationValue = 0.1 + Math.abs(mathRandom(8));
 
     floor.scale.y = 0.05;
@@ -140,7 +132,7 @@ function init() {
   var gparticular = new THREE.CircleGeometry(0.01, 3);
   var aparticular = 5;
 
-  for (var h = 1; h < (isMobile ? 120 : 300); h++) {
+  for (var h = 1; h < 300; h++) {
     var particular = new THREE.Mesh(gparticular, gmaterial);
     particular.position.set(mathRandom(aparticular), mathRandom(aparticular), mathRandom(aparticular));
     particular.rotation.set(mathRandom(), mathRandom(), mathRandom());
@@ -159,7 +151,7 @@ function init() {
   var pelement = new THREE.Mesh(pgeometry, pmaterial);
   pelement.rotation.x = -90 * Math.PI / 180;
   pelement.position.y = -0.001;
-  if (!isMobile) pelement.receiveShadow = true;
+  pelement.receiveShadow = true;
 
   city.add(pelement);
 }
@@ -182,23 +174,21 @@ window.addEventListener('mousemove', onMouseMove, false);
 window.addEventListener('touchmove', onTouchMove, { passive: true });
 window.addEventListener('touchstart', onTouchMove, { passive: true });
 
-var ambientLight = new THREE.AmbientLight(0xFFFFFF, isMobile ? 5 : 4);
-var lightFront = new THREE.SpotLight(0xFFFFFF, isMobile ? 25 : 20, 10);
+var ambientLight = new THREE.AmbientLight(0xFFFFFF, 4);
+var lightFront = new THREE.SpotLight(0xFFFFFF, 20, 10);
 var lightBack = new THREE.PointLight(0xFFFFFF, 0.5);
 
 lightFront.rotation.x = 45 * Math.PI / 180;
 lightFront.rotation.z = -45 * Math.PI / 180;
 lightFront.position.set(5, 5, 5);
+lightFront.castShadow = true;
+lightFront.shadow.mapSize.width = 4096;
+lightFront.shadow.mapSize.height = 4096;
+lightFront.penumbra = 0.1;
 
-if (!isMobile) {
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.shadowMap.needsUpdate = true;
-  lightFront.castShadow = true;
-  lightFront.shadow.mapSize.width = 2048;
-  lightFront.shadow.mapSize.height = 2048;
-  lightFront.penumbra = 0.1;
-}
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.needsUpdate = true;
 
 lightBack.position.set(0, 6, 0);
 
