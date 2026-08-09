@@ -1,15 +1,38 @@
 // OpenDev Labs - Shadcn UI 3D Engine & Interactive Core
 //----------------------------------------------------------------- BASIC Parameters
-var container = document.getElementById('canvas-container');
 var isMobile = (window.innerWidth <= 800 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 var renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: false, powerPreference: "high-performance" });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
-if (container) {
-  container.appendChild(renderer.domElement);
+// Guaranteed DOM Mounting for 3D Background Canvas
+function mountCanvas() {
+  var container = document.getElementById('canvas-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'canvas-container';
+    if (document.body.firstChild) {
+      document.body.insertBefore(container, document.body.firstChild);
+    } else {
+      document.body.appendChild(container);
+    }
+  }
+  if (!container.contains(renderer.domElement)) {
+    container.appendChild(renderer.domElement);
+  }
+  renderer.domElement.style.position = 'fixed';
+  renderer.domElement.style.top = '0';
+  renderer.domElement.style.left = '0';
+  renderer.domElement.style.width = '100vw';
+  renderer.domElement.style.height = '100vh';
+  renderer.domElement.style.zIndex = '0';
+  renderer.domElement.style.pointerEvents = 'none';
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', mountCanvas);
 } else {
-  document.body.appendChild(renderer.domElement);
+  mountCanvas();
 }
 
 window.addEventListener('resize', onWindowResize, false);
@@ -56,12 +79,11 @@ var setTintNum = true;
 function setTintColor() {
   if (setTintNum) {
     setTintNum = false;
-    var setColor = 0x000000;
+    return 0x0a0a14;
   } else {
     setTintNum = true;
-    var setColor = 0x000000;
+    return 0x141422;
   }
-  return setColor;
 }
 
 var buildingMeshes = [];
@@ -75,7 +97,7 @@ function init() {
     var material = new THREE.MeshStandardMaterial({
       color: setTintColor(),
       wireframe: isWireframe,
-      roughness: 0.4,
+      roughness: 0.3,
       metalness: 0.8,
       side: THREE.DoubleSide
     });
@@ -84,7 +106,7 @@ function init() {
       color: 0xFFFFFF,
       wireframe: true,
       transparent: true,
-      opacity: 0.03,
+      opacity: 0.06,
       side: THREE.DoubleSide
     });
 
@@ -254,9 +276,8 @@ var cameraSet = function () {
 var animate = function () {
   requestAnimationFrame(animate);
 
-  if (isMobile) {
-    city.rotation.y -= 0.0012; // Continuous elegant 3D drift on mobile
-  }
+  // Continuous elegant 3D city rotation drift for both laptop and mobile
+  city.rotation.y -= isMobile ? 0.0012 : 0.0006;
 
   city.rotation.y -= ((mouse.x * 8) - camera.rotation.y) * uSpeed;
   city.rotation.x -= (-(mouse.y * 2) - camera.rotation.x) * uSpeed;
