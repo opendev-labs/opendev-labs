@@ -663,6 +663,13 @@ window.toggleMobileNav = function () {
   }
 };
 
+window.toggleMobileDropdown = function () {
+  const panel = document.getElementById('mobile-header-dropdown');
+  if (panel) {
+    panel.classList.toggle('active');
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   initTelemetryCharts();
   if (savedTheme) setTheme(savedTheme);

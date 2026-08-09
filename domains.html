@@ -99,12 +99,35 @@
     </ul>
 
     <div class="nav-right">
+      <!-- Mobile Header Dropdown Select -->
+      <select class="mobile-header-select" onchange="if(this.value) window.location.href=this.value;">
+        <option value="" disabled selected>Menu ▾</option>
+        <option value="index.html">🏠 Home</option>
+        <option value="marketplace.html">🚀 Templates</option>
+        <option value="ai-cloud.html">⚡ Web-AI & Vercel</option>
+        <option value="domains.html">🌐 Managed Domains</option>
+        <option value="pricing.html">🏷️ Pricing ($)</option>
+        <option value="dashboard.html">📊 Client Console</option>
+        <option value="login.html">🔑 Sign In</option>
+      </select>
+
       <a href="login.html" class="btn btn-shadcn-secondary" style="font-size:0.85rem; padding:8px 14px;">Sign In</a>
       <a href="dashboard.html" class="btn btn-shadcn-red" style="font-size:0.85rem; padding:8px 14px;">Dashboard →</a>
       
-      <button class="mobile-menu-toggle btn btn-shadcn-secondary" onclick="toggleMobileNav()" aria-label="Toggle Menu">
-        <i data-lucide="menu" style="width:18px; height:18px;"></i>
+      <button class="mobile-menu-toggle btn btn-shadcn-secondary" onclick="toggleMobileDropdown()" aria-label="Toggle Header Dropdown">
+        <span>Nav ▾</span>
       </button>
+    </div>
+
+    <!-- Header Slide-Down Dropdown Menu Panel -->
+    <div id="mobile-header-dropdown" class="mobile-header-dropdown-panel interactive">
+      <a href="index.html" onclick="toggleMobileDropdown()"><i data-lucide="home"></i> Home</a>
+      <a href="marketplace.html" onclick="toggleMobileDropdown()"><i data-lucide="layout-grid"></i> Templates & Store</a>
+      <a href="ai-cloud.html" onclick="toggleMobileDropdown()"><i data-lucide="cpu"></i> Web-AI & Vercel</a>
+      <a href="domains.html" onclick="toggleMobileDropdown()"><i data-lucide="globe"></i> Managed Domains</a>
+      <a href="pricing.html" onclick="toggleMobileDropdown()"><i data-lucide="tag"></i> Pricing ($)</a>
+      <a href="dashboard.html" onclick="toggleMobileDropdown()"><i data-lucide="layout-dashboard"></i> Client Console</a>
+      <a href="login.html" onclick="toggleMobileDropdown()"><i data-lucide="log-in"></i> Sign In / Account</a>
     </div>
   </header>
 
