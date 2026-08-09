@@ -1,15 +1,10 @@
 // OpenDev Labs - Shadcn UI 3D Engine & Interactive Core
 //----------------------------------------------------------------- BASIC Parameters
 var container = document.getElementById('canvas-container');
-var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+var isMobile = (window.innerWidth <= 800 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+var renderer = new THREE.WebGLRenderer({ antialias: !isMobile, alpha: false, powerPreference: "high-performance" });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-if (window.innerWidth > 800) {
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.shadowMap.needsUpdate = true;
-}
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
 
 if (container) {
   container.appendChild(renderer.domElement);
@@ -19,13 +14,15 @@ if (container) {
 
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height);
 }
 
-var camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 1, 500);
-camera.position.set(0, 2, 14);
+var camera = new THREE.PerspectiveCamera(isMobile ? 25 : 20, window.innerWidth / window.innerHeight, 1, 500);
+camera.position.set(0, 2, isMobile ? 16 : 14);
 
 var scene = new THREE.Scene();
 var city = new THREE.Object3D();
@@ -48,7 +45,7 @@ var themeHexMap = {
 var currentThemeColor = themeHexMap[savedTheme] || 0xF02050;
 
 scene.background = new THREE.Color(currentThemeColor);
-scene.fog = new THREE.Fog(currentThemeColor, 10, 16);
+scene.fog = new THREE.Fog(currentThemeColor, 10, isMobile ? 20 : 16);
 
 function mathRandom(num = 8) {
   var numValue = - Math.random() * num + Math.random() * num;
@@ -73,7 +70,7 @@ function init() {
   var segments = 2;
   var BoxGeo = THREE.BoxGeometry || THREE.CubeGeometry;
 
-  for (var i = 1; i < 100; i++) {
+  for (var i = 1; i < (isMobile ? 60 : 100); i++) {
     var geometry = new BoxGeo(1, 1, 1, segments, segments, segments);
     var material = new THREE.MeshStandardMaterial({
       color: setTintColor(),
@@ -96,8 +93,10 @@ function init() {
     var floor = new THREE.Mesh(geometry, material);
 
     cube.add(wire);
-    cube.castShadow = true;
-    cube.receiveShadow = true;
+    if (!isMobile) {
+      cube.castShadow = true;
+      cube.receiveShadow = true;
+    }
     cube.rotationValue = 0.1 + Math.abs(mathRandom(8));
 
     floor.scale.y = 0.05;
@@ -119,7 +118,7 @@ function init() {
   var gparticular = new THREE.CircleGeometry(0.01, 3);
   var aparticular = 5;
 
-  for (var h = 1; h < 300; h++) {
+  for (var h = 1; h < (isMobile ? 120 : 300); h++) {
     var particular = new THREE.Mesh(gparticular, gmaterial);
     particular.position.set(mathRandom(aparticular), mathRandom(aparticular), mathRandom(aparticular));
     particular.rotation.set(mathRandom(), mathRandom(), mathRandom());
@@ -138,7 +137,7 @@ function init() {
   var pelement = new THREE.Mesh(pgeometry, pmaterial);
   pelement.rotation.x = -90 * Math.PI / 180;
   pelement.position.y = -0.001;
-  pelement.receiveShadow = true;
+  if (!isMobile) pelement.receiveShadow = true;
 
   city.add(pelement);
 }
@@ -146,24 +145,39 @@ function init() {
 var mouse = new THREE.Vector2();
 
 function onMouseMove(event) {
-  event.preventDefault();
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-window.addEventListener('mousemove', onMouseMove, false);
+function onTouchMove(event) {
+  if (event.touches && event.touches.length > 0) {
+    mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+  }
+}
 
-var ambientLight = new THREE.AmbientLight(0xFFFFFF, 4);
-var lightFront = new THREE.SpotLight(0xFFFFFF, 20, 10);
+window.addEventListener('mousemove', onMouseMove, false);
+window.addEventListener('touchmove', onTouchMove, { passive: true });
+window.addEventListener('touchstart', onTouchMove, { passive: true });
+
+var ambientLight = new THREE.AmbientLight(0xFFFFFF, isMobile ? 5 : 4);
+var lightFront = new THREE.SpotLight(0xFFFFFF, isMobile ? 25 : 20, 10);
 var lightBack = new THREE.PointLight(0xFFFFFF, 0.5);
 
 lightFront.rotation.x = 45 * Math.PI / 180;
 lightFront.rotation.z = -45 * Math.PI / 180;
 lightFront.position.set(5, 5, 5);
-lightFront.castShadow = true;
-lightFront.shadow.mapSize.width = 4096;
-lightFront.shadow.mapSize.height = lightFront.shadow.mapSize.width;
-lightFront.penumbra = 0.1;
+
+if (!isMobile) {
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.needsUpdate = true;
+  lightFront.castShadow = true;
+  lightFront.shadow.mapSize.width = 2048;
+  lightFront.shadow.mapSize.height = 2048;
+  lightFront.penumbra = 0.1;
+}
+
 lightBack.position.set(0, 6, 0);
 
 smoke.position.y = 2;
@@ -240,6 +254,10 @@ var cameraSet = function () {
 var animate = function () {
   requestAnimationFrame(animate);
 
+  if (isMobile) {
+    city.rotation.y -= 0.0012; // Continuous elegant 3D drift on mobile
+  }
+
   city.rotation.y -= ((mouse.x * 8) - camera.rotation.y) * uSpeed;
   city.rotation.x -= (-(mouse.y * 2) - camera.rotation.x) * uSpeed;
 
@@ -252,6 +270,17 @@ var animate = function () {
   camera.lookAt(city.position);
   renderer.render(scene, camera);
 };
+
+// WebGL Context Recovery for Mobile Browsers
+renderer.domElement.addEventListener("webglcontextlost", function (event) {
+  event.preventDefault();
+  console.warn("[3D ENGINE]: WebGL Context Lost on Mobile. Recovering...");
+}, false);
+
+renderer.domElement.addEventListener("webglcontextrestored", function () {
+  console.log("[3D ENGINE]: WebGL Context Restored.");
+  init();
+}, false);
 
 generateLines();
 init();
