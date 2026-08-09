@@ -101,8 +101,45 @@
     <div class="nav-right">
       <a href="login.html" class="btn btn-shadcn-secondary" style="font-size:0.85rem; padding:8px 14px;">Sign In</a>
       <a href="dashboard.html" class="btn btn-shadcn-red" style="font-size:0.85rem; padding:8px 14px;">Dashboard →</a>
+      
+      <button class="mobile-menu-toggle btn btn-shadcn-secondary" onclick="toggleMobileNav()" aria-label="Toggle Menu">
+        <i data-lucide="menu" style="width:18px; height:18px;"></i>
+      </button>
     </div>
   </header>
+
+  <!-- Mobile Sub-Nav Scrollable Pill Bar -->
+  <nav class="mobile-sub-nav interactive">
+    <a href="index.html"><i data-lucide="home" style="width:12px; height:12px;"></i> Home</a>
+    <a href="marketplace.html"><i data-lucide="layout-grid" style="width:12px; height:12px;"></i> Templates</a>
+    <a href="ai-cloud.html"><i data-lucide="cpu" style="width:12px; height:12px;"></i> Web-AI</a>
+    <a href="domains.html"><i data-lucide="globe" style="width:12px; height:12px;"></i> Domains</a>
+    <a href="pricing.html" class="active"><i data-lucide="tag" style="width:12px; height:12px;"></i> Pricing</a>
+    <a href="dashboard.html"><i data-lucide="layout-dashboard" style="width:12px; height:12px;"></i> Console</a>
+  </nav>
+
+  <!-- Mobile Navigation Drawer Overlay -->
+  <div id="mobile-nav-drawer" class="mobile-nav-drawer interactive">
+    <div class="mobile-nav-header">
+      <a href="index.html" class="brand-logo" style="font-size:1.05rem;">
+        <span>opendev<span class="highlight">-labs</span></span>
+      </a>
+      <button class="btn btn-shadcn-secondary" onclick="toggleMobileNav()" style="padding:6px 10px;">
+        <i data-lucide="x" style="width:18px; height:18px;"></i>
+      </button>
+    </div>
+    <ul class="mobile-nav-links">
+      <li><a href="index.html" onclick="toggleMobileNav()"><i data-lucide="home"></i> Home</a></li>
+      <li><a href="marketplace.html" onclick="toggleMobileNav()"><i data-lucide="layout-grid"></i> Templates & Store</a></li>
+      <li><a href="ai-cloud.html" onclick="toggleMobileNav()"><i data-lucide="cpu"></i> Web-AI & Vercel</a></li>
+      <li><a href="domains.html" onclick="toggleMobileNav()"><i data-lucide="globe"></i> Managed Domains</a></li>
+      <li><a href="pricing.html" onclick="toggleMobileNav()"><i data-lucide="tag"></i> Pricing ($)</a></li>
+      <li><a href="dashboard.html" onclick="toggleMobileNav()"><i data-lucide="layout-dashboard"></i> Client Console</a></li>
+      <li class="mobile-nav-divider"></li>
+      <li><a href="login.html" onclick="toggleMobileNav()"><i data-lucide="log-in"></i> Sign In / Account</a></li>
+      <li><a href="dashboard.html" onclick="toggleMobileNav()" style="background:var(--accent-red); color:#fff; border-color:var(--accent-red);"><i data-lucide="arrow-right"></i> Open Client Dashboard</a></li>
+    </ul>
+  </div>
 
   <div class="content-wrapper">
     <main class="section interactive" style="padding-top:120px;">

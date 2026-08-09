@@ -640,6 +640,18 @@ function initTelemetryCharts() {
   }, 1000);
 }
 
+window.toggleMobileNav = function () {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  if (drawer) {
+    drawer.classList.toggle('active');
+    if (drawer.classList.contains('active')) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   initTelemetryCharts();
   if (savedTheme) setTheme(savedTheme);
