@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenDev Labs | Premium Software Development Company</title>
+  <meta name="description" content="OpenDev Labs is a software development company building custom WebApps, Android Mobile Apps, OpenRouter AI tools, and Managed Domain Infrastructure.">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- CDN Scripts for Three.js, GSAP & Lucide Icons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- WebGL 3D Canvas Background Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Main React Application Root -->
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+
+  <!-- 3D Engine & Interactive Script -->
+  <script src="app.js"></script>
+  <script>
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -13,7 +13,7 @@ export default function Layout() {
 
   return (
     <SidebarProvider defaultOpen={!isHomePage}>
-      <div className="relative flex min-h-screen w-full flex-col bg-background text-foreground font-sans">
+      <div className="relative flex min-h-screen w-full flex-col bg-background/70 text-foreground font-sans backdrop-blur-[2px]">
         <Header />
         <div className="flex flex-1 overflow-hidden">
           {!isHomePage && <AppSidebar />}

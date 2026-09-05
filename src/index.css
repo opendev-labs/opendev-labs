@@ -4,98 +4,97 @@
 
 @layer base {
   :root {
-    --background: oklch(0.9900 0 0);
-    --foreground: oklch(0 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0 0 0);
-    --popover: oklch(0.9900 0 0);
-    --popover-foreground: oklch(0 0 0);
-    --primary: oklch(0 0 0);
-    --primary-foreground: oklch(1 0 0);
-    --secondary: oklch(0.9400 0 0);
-    --secondary-foreground: oklch(0 0 0);
-    --muted: oklch(0.9700 0 0);
-    --muted-foreground: oklch(0.4400 0 0);
-    --accent: oklch(0.9400 0 0);
-    --accent-foreground: oklch(0 0 0);
-    --destructive: oklch(0.6300 0.1900 23.0300);
-    --destructive-foreground: oklch(1 0 0);
-    --border: oklch(0.9200 0 0);
-    --input: oklch(0.9400 0 0);
-    --ring: oklch(0 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.9900 0 0);
-    --sidebar-foreground: oklch(0 0 0);
-    --sidebar-primary: oklch(0 0 0);
-    --sidebar-primary-foreground: oklch(1 0 0);
-    --sidebar-accent: oklch(0.9400 0 0);
-    --sidebar-accent-foreground: oklch(0 0 0);
-    --sidebar-border: oklch(0.9400 0 0);
-    --sidebar-ring: oklch(0 0 0);
-    --chart-1: oklch(0.8100 0.1700 75.3500);
-    --chart-2: oklch(0.5500 0.2200 264.5300);
-    --chart-3: oklch(0.7200 0 0);
-    --chart-4: oklch(0.9200 0 0);
-    --chart-5: oklch(0.5600 0 0);
+    --background: #ffffff;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #09090b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --accent: #f4f4f5;
+    --accent-foreground: #09090b;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #18181b;
+    --radius: 0.75rem;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #09090b;
+    --sidebar-primary: #000000;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #f4f4f5;
+    --sidebar-accent-foreground: #09090b;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #18181b;
   }
 
   .dark {
-    --background: oklch(0 0 0);
-    --foreground: oklch(1 0 0);
-    --card: oklch(0.1400 0 0);
-    --card-foreground: oklch(1 0 0);
-    --popover: oklch(0.1800 0 0);
-    --popover-foreground: oklch(1 0 0);
-    --primary: oklch(1 0 0);
-    --primary-foreground: oklch(0 0 0);
-    --secondary: oklch(0.2500 0 0);
-    --secondary-foreground: oklch(1 0 0);
-    --muted: oklch(0.2300 0 0);
-    --muted-foreground: oklch(0.7200 0 0);
-    --accent: oklch(0.3200 0 0);
-    --accent-foreground: oklch(1 0 0);
-    --destructive: oklch(0.6900 0.2000 23.9100);
-    --destructive-foreground: oklch(0 0 0);
-    --border: oklch(0.2600 0 0);
-    --input: oklch(0.3200 0 0);
-    --ring: oklch(0.7200 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.1400 0 0);
-    --sidebar-foreground: oklch(1 0 0);
-    --sidebar-primary: oklch(1 0 0);
-    --sidebar-primary-foreground: oklch(0 0 0);
-    --sidebar-accent: oklch(0.3200 0 0);
-    --sidebar-accent-foreground: oklch(1 0 0);
-    --sidebar-border: oklch(0.3200 0 0);
-    --sidebar-ring: oklch(0.7200 0 0);
-    --chart-1: oklch(0.8100 0.1700 75.3500);
-    --chart-2: oklch(0.5800 0.2100 260.8400);
-    --chart-3: oklch(0.5600 0 0);
-    --chart-4: oklch(0.4400 0 0);
-    --chart-5: oklch(0.9200 0 0);
+    --background: #09090b;
+    --foreground: #f4f4f5;
+    --card: #18181b;
+    --card-foreground: #f4f4f5;
+    --popover: #18181b;
+    --popover-foreground: #f4f4f5;
+    --primary: #ffffff;
+    --primary-foreground: #09090b;
+    --secondary: #27272a;
+    --secondary-foreground: #f4f4f5;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #f4f4f5;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #d4d4d8;
+    --sidebar: #09090b;
+    --sidebar-foreground: #f4f4f5;
+    --sidebar-primary: #ffffff;
+    --sidebar-primary-foreground: #09090b;
+    --sidebar-accent: #27272a;
+    --sidebar-accent-foreground: #f4f4f5;
+    --sidebar-border: #27272a;
+    --sidebar-ring: #d4d4d8;
   }
 }
 
 body {
-  @apply bg-background text-foreground antialiased;
-  font-feature-settings: "ss01", "ss02", "cv01", "cv02", "salt";
+  @apply bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 antialiased selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-black dark:selection:text-white transition-colors duration-200;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: oklch(0.26 0 0); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.40 0 0); }
+::-webkit-scrollbar-track { background: #ffffff; }
+.dark ::-webkit-scrollbar-track { background: #09090b; }
+::-webkit-scrollbar-thumb { background: #e4e4e7; border-radius: 9999px; }
+.dark ::-webkit-scrollbar-thumb { background: #27272a; }
+::-webkit-scrollbar-thumb:hover { background: #d4d4d8; }
+.dark ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-.bg-dot-pattern {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 24px 24px;
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+.dark .bg-dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
 }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+/* Clean card hover effects */
+.glow-card-orange {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.animate-marquee { animation: marquee 40s linear infinite; }
+.glow-card-orange:hover {
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}

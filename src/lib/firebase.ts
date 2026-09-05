@@ -14,30 +14,41 @@ const getEnv = (key: string): string => {
   return (typeof process !== 'undefined' ? (process.env[`VITE_FIREBASE_${key}`] || process.env[`NEXT_PUBLIC_FIREBASE_${key}`] || process.env[`FIREBASE_${key}`]) : '') || '';
 };
 
+const apiKey = getEnv("API_KEY");
 const firebaseConfig = {
-    apiKey: getEnv("API_KEY"),
-    authDomain: getEnv("AUTH_DOMAIN"),
-    projectId: getEnv("PROJECT_ID"),
-    storageBucket: getEnv("STORAGE_BUCKET"),
-    messagingSenderId: getEnv("MESSAGING_SENDER_ID"),
-    appId: getEnv("APP_ID"),
-    measurementId: getEnv("MEASUREMENT_ID")
+    apiKey: apiKey,
+    authDomain: getEnv("AUTH_DOMAIN") || "opendev-labs.firebaseapp.com",
+    projectId: getEnv("PROJECT_ID") || "opendev-labs",
+    storageBucket: getEnv("STORAGE_BUCKET") || "opendev-labs.appspot.com",
+    messagingSenderId: getEnv("MESSAGING_SENDER_ID") || "",
+    appId: getEnv("APP_ID") || "",
+    measurementId: getEnv("MEASUREMENT_ID") || ""
 };
 
-// Initialize Firebase only if it hasn't been initialized yet
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const dbId = getEnv("DATABASE_ID") || "opendev-labs-data";
-const db = getFirestore(app, dbId);
-const storage = getStorage(app);
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+let storage: any = null;
 
-// Initialize Analytics only in the browser
-if (typeof window !== "undefined") {
-  isSupported().then(supported => {
-    if (supported) {
-      getAnalytics(app);
+// Only initialize Firebase if a valid API key is present, preventing startup crashes
+if (apiKey && apiKey.length > 10) {
+  try {
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    const dbId = getEnv("DATABASE_ID") || "opendev-labs-data";
+    db = getFirestore(app, dbId);
+    storage = getStorage(app);
+
+    if (typeof window !== "undefined") {
+      isSupported().then(supported => {
+        if (supported && app) {
+          getAnalytics(app);
+        }
+      });
     }
-  });
+  } catch (e) {
+    console.warn("Firebase safely bypassed due to invalid key:", e);
+  }
 }
 
 export { app, auth, db, storage };

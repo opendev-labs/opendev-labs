@@ -209,6 +209,7 @@ export const IDEPage: React.FC = () => {
       }
 
       // Strip markdown fences if the model added them
+      let cleanedCode = streamedContent;
       if (cleanedCode.startsWith('```html')) {
         cleanedCode = cleanedCode.replace(/^```html\n/, '').replace(/\n```$/, '');
       } else if (cleanedCode.startsWith('```')) {

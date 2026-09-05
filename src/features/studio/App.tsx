@@ -8,7 +8,6 @@ import type { Message, FileNode, View, ChatSession, GenerationInfo, GenerationFi
 import { streamChatResponse, generateSuggestions } from './services/llmService';
 import { SidebarIcon } from './components/icons/Icons';
 import { SUPPORTED_MODELS } from './constants';
-import { LamaDBOfficeCockpit, UnifiedOfficeCockpit } from '../../pages/OfficeSubappWrappers';
 import { hubService } from '../../services/hubService';
 import { useAuth } from '../void/hooks/useAuth';
 import { ShareIcon } from './components/icons/Icons';
@@ -637,13 +636,15 @@ function App() {
               </div>
             )}
             {view === 'storage' && (
-              <div className="h-full pt-10 px-8">
-                <LamaDBOfficeCockpit />
+              <div className="h-full pt-10 px-8 text-foreground">
+                <h2 className="text-xl font-bold mb-2">LamaDB Console</h2>
+                <p className="text-muted-foreground">Storage and database management panel.</p>
               </div>
             )}
             {view === 'deploy' && (
-              <div className="h-full pt-10 px-8">
-                <UnifiedOfficeCockpit />
+              <div className="h-full pt-10 px-8 text-foreground">
+                <h2 className="text-xl font-bold mb-2">Deployment Cockpit</h2>
+                <p className="text-muted-foreground">Deployment and hosting control panel.</p>
               </div>
             )}
             {view === 'chat-session' && !activeSession && !isInitialLoad && (

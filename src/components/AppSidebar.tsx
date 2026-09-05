@@ -13,7 +13,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar"
 import { Link } from "react-router-dom"
-import { useAuth } from "@/features/void/hooks/useAuth"
+import { useAuth } from "@/context/AuthContext"
 
 const items = [
   {
@@ -68,7 +68,7 @@ export function AppSidebar() {
             <SidebarMenu>
                 <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                        <Link to={`/user/${user.uid}`}>
+                        <Link to={`/user/${user.id}`}>
                             <User />
                             <span>Profile</span>
                         </Link>

@@ -10,11 +10,15 @@
             "destination": "/api/$1"
         },
         {
+            "source": "/iamyashramteke/(.*)",
+            "destination": "/iamyashramteke/$1"
+        },
+        {
             "source": "/syncstack/(.*)",
             "destination": "/syncstack/$1"
         },
         {
-            "source": "/((?!api/|syncstack/).*)",
+            "source": "/((?!api/|syncstack/|iamyashramteke/|.*\\.html$).*)",
             "destination": "/index.html"
         }
     ],

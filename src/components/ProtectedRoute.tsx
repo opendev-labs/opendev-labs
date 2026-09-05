@@ -1,23 +1,30 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../features/void/hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import { GlobalLoader } from '../features/void/components/common/GlobalLoader';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
+    allowedRoles?: ('developer' | 'client')[];
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-    const { isAuthenticated, isLoading } = useAuth();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
+    const { isAuthenticated, user } = useAuth();
     const location = useLocation();
 
-    if (isLoading) {
-        return <GlobalLoader />;
-    }
-
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
         // Redirect to /auth but save the current location they were trying to go to
         return <Navigate to="/auth" state={{ from: location }} replace />;
+    }
+
+    // Role-Based Isolation Check
+    if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
+        if (user.role === 'client') {
+            return <Navigate to="/client/portal" replace />;
+        }
+        if (user.role === 'developer') {
+            return <Navigate to="/dashboard" replace />;
+        }
     }
 
     return <>{children}</>;

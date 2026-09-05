@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Allow: /iamyashramteke/
+Allow: /auth
+
+Sitemap: https://www.opendev-labs.com/sitemap.xml
