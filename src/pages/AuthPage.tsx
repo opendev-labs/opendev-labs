@@ -112,7 +112,7 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
+    <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
       
       {/* 2D Live Canvas Background */}
       <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" particleCount={40} />
@@ -120,7 +120,7 @@ export const AuthPage: React.FC = () => {
       {/* TOP LEFT CORNER: Back to Home Button */}
       <Link
         to="/"
-        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-black/50 hover:bg-black/70 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition-all shadow-md hover:scale-105"
+        className="absolute top-3 left-3 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 rounded-full bg-black/50 hover:bg-black/70 text-white text-[11px] sm:text-xs font-bold border border-white/20 backdrop-blur-md transition-all shadow-md hover:scale-105"
       >
         ← Back to Home
       </Link>
@@ -128,62 +128,62 @@ export const AuthPage: React.FC = () => {
       {/* TOP RIGHT CORNER: Dark Mode Icon Switch */}
       <button
         onClick={toggleTheme}
-        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 size-8 sm:size-9 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 backdrop-blur-md transition-all shadow-md hover:scale-105"
+        className="absolute top-3 right-3 sm:top-6 sm:right-6 z-30 size-7 sm:size-9 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 backdrop-blur-md transition-all shadow-md hover:scale-105"
         title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
         aria-label="Toggle Theme"
       >
         {theme === 'light' ? (
-          <Moon className="size-4 text-zinc-800 transition-transform hover:-rotate-12" />
+          <Moon className="size-3.5 sm:size-4 text-zinc-800 transition-transform hover:-rotate-12" />
         ) : (
-          <Sun className="size-4 text-amber-400 transition-transform hover:rotate-45" />
+          <Sun className="size-3.5 sm:size-4 text-amber-400 transition-transform hover:rotate-45" />
         )}
       </button>
 
-      {/* LEFT / UPPER PORTION (60% Height on Mobile, Full Height on Desktop with background image) */}
+      {/* TOP / UPPER PORTION (Exact 50% Height on Mobile, Full Height on Desktop with Background Image) */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full h-[60vh] lg:h-auto lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-5 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0"
+        className="w-full h-[50vh] lg:h-full lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-4 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0"
       >
         {/* Company Logo at Bottom Left of Image Area */}
-        <div className="z-10 flex items-center pt-8 lg:pt-0">
-          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
+        <div className="z-10 flex items-center pt-4 lg:pt-0">
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
             <img
               src="/logo-icon.webp"
               alt="OpenDev-Labs Logo"
-              className="h-12 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-10 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
-            <span className="font-extrabold text-2xl sm:text-4xl text-white tracking-tight drop-shadow-lg">
+            <span className="font-extrabold text-xl sm:text-4xl text-white tracking-tight drop-shadow-lg">
               opendev<span className="text-blue-400">-labs</span>
             </span>
           </Link>
         </div>
       </motion.div>
 
-      {/* RIGHT / LOWER PORTION (40% Remaining Height on Mobile, Side Panel on Desktop) */}
+      {/* BOTTOM / LOWER PORTION (Exact 50% Height on Mobile, Side Panel on Desktop) */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full min-h-[40vh] lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-5 sm:p-8 lg:p-10 flex flex-col justify-between items-center lg:min-h-screen z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl py-6 lg:py-12"
+        className="w-full h-[50vh] lg:h-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 sm:p-8 lg:p-10 flex flex-col justify-between items-center z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl py-3 sm:py-6 lg:py-12 overflow-y-auto lg:overflow-visible"
       >
         
         {/* Main Sign-In Content */}
-        <div className="w-full max-w-sm space-y-6 my-auto">
+        <div className="w-full max-w-sm space-y-2.5 sm:space-y-6 my-auto">
           {/* Mode Switcher Pill */}
           <div className="flex justify-center">
-            <div className="inline-flex p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <div className="inline-flex p-0.5 sm:p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
               <button
                 type="button"
                 onClick={() => {
                   setIsAdminMode(false);
                   setEmail('');
                 }}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                   !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
                 }`}
               >
@@ -195,7 +195,7 @@ export const AuthPage: React.FC = () => {
                   setIsAdminMode(true);
                   setEmail('opendev.office@gmail.com');
                 }}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                   isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
                 }`}
               >
@@ -208,7 +208,7 @@ export const AuthPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-xs font-bold text-center"
+              className="p-2 sm:p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-[11px] sm:text-xs font-bold text-center"
             >
               {errorMessage}
             </motion.div>
@@ -216,7 +216,7 @@ export const AuthPage: React.FC = () => {
 
           {/* CLIENT GOOGLE SIGN-IN MODE (CLEAN, GOOGLE-ONLY) */}
           {!isAdminMode ? (
-            <div className="space-y-3 pt-2 text-center">
+            <div className="space-y-2 sm:space-y-3 pt-1 sm:pt-2 text-center">
               <button
                 onClick={triggerRealGoogleAuth}
                 disabled={isAuthenticating}
@@ -245,28 +245,28 @@ export const AuthPage: React.FC = () => {
                 </div>
               </button>
 
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium pt-1">
+              <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-tight font-medium pt-0.5">
                 Sign in with your Google account to access your live webapp portal.
               </p>
             </div>
           ) : (
             /* ADMIN SIGN-IN FORM */
-            <form onSubmit={handleSubmit} className="space-y-4 text-xs pt-2">
-              <div className="space-y-1.5">
+            <form onSubmit={handleSubmit} className="space-y-2 sm:space-y-3 text-xs pt-1">
+              <div className="space-y-1">
                 <Input
                   type="email"
                   placeholder="Admin Email (opendev.office@gmail.com)"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
+                  className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
                   required
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">Password</label>
-                  <a href="mailto:opendev.office@gmail.com" className="text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 text-[11px] sm:text-xs">Password</label>
+                  <a href="mailto:opendev.office@gmail.com" className="text-[10px] sm:text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
                     Forgot Password?
                   </a>
                 </div>
@@ -276,15 +276,15 @@ export const AuthPage: React.FC = () => {
                     placeholder="••••••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
-                    className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
+                    className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                    className="absolute right-3 top-2.5 sm:top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    {showPassword ? <EyeOff className="size-3.5 sm:size-4" /> : <Eye className="size-3.5 sm:size-4" />}
                   </button>
                 </div>
               </div>
@@ -292,14 +292,14 @@ export const AuthPage: React.FC = () => {
               <Button
                 type="submit"
                 disabled={isAuthenticating}
-                className="w-full h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-2 flex items-center justify-center gap-2"
+                className="w-full h-9 sm:h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-1 flex items-center justify-center gap-2"
               >
                 {isAuthenticating ? (
-                  <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="size-3.5 sm:size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <span>Sign In as Admin</span>
-                    <ArrowRight className="size-4" />
+                    <ArrowRight className="size-3.5 sm:size-4" />
                   </>
                 )}
               </Button>
@@ -308,15 +308,15 @@ export const AuthPage: React.FC = () => {
         </div>
 
         {/* Bottom Footer Section (Positioned at bottom of right side panel) */}
-        <div className="w-full max-w-sm pt-6 space-y-4 text-center">
+        <div className="w-full max-w-sm pt-2 sm:pt-6 space-y-2 sm:space-y-4 text-center shrink-0">
           {!isAdminMode && (
-            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
-              <ShieldCheck className="size-4 text-emerald-500" />
+            <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              <ShieldCheck className="size-3.5 sm:size-4 text-emerald-500" />
               <span>Secure Google OAuth 2.0 Access</span>
             </div>
           )}
 
-          <div className="text-center pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-zinc-500 font-medium">
+          <div className="text-center pt-2 sm:pt-3 border-t border-zinc-100 dark:border-zinc-800 text-[11px] sm:text-xs text-zinc-500 font-medium">
             {isAdminMode ? (
               <span>
                 Looking for client project portal?{' '}
