@@ -139,20 +139,20 @@ export const AuthPage: React.FC = () => {
         )}
       </button>
 
-      {/* LEFT PORTION (Full-canvas image background with company logo at bottom left) */}
+      {/* LEFT / UPPER PORTION (60% Height on Mobile, Full Height on Desktop with background image) */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-5 sm:p-6 lg:p-10 flex flex-col justify-end items-start min-h-[200px] sm:min-h-[280px] lg:min-h-screen z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800"
+        className="w-full h-[60vh] lg:h-auto lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-5 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0"
       >
-        {/* Company Logo at Bottom Left */}
-        <div className="z-10 flex items-center pt-12 lg:pt-0">
+        {/* Company Logo at Bottom Left of Image Area */}
+        <div className="z-10 flex items-center pt-8 lg:pt-0">
           <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
             <img
               src="/logo-icon.webp"
               alt="OpenDev-Labs Logo"
-              className="h-14 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
+              className="h-12 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
@@ -164,12 +164,12 @@ export const AuthPage: React.FC = () => {
         </div>
       </motion.div>
 
-      {/* RIGHT PORTION (Compact Mobile-Style Rectangular Sign In Drawer) */}
+      {/* RIGHT / LOWER PORTION (40% Remaining Height on Mobile, Side Panel on Desktop) */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-5 sm:p-8 lg:p-10 flex flex-col justify-between items-center min-h-[520px] lg:min-h-screen z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl py-8 lg:py-12"
+        className="w-full min-h-[40vh] lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-5 sm:p-8 lg:p-10 flex flex-col justify-between items-center lg:min-h-screen z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl py-6 lg:py-12"
       >
         
         {/* Main Sign-In Content */}
