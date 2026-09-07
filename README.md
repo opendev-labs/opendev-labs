@@ -5,6 +5,8 @@
 
   [![Latest Release](https://img.shields.io/github/v/release/opendev-labs/opendev-labs?color=2563EB&style=for-the-badge&logo=github)](https://github.com/opendev-labs/opendev-labs/releases)
   [![Production Website](https://img.shields.io/badge/Website-opendev--labs.com-000000?style=for-the-badge&logo=google-chrome&logoColor=white)](https://www.opendev-labs.com)
+  [![LinkedIn Company](https://img.shields.io/badge/LinkedIn-OpenDev--Labs-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/opendev-labs/)
+  [![LinkedIn Founder](https://img.shields.io/badge/LinkedIn-Yash--Ramteke-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/iamyashramteke/)
   [![License](https://img.shields.io/badge/License-MIT-emerald?style=for-the-badge)](LICENSE)
   [![Uptime Status](https://img.shields.io/badge/Status-100%25%20Operational-emerald?style=for-the-badge&logo=vibe)](https://www.opendev-labs.com)
 
@@ -109,8 +111,10 @@ graph TD
 **Yash Shirish Ramteke**  
 *Founder & Lead Software Architect*
 
-- 🌐 **Portfolio**: [https://www.opendev-labs.com/iamyashramteke/](https://www.opendev-labs.com/iamyashramteke/)
-- 💼 **LinkedIn**: [Yash Shirish Ramteke (iamyash.io)](https://www.linkedin.com/in/iamyash-io)
+- 🌐 **Website**: [https://www.opendev-labs.com](https://www.opendev-labs.com)
+- 🌟 **Portfolio**: [https://www.opendev-labs.com/iamyashramteke/](https://www.opendev-labs.com/iamyashramteke/)
+- 🏢 **Company LinkedIn**: [OpenDev-Labs LinkedIn](https://www.linkedin.com/in/opendev-labs/)
+- 💼 **Founder LinkedIn**: [Yash Shirish Ramteke (iamyashramteke)](https://www.linkedin.com/in/iamyashramteke/) | [(iamyash-io)](https://www.linkedin.com/in/iamyash-io)
 - 📸 **Instagram**: [@opendev.labs](https://www.instagram.com/opendev.labs) | [@ww.imyash.io](https://www.instagram.com/ww.imyash.io)
 - 📧 **Work Mail**: `opendev.office@gmail.com`
 - ✉️ **Creator Mail**: `iamyash.creator@gmail.com`
