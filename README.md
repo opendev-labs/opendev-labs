@@ -38,29 +38,29 @@ We build high-performance web applications, AI-assisted development hubs, automa
 
 ## 📷 Platform Visual Showcase
 
-### 1. Main Application & Dynamic Hero Studio
-The core landing engine features dynamic typewriter intent prediction, ambient canvas particles, and instant solution browsing.
+### 1. Software Solutions & Architecture Services
+Tailored software engineering options: One-Time Handover Builds with complete source code ownership alongside Managed Monthly Retainers.
 
-<a href="https://www.opendev-labs.com">
-  <img src="docs/images/homepage.png" alt="OpenDev-Labs Homepage Preview" width="100%" style="border-radius: 8px;" />
+<a href="https://www.opendev-labs.com/solutions">
+  <img src="docs/images/solutions.png" alt="OpenDev-Labs Software Solutions" width="100%" style="border-radius: 8px;" />
 </a>
 
 ---
 
-### 2. Developer Studio & Secure Client Portal Authentication
+### 2. Transparent Plans, Retainers & Pricing Dashboard
+Automated retainer management including 24/7 server health monitoring, daily database backups, and allocated monthly developer hours.
+
+<a href="https://www.opendev-labs.com/pricing">
+  <img src="docs/images/pricing.png" alt="OpenDev-Labs Pricing & Retainers" width="100%" style="border-radius: 8px;" />
+</a>
+
+---
+
+### 3. Developer Studio & Secure Client Portal Authentication
 Unified role-based authentication allowing developers to manage active builds and clients to inspect project milestones and financial receipts.
 
 <a href="https://www.opendev-labs.com/auth">
   <img src="docs/images/auth_login.png" alt="OpenDev-Labs Auth Login Portal" width="100%" style="border-radius: 8px;" />
-</a>
-
----
-
-### 3. Software Solutions & Retainer Management
-Transparent delivery models offering one-time handover builds alongside managed monthly maintenance retainers.
-
-<a href="https://www.opendev-labs.com/solutions">
-  <img src="docs/images/solutions.png" alt="OpenDev-Labs Solutions & Retainers" width="100%" style="border-radius: 8px;" />
 </a>
 
 ---
