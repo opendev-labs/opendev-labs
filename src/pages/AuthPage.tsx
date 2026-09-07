@@ -35,8 +35,8 @@ export const AuthPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
 
   const [isAdminMode, setIsAdminMode] = useState(false);
-  const [email, setEmail] = useState('khawar@elitetradinghub.com');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
@@ -58,11 +58,16 @@ export const AuthPage: React.FC = () => {
           setErrorMessage('Invalid admin username or password. Use registered studio credentials.');
         }
       } else {
+        const cleanEmail = email.trim().toLowerCase();
         const foundClient = clients.find(
-          c => c.email.toLowerCase() === email.toLowerCase() ||
-               c.name.toLowerCase().includes(email.toLowerCase())
-        ) || clients[0];
-        loginAsClient(foundClient.id);
+          c => c.email.toLowerCase() === cleanEmail ||
+               c.name.toLowerCase().includes(cleanEmail)
+        );
+        if (foundClient) {
+          loginAsClient(foundClient.id);
+        } else {
+          loginWithGoogle(cleanEmail, cleanEmail.split('@')[0]);
+        }
         navigate('/client/portal');
       }
       setIsAuthenticating(false);
@@ -80,8 +85,8 @@ export const AuthPage: React.FC = () => {
         const result = await signInWithPopup(auth, provider);
         const googleUser = result.user;
         loginWithGoogle(
-          googleUser.email || 'client@opendev-labs.com',
-          googleUser.displayName || 'Google Client User',
+          googleUser.email || undefined,
+          googleUser.displayName || undefined,
           googleUser.photoURL || undefined
         );
         navigate('/client/portal');
@@ -107,59 +112,68 @@ export const AuthPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col md:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
       
       {/* 2D Live Canvas Background */}
       <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" particleCount={40} />
 
-      {/* LEFT PORTION (Expanded full-canvas image background with company logo top-left) */}
+      {/* TOP LEFT CORNER: Back to Home Button */}
+      <Link
+        to="/"
+        className="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full bg-black/50 hover:bg-black/70 text-white text-xs font-bold border border-white/20 backdrop-blur-md transition-all shadow-md hover:scale-105"
+      >
+        ← Back to Home
+      </Link>
+
+      {/* TOP RIGHT CORNER: Dark Mode Icon Switch */}
+      <button
+        onClick={toggleTheme}
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 size-8 sm:size-9 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 backdrop-blur-md transition-all shadow-md hover:scale-105"
+        title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+        aria-label="Toggle Theme"
+      >
+        {theme === 'light' ? (
+          <Moon className="size-4 text-zinc-800 transition-transform hover:-rotate-12" />
+        ) : (
+          <Sun className="size-4 text-amber-400 transition-transform hover:rotate-45" />
+        )}
+      </button>
+
+      {/* LEFT PORTION (Full-canvas image background with company logo at bottom left) */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full lg:flex-1 relative bg-[url('/digital-nomads.jpg')] bg-cover bg-center p-6 lg:p-10 flex flex-col justify-between items-start min-h-[350px] lg:min-h-screen z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800"
+        className="w-full lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-5 sm:p-6 lg:p-10 flex flex-col justify-end items-start min-h-[200px] sm:min-h-[280px] lg:min-h-screen z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800"
       >
-        {/* Top Left Company Logo */}
-        <Link to="/" className="flex items-center gap-3 group bg-black/40 hover:bg-black/60 px-4 py-2 rounded-full border border-white/20 transition-all backdrop-blur-md">
-          <img
-            src="/logo-icon.webp"
-            alt="OpenDev-Labs Logo"
-            className="h-9 w-auto object-contain drop-shadow-md transition-transform group-hover:scale-105"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-          <span className="font-extrabold text-base sm:text-lg text-white tracking-tight drop-shadow-md">
-            opendev<span className="text-blue-400">-labs</span>
-          </span>
-        </Link>
+        {/* Company Logo at Bottom Left */}
+        <div className="z-10 flex items-center pt-12 lg:pt-0">
+          <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
+            <img
+              src="/logo-icon.webp"
+              alt="OpenDev-Labs Logo"
+              className="h-14 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <span className="font-extrabold text-2xl sm:text-4xl text-white tracking-tight drop-shadow-lg">
+              opendev<span className="text-blue-400">-labs</span>
+            </span>
+          </Link>
+        </div>
       </motion.div>
 
       {/* RIGHT PORTION (Compact Mobile-Style Rectangular Sign In Drawer) */}
       <motion.div
-        initial={{ opacity: 0, x: 30 }}
+        initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-6 sm:p-8 lg:p-10 flex flex-col justify-center items-center min-h-[520px] lg:min-h-screen z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl"
+        className="w-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-5 sm:p-8 lg:p-10 flex flex-col justify-between items-center min-h-[520px] lg:min-h-screen z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl py-8 lg:py-12"
       >
-        {/* Top Right Controls (Theme Toggle & Home Link) */}
-        <div className="absolute top-6 right-6 flex items-center gap-3">
-          <Link
-            to="/"
-            className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white font-bold transition-colors"
-          >
-            ← Home
-          </Link>
-          <button
-            onClick={toggleTheme}
-            className="size-8 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all"
-            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-          >
-            {theme === 'light' ? <Moon className="size-4 text-zinc-800" /> : <Sun className="size-4 text-amber-400" />}
-          </button>
-        </div>
-
-        <div className="w-full max-w-sm space-y-6 pt-4">
+        
+        {/* Main Sign-In Content */}
+        <div className="w-full max-w-sm space-y-6 my-auto">
           {/* Mode Switcher Pill */}
           <div className="flex justify-center">
             <div className="inline-flex p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
@@ -167,7 +181,7 @@ export const AuthPage: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setIsAdminMode(false);
-                  setEmail('khawar@elitetradinghub.com');
+                  setEmail('');
                 }}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
                   !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
@@ -190,18 +204,6 @@ export const AuthPage: React.FC = () => {
             </div>
           </div>
           
-          {/* Header (Fixed height slot for perfect alignment) */}
-          <div className="text-center space-y-1.5 h-16 flex flex-col justify-center">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-              {isAdminMode ? 'Admin Security Access' : 'Sign In to Client Portal'}
-            </h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
-              {isAdminMode
-                ? 'Enter administrator credentials to access agency revenue & client CRM.'
-                : 'Select Google Sign-In or enter your registered client credentials below.'}
-            </p>
-          </div>
-
           {errorMessage && (
             <motion.div
               initial={{ opacity: 0, y: -5 }}
@@ -212,125 +214,116 @@ export const AuthPage: React.FC = () => {
             </motion.div>
           )}
 
-          {/* TOP ACTION SLOT (Google Sign-In for Clients / Security Badge for Admin - Identical Slot Height) */}
-          <div className="space-y-4">
-            {!isAdminMode ? (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+          {/* CLIENT GOOGLE SIGN-IN MODE (CLEAN, GOOGLE-ONLY) */}
+          {!isAdminMode ? (
+            <div className="space-y-3 pt-2 text-center">
+              <button
                 onClick={triggerRealGoogleAuth}
+                disabled={isAuthenticating}
                 type="button"
-                className="w-full h-12 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-900 dark:text-white text-xs font-bold flex items-center justify-center gap-3 shadow-sm transition-all"
+                className="gsi-material-button"
               >
-                {/* Official Google G Icon */}
-                <svg className="size-5 shrink-0" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                </svg>
-                <span>Continue with Google</span>
-              </motion.button>
-            ) : (
-              <div className="w-full h-12 rounded-full border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 text-xs font-bold flex items-center justify-center gap-2">
-                <Lock className="size-4 text-emerald-500 shrink-0" />
-                <span>Authorized Admin Portal Access</span>
-              </div>
-            )}
+                <div className="gsi-material-button-state"></div>
+                <div className="gsi-material-button-content-wrapper">
+                  {isAuthenticating ? (
+                    <div className="size-4 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <div className="gsi-material-button-icon">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlnsXlink="http://www.w3.org/1999/xlink" style={{ display: 'block' }}>
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                          <path fill="none" d="M0 0h48v48H0z"></path>
+                        </svg>
+                      </div>
+                      <span className="gsi-material-button-contents">Sign in with Google</span>
+                      <span style={{ display: 'none' }}>Sign in with Google</span>
+                    </>
+                  )}
+                </div>
+              </button>
 
-            {/* Equal Divider */}
-            <div className="relative flex items-center justify-center my-2">
-              <div className="border-t border-zinc-200 dark:border-zinc-800 w-full" />
-              <span className="bg-white dark:bg-zinc-950 px-3 text-[10px] uppercase font-bold text-zinc-400">
-                {isAdminMode ? 'or sign in with admin key' : 'or sign in with email'}
-              </span>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium pt-1">
+                Sign in with your Google account to access your live webapp portal.
+              </p>
             </div>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-            <div className="space-y-1.5">
-              <label className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">
-                {isAdminMode ? 'Admin Email / Username' : 'Client Account Email'}
-              </label>
-              <Input
-                type="email"
-                placeholder={isAdminMode ? 'opendev.office@gmail.com' : 'khawar@elitetradinghub.com'}
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
-                required
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">Password</label>
-                <a href="mailto:opendev.office@gmail.com" className="text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
-                  Forgot Password?
-                </a>
-              </div>
-              <div className="relative">
+          ) : (
+            /* ADMIN SIGN-IN FORM */
+            <form onSubmit={handleSubmit} className="space-y-4 text-xs pt-2">
+              <div className="space-y-1.5">
                 <Input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••••••"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
+                  type="email"
+                  placeholder="Admin Email (opendev.office@gmail.com)"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
               </div>
-            </div>
 
-            {/* Remember Me */}
-            <div className="flex items-center justify-between pt-1 text-xs">
-              <button
-                type="button"
-                onClick={() => setRememberMe(!rememberMe)}
-                className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white select-none font-medium"
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 text-xs">Password</label>
+                  <a href="mailto:opendev.office@gmail.com" className="text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
+                    Forgot Password?
+                  </a>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isAuthenticating}
+                className="w-full h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-2 flex items-center justify-center gap-2"
               >
-                {rememberMe ? (
-                  <CheckSquare className="size-4 text-black dark:text-white" />
+                {isAuthenticating ? (
+                  <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <Square className="size-4 text-zinc-400" />
+                  <>
+                    <span>Sign In as Admin</span>
+                    <ArrowRight className="size-4" />
+                  </>
                 )}
-                <span>Keep me signed in</span>
-              </button>
+              </Button>
+            </form>
+          )}
+        </div>
+
+        {/* Bottom Footer Section (Positioned at bottom of right side panel) */}
+        <div className="w-full max-w-sm pt-6 space-y-4 text-center">
+          {!isAdminMode && (
+            <div className="flex items-center justify-center gap-1.5 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              <ShieldCheck className="size-4 text-emerald-500" />
+              <span>Secure Google OAuth 2.0 Access</span>
             </div>
+          )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isAuthenticating}
-              className="w-full h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-2 flex items-center justify-center gap-2"
-            >
-              {isAuthenticating ? (
-                <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <span>{isAdminMode ? 'Sign In as Admin' : 'Access Client Portal'}</span>
-                  <ArrowRight className="size-4" />
-                </>
-              )}
-            </Button>
-          </form>
-
-          {/* Mode Footer Switcher Link */}
-          <div className="text-center pt-4 border-t border-zinc-100 dark:border-zinc-800 text-xs text-zinc-500 font-medium">
+          <div className="text-center pt-3 border-t border-zinc-100 dark:border-zinc-800 text-xs text-zinc-500 font-medium">
             {isAdminMode ? (
               <span>
                 Looking for client project portal?{' '}
                 <button
                   onClick={() => {
                     setIsAdminMode(false);
-                    setEmail('khawar@elitetradinghub.com');
+                    setEmail('');
                   }}
                   className="font-bold text-black dark:text-white hover:underline transition-colors"
                 >
@@ -352,7 +345,6 @@ export const AuthPage: React.FC = () => {
               </span>
             )}
           </div>
-
         </div>
       </motion.div>
     </div>

@@ -24,23 +24,36 @@ var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-if (window.innerWidth > 800) {
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.shadowMap.needsUpdate = true;
+// Guaranteed DOM Mounting for 3D Background Canvas
+function mountCanvas() {
+  var container = document.getElementById('canvas-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'canvas-container';
+    if (document.body.firstChild) {
+      document.body.insertBefore(container, document.body.firstChild);
+    } else {
+      document.body.appendChild(container);
+    }
+  }
+  if (!container.contains(renderer.domElement)) {
+    container.appendChild(renderer.domElement);
+  }
 }
 
 container.appendChild(renderer.domElement);
 
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+  camera.aspect = width / height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(width, height);
 }
 
-var camera = new THREE.PerspectiveCamera(20, window.innerWidth / window.innerHeight, 1, 500);
-camera.position.set(0, 2, 14);
+var camera = new THREE.PerspectiveCamera(isMobile ? 25 : 20, window.innerWidth / window.innerHeight, 1, 500);
+camera.position.set(0, 2, isMobile ? 16 : 14);
 
 var scene = new THREE.Scene();
 var city = new THREE.Object3D();
@@ -159,7 +172,16 @@ function onMouseMove(event) {
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
+function onTouchMove(event) {
+  if (event.touches && event.touches.length > 0) {
+    mouse.x = (event.touches[0].clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.touches[0].clientY / window.innerHeight) * 2 + 1;
+  }
+}
+
 window.addEventListener('mousemove', onMouseMove, false);
+window.addEventListener('touchmove', onTouchMove, { passive: true });
+window.addEventListener('touchstart', onTouchMove, { passive: true });
 
 var ambientLight = new THREE.AmbientLight(0xFFFFFF, 2.5);
 var lightFront = new THREE.SpotLight(currentThemeColor, 15, 30);
@@ -248,6 +270,9 @@ var cameraSet = function () {
 var animate = function () {
   requestAnimationFrame(animate);
 
+  // Continuous elegant 3D city rotation drift for both laptop and mobile
+  city.rotation.y -= isMobile ? 0.0012 : 0.0006;
+
   city.rotation.y -= ((mouse.x * 8) - camera.rotation.y) * uSpeed;
   city.rotation.x -= (-(mouse.y * 2) - camera.rotation.x) * uSpeed;
 
@@ -260,6 +285,17 @@ var animate = function () {
   camera.lookAt(city.position);
   renderer.render(scene, camera);
 };
+
+// WebGL Context Recovery for Mobile Browsers
+renderer.domElement.addEventListener("webglcontextlost", function (event) {
+  event.preventDefault();
+  console.warn("[3D ENGINE]: WebGL Context Lost on Mobile. Recovering...");
+}, false);
+
+renderer.domElement.addEventListener("webglcontextrestored", function () {
+  console.log("[3D ENGINE]: WebGL Context Restored.");
+  init();
+}, false);
 
 generateLines();
 init();
@@ -509,7 +545,7 @@ function handleTerminalKey(event) {
   To deploy something, run \`open --prod\`.`);
     } else if (cmd === 'open' || cmd === 'open --prod' || cmd === 'npx open') {
       appendConsole(`OpenDev CLI v1.0.0
-> Inspecting project directory: ~/Projects/ebookstall
+> Inspecting project directory: ~/Projects/digital-store
 > Detected Next.js 16 E-Commerce WebApp (Razorpay + Firestore)
 > Building production edge bundle...
 > Deploying to OpenDev Global Edge Network...
@@ -517,17 +553,17 @@ function handleTerminalKey(event) {
 ✓ Production Deployment Live!
 
 🌐 Web Application URL:
-   https://ebookstall.opendev.app
+   https://digital-store.opendev.app
 
 📱 Android Mobile APK Download:
-   https://ebookstall.opendev.app/download/ebookstall.apk`);
+   https://digital-store.opendev.app/download/app.apk`);
     } else if (cmd === 'open android') {
       appendConsole(`> Running Capacitor CLI Android APK Build...
 > Compiling release APK bundle...
-✓ Android APK Export Complete: https://ebookstall.opendev.app/download/ebookstall.apk`);
+✓ Android APK Export Complete: https://digital-store.opendev.app/download/app.apk`);
     } else if (cmd.startsWith('open domain') || cmd.startsWith('open domains')) {
       appendConsole(`> Provisioning Cloudflare Anycast DNS & SSL Certificate...
-✓ Custom Domain bound to https://ebookstall.opendev.app (SSL Active)`);
+✓ Custom Domain bound to https://digital-store.opendev.app (SSL Active)`);
     } else if (cmd === 'run') {
       appendConsole(`[OPENROUTER AI]: Dispatching DeepSeek R1 model via free API key...
 [VERCEL EDGE]: Synthesizing Next.js 16 response...
@@ -536,7 +572,7 @@ function handleTerminalKey(event) {
       appendConsole(`[STATUS]: OpenDev Cluster 'opendev-edge-01'
   - OpenRouter Models: DeepSeek R1, Llama 3.3, Qwen 2.5
   - Stack: Next.js 16 | React 19 | Firebase | Razorpay | Capacitor
-  - Primary Deployment Domain: *.opendev.app (e.g. ebookstall.opendev.app)
+  - Primary Deployment Domain: *.opendev.app (e.g. digital-store.opendev.app)
   - Vercel Edge Latency: 3.2ms (p99)`);
     } else if (cmd === 'add line') {
       cameraSet();

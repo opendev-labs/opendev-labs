@@ -12,7 +12,8 @@ import {
   Search,
   Command,
   Sun,
-  Moon
+  Moon,
+  Menu
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useClients } from '../../context/ClientContext';
@@ -30,9 +31,10 @@ import {
 interface HeaderProps {
   onOpenCommand: () => void;
   onOpenAddClient: () => void;
+  onToggleMobileSidebar?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient }) => {
+export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient, onToggleMobileSidebar }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { clients, notifications } = useClients();
@@ -45,8 +47,17 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient }
   return (
     <header className="h-16 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 sticky top-0 z-20 flex items-center justify-between px-4 md:px-6 text-zinc-900 dark:text-zinc-100 transition-colors">
       
-      {/* Left: Breadcrumb & Ticker Pills */}
-      <div className="flex items-center gap-4">
+      {/* Left: Mobile Sidebar Trigger & Breadcrumb & Ticker Pills */}
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Mobile Hamburger Menu Toggle Button */}
+        <button
+          onClick={onToggleMobileSidebar}
+          className="md:hidden p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+          aria-label="Toggle Mobile Navigation"
+        >
+          <Menu className="size-5" />
+        </button>
+
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-medium hidden sm:flex">
           <span>{user?.role === 'developer' ? 'Developer' : 'Client'}</span>
@@ -95,15 +106,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient }
           <Globe className="size-3.5" /> Website
         </a>
 
-        {/* Dark Mode Toggle Switch */}
-        <button
-          onClick={toggleTheme}
-          className="size-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-        >
-          {theme === 'light' ? <Moon className="size-4 text-zinc-700" /> : <Sun className="size-4 text-amber-400" />}
-        </button>
-
         {/* Quick Add Client (If Dev) */}
         {user?.role === 'developer' && (
           <button
@@ -144,6 +146,15 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient }
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Dark Mode Toggle Switch - Top Right End */}
+        <button
+          onClick={toggleTheme}
+          className="size-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors shrink-0"
+          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+        >
+          {theme === 'light' ? <Moon className="size-4 text-zinc-700" /> : <Sun className="size-4 text-amber-400" />}
+        </button>
       </div>
     </header>
   );

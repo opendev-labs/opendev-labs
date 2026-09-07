@@ -5,7 +5,7 @@ import { GlobalLoader } from '../features/void/components/common/GlobalLoader';
 
 interface ProtectedRouteProps {
     children: React.ReactNode;
-    allowedRoles?: ('developer' | 'client')[];
+    allowedRoles?: ('developer' | 'client' | 'user')[];
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
@@ -19,7 +19,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowe
 
     // Role-Based Isolation Check
     if (allowedRoles && allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-        if (user.role === 'client') {
+        if (user.role === 'client' || user.role === 'user') {
             return <Navigate to="/client/portal" replace />;
         }
         if (user.role === 'developer') {

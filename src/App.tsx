@@ -13,6 +13,10 @@ import { ClientsManager } from './pages/ClientsManager';
 import { PaymentReminders } from './pages/PaymentReminders';
 import { InvoicesPage } from './pages/InvoicesPage';
 import { ClientPortal } from './pages/ClientPortal';
+import { ClientPaymentsPage } from './pages/ClientPaymentsPage';
+import { ClientSupportPage } from './pages/ClientSupportPage';
+import { ClientMilestonesPage } from './pages/ClientMilestonesPage';
+import { ClientCredentialsPage } from './pages/ClientCredentialsPage';
 import { ProfileSettings } from './pages/ProfileSettings';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -61,15 +65,18 @@ export function App() {
               <Route
                 path="/client"
                 element={
-                  <ProtectedRoute allowedRoles={['client', 'developer']}>
+                  <ProtectedRoute allowedRoles={['client', 'developer', 'user']}>
                     <DashboardLayout />
                   </ProtectedRoute>
                 }
               >
                 <Route index element={<Navigate to="/client/portal" replace />} />
                 <Route path="portal" element={<ClientPortal />} />
+                <Route path="payments" element={<ClientPaymentsPage />} />
                 <Route path="invoices" element={<InvoicesPage />} />
-                <Route path="support" element={<ClientPortal />} />
+                <Route path="support" element={<ClientSupportPage />} />
+                <Route path="milestones" element={<ClientMilestonesPage />} />
+                <Route path="credentials" element={<ClientCredentialsPage />} />
               </Route>
 
               {/* Fallback */}

@@ -19,7 +19,7 @@ const waitForPuter = (): Promise<void> =>
   });
 
 // shadcn UI Components
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 // SVGs and Icons

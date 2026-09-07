@@ -24,7 +24,17 @@ import { Footer } from '../components/layout/Footer';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
-import { Live2DWavesCanvas } from '../components/ui/Live2DWavesCanvas';
+
+import { TypewriterHeading } from '../components/ui/TypewriterHeading';
+
+const landingPhrases = [
+  "Engineering High-Performance Web Applications",
+  "Tailored Software Development & Custom Handover Builds",
+  "Reliable Monthly Retainers Starting at ₹3,000–₹4,000/mo",
+  "Daily Automated Backups & 24/7 Server Health Monitoring",
+  "Full Intellectual Property Ownership & Clean Source Code",
+  "Trusted by Fast-Growing Startups & Leading Enterprises"
+];
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -35,90 +45,251 @@ export const LandingPage: React.FC = () => {
       {/* 1. Header Navigation (Shared Navbar with top-right Dark Mode Toggle) */}
       <Navbar />
 
-      {/* 2. Hero Section (Clean Style with Live 2D Frequency Waves Canvas) */}
-      <section className="pt-16 pb-16 md:pt-24 md:pb-24 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative overflow-hidden transition-colors min-h-[640px]">
+      {/* 2. Hero Section (Fits 100dvh screen cleanly - Text top-centered, CTA buttons pinned to bottom of viewport) */}
+      <section className="min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-between items-center pt-16 pb-4 sm:pt-20 sm:pb-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative overflow-hidden transition-colors">
+        {/* Hero Background Image (Folded Paper) */}
+        <div className="absolute inset-0 bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
+
         {/* Subtle corner ambient accents matching wave color palette */}
         <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-blue-500/5 dark:bg-blue-400/10 blur-3xl pointer-events-none z-0" />
         <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-indigo-500/5 dark:bg-indigo-400/10 blur-3xl pointer-events-none z-0" />
 
         <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20 z-0" particleCount={30} />
-        <Live2DWavesCanvas
-          className="absolute inset-0 pointer-events-none opacity-100 z-0"
-          waveCount={5}
-          verticalBaseStart={0.30}
-        />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 pointer-events-none">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 w-full flex flex-col justify-between items-center flex-1 h-full">
           
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <span className="inline-block px-4 py-1.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-6 shadow-xs">
-              Trusted by fast-growing startups and enterprises
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl sm:text-7xl lg:text-8xl font-extrabold tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.05]"
-          >
-            Engineering High-Performance Web Applications
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="mt-6 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed font-medium"
-          >
-            Flexible development models tailored to your business: choose a{' '}
-            <span className="text-zinc-900 dark:text-white font-extrabold">One-Time Handover Build</span> or a{' '}
-            <span className="text-zinc-900 dark:text-white font-extrabold">Monthly Retainer starting at ₹3,000–₹4,000/mo</span> for continuous maintenance and daily backups.
-          </motion.p>
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4 pointer-events-auto"
-          >
-            <button
-              onClick={() => navigate('/solutions')}
-              className="h-12 px-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl hover:scale-105 flex items-center gap-2"
+          {/* Top & Middle Section: Badge + Dynamic Typewriter Heading */}
+          <div className="my-auto pt-2 sm:pt-4 w-full">
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6"
             >
-              Explore Solutions <ArrowRight className="size-4" />
-            </button>
-            <button
-              onClick={() => navigate('/pricing')}
-              className="h-12 px-8 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-zinc-900 dark:text-white font-extrabold text-sm hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-xs"
-            >
-              Explore Plans & Pricing
-            </button>
-          </motion.div>
+              <span className="px-4 py-1.5 rounded-full bg-zinc-100/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300 shadow-xs">
+                Trusted by fast-growing startups and enterprises
+              </span>
+            </motion.div>
 
-          {/* Client Logos Ticker Bar */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="mt-16 pt-12 border-t border-zinc-200 dark:border-zinc-800/80"
-          >
-            <span className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-widest block mb-8">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="mt-6 sm:mt-10 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.06] min-h-[140px] sm:min-h-[180px] flex items-center justify-center"
+            >
+              <TypewriterHeading phrases={landingPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
+            </motion.h1>
+          </div>
+
+          {/* Bottom Section: Shifted Subtitle + Bottom Pinned CTA Buttons */}
+          <div className="w-full mt-auto pt-4 pb-2 sm:pb-4 flex flex-col items-center">
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-6 text-base sm:text-lg lg:text-xl text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed font-medium"
+            >
+              Flexible development models tailored to your business: choose a{' '}
+              <span className="text-zinc-900 dark:text-white font-extrabold">One-Time Handover Build</span> or a{' '}
+              <span className="text-zinc-900 dark:text-white font-extrabold">Monthly Retainer starting at ₹3,000–₹4,000/mo</span> for continuous maintenance and daily backups.
+            </motion.p>
+
+            {/* Action Buttons (Pinned to bottom of initial screen before scrolling) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
+            >
+              <button
+                onClick={() => navigate('/solutions')}
+                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-base hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Explore Solutions <ArrowRight className="size-4" />
+              </button>
+              <button
+                onClick={() => navigate('/pricing')}
+                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md text-zinc-900 dark:text-white font-extrabold text-base hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-xs cursor-pointer"
+              >
+                Explore Plans & Pricing
+              </button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2.5 Social Proof & v0-Style Featured Work Showcase Cards */}
+      <section className="py-12 sm:py-16 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/30 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8">
+            <span className="text-[11px] sm:text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-4">
               Trusted by creators and leading enterprises
             </span>
 
-            <div className="flex flex-wrap items-center justify-center gap-10 opacity-70 grayscale hover:grayscale-0 transition-all text-xs font-mono font-extrabold text-zinc-700 dark:text-zinc-300 tracking-wider">
+            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 opacity-80 grayscale hover:grayscale-0 transition-all text-xs sm:text-sm font-mono font-extrabold text-zinc-700 dark:text-zinc-300 tracking-wider">
               <span>ELITE-TRADING HUB</span>
               <span>VISHWA LEADER</span>
               <span>OPENDEV LABS</span>
               <span>YASH RAMTEKE</span>
             </div>
-          </motion.div>
+          </div>
+
+          {/* 3 Live Desktop Preview Cards of Created Websites with SHARP Corners */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mt-10">
+            
+            {/* Card 1: Elite-Trading Hub */}
+            <a
+              href="https://www.elite-tradinghub.com"
+              target="_blank"
+              rel="noreferrer"
+              className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
+                {/* Live Scaled Iframe Preview */}
+                <iframe
+                  src="https://www.elite-tradinghub.com"
+                  title="Elite-Trading Hub Live Site"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    width: '1280px',
+                    height: '800px',
+                    transform: 'scale(0.32)',
+                    transformOrigin: 'top left',
+                  }}
+                  loading="lazy"
+                />
+                {/* Backup image behind iframe */}
+                <img
+                  src="/thumb-elite-tradinghub.png"
+                  alt="Elite-Trading Hub Live Preview"
+                  className="w-full h-full object-cover object-top -z-10 absolute inset-0"
+                />
+              </div>
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-blue-500/40 p-1.5 flex items-center justify-center shrink-0">
+                    <img
+                      src="/logo-elite-tradinghub.png"
+                      alt="Elite-Trading Hub Black Bull Logo"
+                      className="w-full h-full object-contain dark:invert"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="size-2 bg-emerald-500 animate-pulse rounded-none shrink-0" />
+                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-blue-500 transition-colors">
+                      www.elite-tradinghub.com
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
+              </div>
+            </a>
+
+            {/* Card 2: Vishwa Leader Institute */}
+            <a
+              href="https://www.vishwaleader.com"
+              target="_blank"
+              rel="noreferrer"
+              className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
+                {/* Live Scaled Iframe Preview */}
+                <iframe
+                  src="https://www.vishwaleader.com"
+                  title="Vishwa Leader Institute Live Site"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    width: '1280px',
+                    height: '800px',
+                    transform: 'scale(0.32)',
+                    transformOrigin: 'top left',
+                  }}
+                  loading="lazy"
+                />
+                {/* Backup image behind iframe */}
+                <img
+                  src="/thumb-vishwaleader.png"
+                  alt="Vishwa Leader Institute Live Preview"
+                  className="w-full h-full object-cover object-top -z-10 absolute inset-0"
+                />
+              </div>
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-amber-500/40 p-1 flex items-center justify-center shrink-0">
+                    <img
+                      src="/logo-vishwaleader.png"
+                      alt="Vishwa Leader Official Logo"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="size-2 bg-amber-500 animate-pulse rounded-none shrink-0" />
+                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">
+                      www.vishwaleader.com
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
+              </div>
+            </a>
+
+            {/* Card 3: OpenDev-Labs Engine */}
+            <a
+              href="https://www.opendev-labs.com"
+              target="_blank"
+              rel="noreferrer"
+              className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
+            >
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
+                {/* Live Scaled Iframe Preview */}
+                <iframe
+                  src="https://www.opendev-labs.com"
+                  title="OpenDev-Labs Engine Live Site"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    width: '1280px',
+                    height: '800px',
+                    transform: 'scale(0.32)',
+                    transformOrigin: 'top left',
+                  }}
+                  loading="lazy"
+                />
+                {/* Backup image behind iframe */}
+                <img
+                  src="/thumb-opendevlabs.png"
+                  alt="OpenDev-Labs Engine Live Preview"
+                  className="w-full h-full object-cover object-top -z-10 absolute inset-0"
+                />
+              </div>
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-emerald-500/40 p-1 flex items-center justify-center shrink-0">
+                    <img
+                      src="/logo-opendevlabs.png"
+                      alt="OpenDev-Labs Official Logo"
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="size-2 bg-emerald-500 animate-pulse rounded-none shrink-0" />
+                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
+                      www.opendev-labs.com
+                    </span>
+                  </div>
+                </div>
+                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
+              </div>
+            </a>
+          </div>
         </div>
       </section>
 

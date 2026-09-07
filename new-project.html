@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Project – OpenDev Platform</title>
+  <meta name="description" content="Import a GitHub repository or drag and drop a local project folder to deploy on opendev.app.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .dash-topbar {
+      background: #000000;
+      border-bottom: 1px solid #27272a;
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .new-container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+    .wizard-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      font-size: 0.85rem;
+      color: #71717a;
+    }
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #27272a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: #fff;
+    }
+    .step-badge.active {
+      background: #f42050;
+    }
+    .repo-item {
+      background: #050507;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+    .repo-item:hover {
+      border-color: #f42050;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="dash-topbar">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <a href="dashboard.html" class="brand-logo" style="text-decoration:none;">
+        <div class="logo-box">
+          <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+        </div>
+        <span style="font-weight:800; font-size:1.1rem; color:#fff;">opendev<span style="color:#f42050;">-labs</span></span>
+      </a>
+      <span style="color:#3f3f46;">/</span>
+      <span style="font-size:0.9rem; font-weight:600; color:#a1a1aa;">Import New Project</span>
+    </div>
+
+    <a href="dashboard.html" class="btn btn-shadcn-secondary" style="font-size:0.85rem; text-decoration:none;">Cancel</a>
+  </header>
+
+  <div class="new-container">
+    <div class="wizard-card">
+      <div class="step-indicator">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="step-badge active">1</div>
+          <span style="color:#fff; font-weight:600;">Import Git Repository / Folder</span>
+        </div>
+        <i data-lucide="chevron-right" style="width:16px; height:16px;"></i>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="step-badge" id="badge-step-2">2</div>
+          <span>Configure & Deploy</span>
+        </div>
+      </div>
+
+      <!-- Step 1 View -->
+      <div id="view-step-1">
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0 0 8px;">Let's build something new.</h1>
+        <p style="color:#a1a1aa; font-size:0.9rem; margin-bottom:28px;">To deploy a new project, import a repository from a Git provider or select a local project folder.</p>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+          <!-- Git Repos List -->
+          <div>
+            <h3 style="font-size:1rem; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="github" style="width:18px; height:18px;"></i> Import GitHub Repository
+            </h3>
+
+            <div class="repo-item">
+              <div>
+                <div style="font-weight:700; font-size:0.95rem; color:#fff;">opendev/ebookstall</div>
+                <small style="color:#a1a1aa;">Updated 2h ago • Next.js 16</small>
+              </div>
+              <button class="btn btn-shadcn-red" style="padding:6px 14px; font-size:0.8rem;" onclick="selectRepo('ebookstall', 'https://github.com/opendev/ebookstall', 'Next.js 16')">Import</button>
+            </div>
+
+            <div class="repo-item">
+              <div>
+                <div style="font-weight:700; font-size:0.95rem; color:#fff;">opendev/ai-saas</div>
+                <small style="color:#a1a1aa;">Updated 1d ago • React 19 / OpenRouter</small>
+              </div>
+              <button class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="selectRepo('ai-saas', 'https://github.com/opendev/ai-saas', 'React 19 / OpenRouter')">Import</button>
+            </div>
+
+            <div class="repo-item">
+              <div>
+                <div style="font-weight:700; font-size:0.95rem; color:#fff;">opendev/portfolio-template</div>
+                <small style="color:#a1a1aa;">Updated 3d ago • Vite / Tailwind</small>
+              </div>
+              <button class="btn btn-shadcn-secondary" style="padding:6px 14px; font-size:0.8rem;" onclick="selectRepo('portfolio', 'https://github.com/opendev/portfolio', 'Vite / Tailwind')">Import</button>
+            </div>
+          </div>
+
+          <!-- Drag and Drop Local Folder -->
+          <div>
+            <h3 style="font-size:1rem; font-weight:700; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+              <i data-lucide="folder-up" style="width:18px; height:18px; color:#00f2fe;"></i> Deploy Local Project Folder
+            </h3>
+
+            <div class="quick-deploy-card" style="margin:0; padding:28px; text-align:center;" id="dropzone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDropWizard(event)">
+              <i data-lucide="upload-cloud" style="width:36px; height:36px; color:#f42050; margin-bottom:12px;"></i>
+              <div style="font-weight:700; font-size:1rem; margin-bottom:6px;">Drag & Drop Project Folder</div>
+              <p style="color:#a1a1aa; font-size:0.82rem; margin-bottom:16px;">Drop a zip or local build directory to deploy directly.</p>
+              
+              <input type="file" id="wizard-folder-input" webkitdirectory directory multiple style="display:none;" onchange="handleFolderSelectWizard(event)">
+              <button class="btn btn-shadcn-secondary" style="font-size:0.85rem;" onclick="document.getElementById('wizard-folder-input').click()">
+                Select Folder from Computer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2 Config View -->
+      <div id="view-step-2" style="display:none;">
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0 0 8px;">Configure Project Settings</h1>
+        <p style="color:#a1a1aa; font-size:0.9rem; margin-bottom:28px;">Configure project name, subdomain, framework settings, and environment variables.</p>
+
+        <div style="display:flex; flex-direction:column; gap:20px; max-width:600px;">
+          <div>
+            <label style="font-size:0.85rem; color:#a1a1aa; display:block; margin-bottom:6px;">Project Subdomain (opendev.app)</label>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <input type="text" id="config-subdomain" class="deploy-url-input" style="flex:1;" value="ebookstall">
+              <span style="font-family:monospace; color:#a1a1aa;">.opendev.app</span>
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:0.85rem; color:#a1a1aa; display:block; margin-bottom:6px;">Framework Preset</label>
+            <select id="config-framework" class="deploy-url-input" style="width:100%;">
+              <option value="Next.js 16">Next.js 16 (App Router & Server Actions)</option>
+              <option value="React 19 / Vite">React 19 + Vite</option>
+              <option value="Static HTML/JS">Static HTML / Vanilla CSS</option>
+              <option value="Astro / Svelte">Astro / SvelteKit</option>
+            </select>
+          </div>
+
+          <div>
+            <label style="font-size:0.85rem; color:#a1a1aa; display:block; margin-bottom:6px;">Environment Variables (Secrets)</label>
+            <textarea id="config-env" class="deploy-url-input" style="width:100%; height:90px; font-family:monospace; font-size:0.82rem;" placeholder="OPENROUTER_API_KEY=sk-or-v1-xxxx&#10;RAZORPAY_KEY_ID=rzp_live_xxxx"></textarea>
+          </div>
+
+          <div style="display:flex; gap:12px; margin-top:12px;">
+            <button class="btn btn-shadcn-red" style="padding:12px 28px; font-weight:700;" onclick="triggerWizardDeploy()">
+              🚀 Deploy to opendev.app
+            </button>
+            <button class="btn btn-shadcn-secondary" onclick="backToStep1()">← Back</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Build Terminal Stream -->
+      <div id="view-building" style="display:none;">
+        <h2 style="font-size:1.4rem; font-weight:800; margin:0 0 16px;">Building Production Deployment...</h2>
+        
+        <div class="terminal-view">
+          <div class="terminal-output" id="wizard-terminal-logs">[OPENDEV CLI v1.0.0]: Initializing production edge build...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    let currentRepo = 'digital-store';
+    let currentSource = 'https://github.com/opendev/digital-store';
+    let currentFramework = 'Next.js 16';
+
+    function selectRepo(name, source, framework) {
+      currentRepo = name;
+      currentSource = source;
+      currentFramework = framework;
+
+      document.getElementById('config-subdomain').value = name;
+      document.getElementById('config-framework').value = framework;
+
+      document.getElementById('view-step-1').style.display = 'none';
+      document.getElementById('view-step-2').style.display = 'block';
+      document.getElementById('badge-step-2').classList.add('active');
+    }
+
+    function backToStep1() {
+      document.getElementById('view-step-1').style.display = 'block';
+      document.getElementById('view-step-2').style.display = 'none';
+      document.getElementById('badge-step-2').classList.remove('active');
+    }
+
+    function handleFolderSelectWizard(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        const folderName = files[0].webkitRelativePath ? files[0].webkitRelativePath.split('/')[0] : 'my-app';
+        selectRepo(folderName.toLowerCase().replace(/[^a-z0-9-]/g, ''), 'Local Directory Upload', 'Static HTML / Vite');
+      }
+    }
+
+    function handleDropWizard(e) {
+      e.preventDefault();
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        selectRepo('local-web-app', 'Local Directory Upload', 'Static HTML / Vite');
+      }
+    }
+
+    function triggerWizardDeploy() {
+      const sub = document.getElementById('config-subdomain').value.trim().toLowerCase() || 'app';
+      const framework = document.getElementById('config-framework').value;
+
+      document.getElementById('view-step-2').style.display = 'none';
+      document.getElementById('view-building').style.display = 'block';
+
+      const terminal = document.getElementById('wizard-terminal-logs');
+      terminal.innerHTML = `[OPENDEV CLI v1.0.0]: Connected to OpenDev Global Edge Network
+[PROJECT]: ${sub}.opendev.app
+> Source: ${currentSource}
+> Framework: ${framework}
+
+> [1/4] Cloning repository source & resolving dependencies...`;
+
+      setTimeout(() => {
+        terminal.innerHTML += `\n> [2/4] Executing static edge compilation for ${framework}...`;
+      }, 1000);
+
+      setTimeout(() => {
+        terminal.innerHTML += `\n> [3/4] Optimizing edge functions & minifying bundles...`;
+      }, 2000);
+
+      setTimeout(() => {
+        terminal.innerHTML += `\n> [4/4] Provisioning Wildcard SSL & Anycast DNS for ${sub}.opendev.app...
+✓ DEPLOYMENT SUCCESSFUL! Live at https://${sub}.opendev.app`;
+
+        const newProj = {
+          name: sub,
+          subdomain: `${sub}.opendev.app`,
+          repo: currentSource,
+          framework: framework,
+          status: 'live',
+          commit: Math.random().toString(36).substring(2, 9),
+          buildTime: '2.2s',
+          previewUrl: 'preview-ebookstall.html',
+          desc: `${framework} App on OpenDev Edge`
+        };
+
+        saveProject(newProj);
+
+        setTimeout(() => {
+          window.location.href = `project?p=${sub}`;
+        }, 1500);
+      }, 3200);
+    }
+  </script>
+</body>
+</html>

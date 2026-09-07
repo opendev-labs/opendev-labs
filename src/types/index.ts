@@ -1,8 +1,20 @@
-export type UserRole = 'developer' | 'client';
+export type UserRole = 'developer' | 'client' | 'user';
+
+export interface RegisteredUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  joinedAt: string;
+  role: UserRole;
+  clientId?: string;
+}
 
 export type BillingType = 'monthly_retainer' | 'one_time_build';
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'offboarded';
+
+export type WebsiteStatus = 'under-development' | 'under-maintenance' | 'completed';
 
 export interface PaymentRecord {
   id: string;
@@ -25,6 +37,10 @@ export interface Client {
   email: string;
   phone: string;
   websiteUrl: string;
+  domain?: string;
+  websiteStatus: WebsiteStatus;
+  advancePaid: boolean;
+  advanceAmount?: number;
   previewUrl?: string;
   billingType: BillingType;
   monthlyFee: number; // in INR or USD
@@ -74,4 +90,39 @@ export interface NotificationItem {
   date: string;
   read: boolean;
   clientId?: string;
+  clientName?: string;
+}
+
+export interface ProjectRequest {
+  id: string;
+  userEmail: string;
+  userName: string;
+  projectType: string;
+  requestedDomain: string;
+  extraRequirements: string;
+  createdAt: string;
+  status: 'pending_review' | 'accepted' | 'client_converted';
+}
+
+export interface ChangelogItem {
+  id: string;
+  clientId: string; // client ID or 'all'
+  clientName: string;
+  title: string;
+  version?: string;
+  description: string;
+  date: string;
+}
+
+export interface PaymentNotification {
+  id: string;
+  clientId: string;
+  clientName: string;
+  clientEmail: string;
+  amount: number;
+  paymentMethod: 'GPay' | 'PhonePe' | 'Cash' | 'Bank Transfer / NEFT' | 'Razorpay' | 'Other';
+  transactionRef?: string;
+  notes?: string;
+  date: string;
+  status: 'pending_verification' | 'confirmed' | 'rejected';
 }

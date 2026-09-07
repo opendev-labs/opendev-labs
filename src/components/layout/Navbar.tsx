@@ -36,16 +36,29 @@ export const Navbar: React.FC = () => {
     return false;
   };
 
+  // Lock body scroll when mobile menu is open
+  React.useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md transition-colors duration-200">
-      <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
+    <>
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md transition-colors duration-200">
+        <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         
         {/* Left: Brand Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <img
             src="/logo-icon.webp"
             alt="OpenDev-Labs Logo"
-            className="h-8 w-auto object-contain transition-transform group-hover:scale-105"
+            className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105"
             onError={(e) => {
               (e.target as HTMLElement).style.display = 'none';
             }}
@@ -88,23 +101,9 @@ export const Navbar: React.FC = () => {
           </a>
         </nav>
 
-        {/* Right Actions & ALWAYS-VISIBLE TOP-RIGHT DARK MODE SWITCH */}
+        {/* Right Actions & ALWAYS-VISIBLE TOP-RIGHT END DARK MODE SWITCH */}
         <div className="flex items-center gap-2 sm:gap-3">
           
-          {/* TOP RIGHT CORNER DARK MODE ICON TOGGLE */}
-          <button
-            onClick={toggleTheme}
-            className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800/90 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs hover:scale-105"
-            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-            aria-label="Toggle Theme"
-          >
-            {theme === 'light' ? (
-              <Moon className="size-4 text-zinc-800 transition-transform hover:-rotate-12" />
-            ) : (
-              <Sun className="size-4 text-amber-400 transition-transform hover:rotate-45" />
-            )}
-          </button>
-
           {/* User Auth Buttons (Desktop & Tablet) */}
           <div className="hidden sm:flex items-center gap-2">
             {isAuthenticated && user ? (
@@ -149,132 +148,124 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile Menu Hamburger Button */}
+          {/* Mobile Menu Hamburger / Dropdown Toggle Button */}
           <button
-            onClick={() => setMobileMenuOpen(true)}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="md:hidden p-2 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            aria-label="Open Navigation Menu"
+            aria-label="Toggle Navigation Menu"
           >
-            <Menu className="size-5" />
+            {mobileMenuOpen ? <X className="size-5 text-blue-600 dark:text-blue-400" /> : <Menu className="size-5" />}
+          </button>
+
+          {/* TOP RIGHT END DARK MODE ICON TOGGLE */}
+          <button
+            onClick={toggleTheme}
+            className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800/90 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-all shadow-xs hover:scale-105 ml-1 shrink-0"
+            title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
+            aria-label="Toggle Theme"
+          >
+            {theme === 'light' ? (
+              <Moon className="size-4 text-zinc-800 transition-transform hover:-rotate-12" />
+            ) : (
+              <Sun className="size-4 text-amber-400 transition-transform hover:rotate-45" />
+            )}
           </button>
         </div>
       </div>
-
-      {/* Mobile Drawer Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="fixed inset-0 z-50 bg-white dark:bg-zinc-950 flex flex-col justify-between p-6 overflow-y-auto"
-          >
-            {/* Top drawer bar */}
-            <div className="flex items-center justify-between pb-6 border-b border-zinc-200 dark:border-zinc-800">
-              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-2">
-                <span className="font-extrabold text-lg text-zinc-900 dark:text-white">
-                  opendev<span className="text-blue-600 dark:text-blue-400">-labs</span>
-                </span>
-              </Link>
-              
-              <div className="flex items-center gap-3">
-                {/* Mobile Drawer Theme Switch */}
-                <button
-                  onClick={toggleTheme}
-                  className="size-9 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 flex items-center justify-center border border-zinc-200 dark:border-zinc-700"
-                >
-                  {theme === 'light' ? <Moon className="size-4" /> : <Sun className="size-4 text-amber-400" />}
-                </button>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
-                >
-                  <X className="size-6" />
-                </button>
-              </div>
-            </div>
-
-            {/* Mobile Nav Links */}
-            <div className="flex flex-col gap-3 py-8">
-              <Link
-                to="/"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-bold text-zinc-900 dark:text-white hover:text-blue-600 py-2 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between"
-              >
-                Home <ChevronRight className="size-4 text-zinc-400" />
-              </Link>
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="text-lg font-bold text-zinc-900 dark:text-white hover:text-blue-600 py-2 border-b border-zinc-100 dark:border-zinc-900 flex items-center justify-between"
-                >
-                  {item.label} <ChevronRight className="size-4 text-zinc-400" />
-                </Link>
-              ))}
-              <a
-                href="/iamyashramteke/"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-bold text-blue-600 dark:text-blue-400 py-2 flex items-center justify-between"
-              >
-                Yash Portfolio <ExternalLink className="size-4" />
-              </a>
-            </div>
-
-            {/* Mobile Auth Bottom Bar */}
-            <div className="pt-6 border-t border-zinc-200 dark:border-zinc-800 flex flex-col gap-3">
-              {isAuthenticated && user ? (
-                <>
-                  <Button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate(user.role === 'developer' ? '/dashboard' : '/client/portal');
-                    }}
-                    className="w-full h-11 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm rounded-xl"
-                  >
-                    My {user.role === 'developer' ? 'Studio Dashboard' : 'Client Portal'}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      logout();
-                      setMobileMenuOpen(false);
-                    }}
-                    className="w-full h-10 text-red-600 font-bold text-xs"
-                  >
-                    Sign Out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate('/auth');
-                    }}
-                    className="w-full h-11 bg-blue-600 text-white font-extrabold text-sm rounded-xl"
-                  >
-                    Get Started
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      navigate('/auth');
-                    }}
-                    className="w-full h-11 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold text-sm rounded-xl"
-                  >
-                    Login
-                  </Button>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
+
+    {/* Runway-Style Mobile Dropdown Overlay Menu (Positioned directly under fixed header bar) */}
+    <AnimatePresence>
+      {mobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto text-zinc-900 dark:text-zinc-100 md:hidden"
+        >
+          {/* Menu List - Runway Typography Style */}
+          <div className="flex flex-col my-auto py-2">
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 py-4 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors"
+            >
+              Home
+            </Link>
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 py-4 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <a
+              href="/iamyashramteke/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 py-4 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors flex items-center justify-between"
+            >
+              <span>Yash Portfolio</span>
+              <ExternalLink className="size-6 text-zinc-400" />
+            </a>
+          </div>
+
+          {/* Bottom Stack Action Buttons */}
+          <div className="pt-4 space-y-3">
+            {isAuthenticated && user ? (
+              <>
+                <Button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate(user.role === 'developer' ? '/dashboard' : '/client/portal');
+                  }}
+                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm rounded-xl shadow-md"
+                >
+                  My {user.role === 'developer' ? 'Studio Dashboard' : 'Client Portal'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    logout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full h-12 border-zinc-300 dark:border-zinc-700 text-red-600 dark:text-red-400 font-bold text-sm rounded-xl"
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate('/auth');
+                  }}
+                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm rounded-xl shadow-md"
+                >
+                  Get Started
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    navigate('/auth');
+                  }}
+                  className="w-full h-12 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold text-sm rounded-xl"
+                >
+                  Login
+                </Button>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   );
 };

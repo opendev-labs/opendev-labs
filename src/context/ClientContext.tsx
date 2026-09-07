@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client, PaymentRecord, Invoice, MaintenanceTicket, NotificationItem } from '../types';
+import { Client, PaymentRecord, Invoice, MaintenanceTicket, NotificationItem, ProjectRequest, ChangelogItem, PaymentNotification } from '../types';
 
 interface ClientContextType {
   clients: Client[];
@@ -7,9 +7,13 @@ interface ClientContextType {
   invoices: Invoice[];
   tickets: MaintenanceTicket[];
   notifications: NotificationItem[];
-  addClient: (client: Omit<Client, 'id' | 'joinedDate'>) => void;
+  projectRequests: ProjectRequest[];
+  changelogs: ChangelogItem[];
+  paymentNotifications: PaymentNotification[];
+  addClient: (client: Omit<Client, 'id' | 'joinedDate'>) => Client;
   updateClient: (client: Client) => void;
   deleteClient: (id: string) => void;
+  clearAllClients: () => void;
   markPaymentStatus: (clientId: string, month: string, status: 'paid' | 'pending' | 'overdue') => void;
   offboardClient: (clientId: string) => void;
   reactivateClient: (clientId: string) => void;
@@ -19,179 +23,73 @@ interface ClientContextType {
   markNotificationRead: (id: string) => void;
   getWhatsAppReminderUrl: (client: Client) => string;
   getRazorpayLink: (client: Client) => string;
+  addProjectRequest: (req: Omit<ProjectRequest, 'id' | 'createdAt' | 'status'>) => void;
+  updateProjectRequestStatus: (id: string, status: ProjectRequest['status']) => void;
+  addChangelog: (item: Omit<ChangelogItem, 'id' | 'date'>) => void;
+  deleteChangelog: (id: string) => void;
+  notifyPayment: (data: Omit<PaymentNotification, 'id' | 'date' | 'status'>) => void;
+  confirmPaymentNotification: (id: string) => void;
+  rejectPaymentNotification: (id: string) => void;
 }
 
-const INITIAL_CLIENTS: Client[] = [
-  {
-    id: 'client-elite',
-    name: 'Elite-Trading Hub',
-    company: 'Momhand Khawar (Elite-Trading)',
-    email: 'khawar@elitetradinghub.com',
-    phone: '+91 81695 68582',
-    websiteUrl: 'https://elite-tradinghub.com',
-    previewUrl: 'https://elite-tradinghub.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 4000,
-    currency: 'INR',
-    billingCycleDay: 5,
-    nextPaymentDue: '2026-09-05',
-    status: 'paid',
-    joinedDate: '2026-08-27',
-    password: 'elitetrading123',
-    razorpayPaymentLink: 'https://rzp.io/l/opendev-elitetrading',
-    notes: 'Financial WebApp Project (₹6,000 Advance Paid to start work; remaining paid upon delivery). Active ₹4,000/mo retainer for daily backups & SEBI compliance.'
-  },
-  {
-    id: 'client-vishwa',
-    name: 'Vishwa Leader Institute',
-    company: 'Vishwa Leader Edu Foundation',
-    email: 'contact@vishwaleader.com',
-    phone: '+91 81695 68582',
-    websiteUrl: 'https://vishwaleader.com',
-    previewUrl: 'https://vishwaleader.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 6000,
-    currency: 'INR',
-    billingCycleDay: 10,
-    nextPaymentDue: '2026-09-10',
-    status: 'paid',
-    joinedDate: '2026-01-20',
-    password: 'vishwaleader123',
-    razorpayPaymentLink: 'https://rzp.io/l/opendev-vishwaleader',
-    notes: 'High-Value Enterprise Educational Platform (₹2,50,000 One-Time Build) + Active ₹6,000/mo Maintenance & Server Cloud Retainer.'
-  },
-  {
-    id: 'client-techmatrix',
-    name: 'TechMatrix Global',
-    company: 'TechMatrix Ltd.',
-    email: 'opendev.office@gmail.com',
-    phone: '+91 81695 68582',
-    websiteUrl: 'https://techmatrixglobal.com',
-    previewUrl: 'https://techmatrixglobal.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 15000,
-    currency: 'INR',
-    billingCycleDay: 1,
-    nextPaymentDue: '2026-09-01',
-    status: 'overdue',
-    joinedDate: '2025-11-10',
-    password: 'techmatrix123',
-    razorpayPaymentLink: 'https://rzp.io/l/opendev-techmatrix',
-    notes: 'AI-Powered Enterprise System (₹15,000/mo Retainer). Hosted on Vercel & Render cloud servers with daily DB backups.'
-  }
-];
-
-const INITIAL_PAYMENTS: PaymentRecord[] = [
-  {
-    id: 'pay-elite-101',
-    clientId: 'client-elite',
-    clientName: 'Elite-Trading Hub',
-    month: 'September 2026',
-    amount: 4000,
-    dueDate: '2026-09-05',
-    paidDate: '2026-09-02',
-    status: 'paid',
-    paymentMethod: 'UPI / Razorpay',
-    notes: 'Monthly retainer ₹4,000 active for full support & backups.'
-  },
-  {
-    id: 'pay-tech-102',
-    clientId: 'client-techmatrix',
-    clientName: 'TechMatrix Global',
-    month: 'September 2026',
-    amount: 15000,
-    dueDate: '2026-09-01',
-    status: 'overdue',
-    notes: 'Automated WhatsApp payment reminder sent.'
-  }
-];
-
-const INITIAL_INVOICES: Invoice[] = [
-  {
-    id: 'inv-2026-087',
-    invoiceNumber: 'INV-2026-087',
-    clientId: 'client-elite',
-    clientName: 'Elite-Trading Hub (Momhand Khawar)',
-    clientEmail: 'opendev.office@gmail.com',
-    issueDate: '2026-08-27',
-    dueDate: '2026-09-05',
-    amount: 4000,
-    currency: 'INR',
-    status: 'paid',
-    items: [
-      { description: 'Monthly WebApp Retainer: Full Support, Security Monitoring & Daily Backups', amount: 4000 }
-    ]
-  }
-];
-
-const INITIAL_TICKETS: MaintenanceTicket[] = [
-  {
-    id: 'tkt-elite-1',
-    clientId: 'client-elite',
-    clientName: 'Elite-Trading Hub',
-    title: 'SEBI Compliance Disclaimer update on PMS footer',
-    description: 'Update the regulatory governance text on the Risk/Reward calculator page.',
-    priority: 'high',
-    status: 'in_progress',
-    createdAt: '2026-09-01',
-  }
-];
-
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 'notif-1',
-    title: 'Payment Received: Elite-Trading Hub',
-    message: '₹4,000 monthly retainer collected for September 2026.',
-    type: 'payment',
-    date: '2026-09-02',
-    read: true,
-    clientId: 'client-elite',
-  },
-  {
-    id: 'notif-2',
-    title: 'Payment Overdue: TechMatrix Global',
-    message: '₹15,000 retainer payment was due on Sept 1, 2026.',
-    type: 'reminder',
-    date: '2026-09-02',
-    read: false,
-    clientId: 'client-techmatrix',
-  }
-];
+const INITIAL_CLIENTS: Client[] = [];
+const INITIAL_PAYMENTS: PaymentRecord[] = [];
+const INITIAL_INVOICES: Invoice[] = [];
+const INITIAL_TICKETS: MaintenanceTicket[] = [];
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
+const INITIAL_PROJECT_REQUESTS: ProjectRequest[] = [];
+const INITIAL_CHANGELOGS: ChangelogItem[] = [];
+const INITIAL_PAYMENT_NOTIFICATIONS: PaymentNotification[] = [];
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [clients, setClients] = useState<Client[]>(() => {
-    const saved = localStorage.getItem('opendev_clients_v4');
+    const saved = localStorage.getItem('opendev_clients_v5');
     return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
   });
 
   const [payments, setPayments] = useState<PaymentRecord[]>(() => {
-    const saved = localStorage.getItem('opendev_payments_v4');
+    const saved = localStorage.getItem('opendev_payments_v5');
     return saved ? JSON.parse(saved) : INITIAL_PAYMENTS;
   });
 
   const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    const saved = localStorage.getItem('opendev_invoices_v4');
+    const saved = localStorage.getItem('opendev_invoices_v5');
     return saved ? JSON.parse(saved) : INITIAL_INVOICES;
   });
 
   const [tickets, setTickets] = useState<MaintenanceTicket[]>(() => {
-    const saved = localStorage.getItem('opendev_tickets_v4');
+    const saved = localStorage.getItem('opendev_tickets_v5');
     return saved ? JSON.parse(saved) : INITIAL_TICKETS;
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem('opendev_notifications_v4');
+    const saved = localStorage.getItem('opendev_notifications_v5');
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
 
+  const [projectRequests, setProjectRequests] = useState<ProjectRequest[]>(() => {
+    const saved = localStorage.getItem('opendev_project_requests_v1');
+    return saved ? JSON.parse(saved) : INITIAL_PROJECT_REQUESTS;
+  });
+
+  const [changelogs, setChangelogs] = useState<ChangelogItem[]>(() => {
+    const saved = localStorage.getItem('opendev_changelogs_v1');
+    return saved ? JSON.parse(saved) : INITIAL_CHANGELOGS;
+  });
+
+  const [paymentNotifications, setPaymentNotifications] = useState<PaymentNotification[]>(() => {
+    const saved = localStorage.getItem('opendev_payment_notifications_v1');
+    return saved ? JSON.parse(saved) : INITIAL_PAYMENT_NOTIFICATIONS;
+  });
+
   useEffect(() => {
-    localStorage.setItem('opendev_clients_v4', JSON.stringify(clients));
+    localStorage.setItem('opendev_clients_v5', JSON.stringify(clients));
   }, [clients]);
 
   useEffect(() => {
-    localStorage.setItem('opendev_payments_v4', JSON.stringify(payments));
+    localStorage.setItem('opendev_payments_v5', JSON.stringify(payments));
   }, [payments]);
 
   useEffect(() => {
@@ -206,14 +104,19 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     localStorage.setItem('opendev_notifications_v4', JSON.stringify(notifications));
   }, [notifications]);
 
-  const addClient = (clientData: Omit<Client, 'id' | 'joinedDate'>) => {
+  useEffect(() => {
+    localStorage.setItem('opendev_payment_notifications_v1', JSON.stringify(paymentNotifications));
+  }, [paymentNotifications]);
+
+  const addClient = (clientData: Omit<Client, 'id' | 'joinedDate'>): Client => {
     const newClient: Client = {
       ...clientData,
       id: `client-${Date.now()}`,
       joinedDate: new Date().toISOString().split('T')[0],
-      razorpayPaymentLink: `https://rzp.io/l/opendev-${clientData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+      razorpayPaymentLink: clientData.razorpayPaymentLink || `https://rzp.io/l/opendev-${clientData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
     };
     setClients(prev => [...prev, newClient]);
+    return newClient;
   };
 
   const updateClient = (updatedClient: Client) => {
@@ -222,6 +125,10 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const deleteClient = (id: string) => {
     setClients(prev => prev.filter(c => c.id !== id));
+  };
+
+  const clearAllClients = () => {
+    setClients([]);
   };
 
   const markPaymentStatus = (clientId: string, month: string, status: 'paid' | 'pending' | 'overdue') => {
@@ -338,6 +245,79 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setInvoices(prev => [newInvoice, ...prev]);
   };
 
+  useEffect(() => {
+    localStorage.setItem('opendev_project_requests_v1', JSON.stringify(projectRequests));
+  }, [projectRequests]);
+
+  useEffect(() => {
+    localStorage.setItem('opendev_changelogs_v1', JSON.stringify(changelogs));
+  }, [changelogs]);
+
+  const addProjectRequest = (reqData: Omit<ProjectRequest, 'id' | 'createdAt' | 'status'>) => {
+    const newReq: ProjectRequest = {
+      ...reqData,
+      id: `req-${Date.now()}`,
+      createdAt: new Date().toISOString().split('T')[0],
+      status: 'pending_review',
+    };
+    setProjectRequests(prev => [newReq, ...prev.filter(r => r.userEmail.toLowerCase() !== reqData.userEmail.toLowerCase())]);
+  };
+
+  const updateProjectRequestStatus = (id: string, status: ProjectRequest['status']) => {
+    setProjectRequests(prev => prev.map(r => (r.id === id ? { ...r, status } : r)));
+  };
+
+  const addChangelog = (itemData: Omit<ChangelogItem, 'id' | 'date'>) => {
+    const newLog: ChangelogItem = {
+      ...itemData,
+      id: `log-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0],
+    };
+    setChangelogs(prev => [newLog, ...prev]);
+  };
+
+  const deleteChangelog = (id: string) => {
+    setChangelogs(prev => prev.filter(l => l.id !== id));
+  };
+
+  const notifyPayment = (data: Omit<PaymentNotification, 'id' | 'date' | 'status'>) => {
+    const newPaymentNotif: PaymentNotification = {
+      ...data,
+      id: `pnotif-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0],
+      status: 'pending_verification',
+    };
+    setPaymentNotifications(prev => [newPaymentNotif, ...prev]);
+
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      title: `Payment Received (${data.paymentMethod}): ${data.clientName}`,
+      message: `${data.clientName} reported payment of ₹${data.amount} via ${data.paymentMethod}. Ref: ${data.transactionRef || 'N/A'}.`,
+      date: new Date().toISOString().split('T')[0],
+      type: 'payment',
+      read: false,
+      clientName: data.clientName,
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+  };
+
+  const confirmPaymentNotification = (id: string) => {
+    const notif = paymentNotifications.find(n => n.id === id);
+    if (notif) {
+      setPaymentNotifications(prev =>
+        prev.map(n => (n.id === id ? { ...n, status: 'confirmed' as const } : n))
+      );
+      const currentMonth = new Date().toLocaleString('default', { month: 'short' });
+      markPaymentStatus(notif.clientId, currentMonth, 'paid');
+    }
+  };
+
+  const rejectPaymentNotification = (id: string) => {
+    setPaymentNotifications(prev =>
+      prev.map(n => (n.id === id ? { ...n, status: 'rejected' as const } : n))
+    );
+  };
+
   const markNotificationRead = (id: string) => {
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
@@ -360,9 +340,13 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         invoices,
         tickets,
         notifications,
+        projectRequests,
+        changelogs,
+        paymentNotifications,
         addClient,
         updateClient,
         deleteClient,
+        clearAllClients,
         markPaymentStatus,
         offboardClient,
         reactivateClient,
@@ -372,6 +356,13 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         markNotificationRead,
         getWhatsAppReminderUrl,
         getRazorpayLink,
+        addProjectRequest,
+        updateProjectRequestStatus,
+        addChangelog,
+        deleteChangelog,
+        notifyPayment,
+        confirmPaymentNotification,
+        rejectPaymentNotification,
       }}
     >
       {children}

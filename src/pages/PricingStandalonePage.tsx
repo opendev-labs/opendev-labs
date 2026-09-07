@@ -7,6 +7,17 @@ import { Live2DWavesCanvas } from '../components/ui/Live2DWavesCanvas';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
 
+import { TypewriterHeading } from '../components/ui/TypewriterHeading';
+
+const pricingPhrases = [
+  "Choose the Perfect Plan for Your Business",
+  "Transparent Development Engagement Models",
+  "One-Time Codebase Handover with Full Source Code",
+  "Monthly Retainer Models Starting at ₹3,000–₹4,000/mo",
+  "Daily Automated Database Backups & Uptime Monitoring",
+  "No Hidden Fees or Surprise Operational Costs"
+];
+
 export const PricingStandalonePage: React.FC = () => {
   const navigate = useNavigate();
 
@@ -16,20 +27,20 @@ export const PricingStandalonePage: React.FC = () => {
       {/* Top Navbar with Top-Right Dark Mode Toggle */}
       <Navbar />
 
-      {/* Hero Header */}
-      <section className="relative pt-12 pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
+      {/* Hero Header - Screen-fit height with typing animated heading */}
+      <section className="relative min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-center items-center pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
         <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" waveCount={4} verticalBaseStart={0.35} />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center my-auto w-full">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-4 sm:mb-6 shadow-xs">
             Simple, Transparent Web & Automation Plans
           </span>
           
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-white max-w-4xl mx-auto">
-            Choose the Perfect Plan for Your Business
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.06] min-h-[140px] sm:min-h-[180px] flex items-center justify-center">
+            <TypewriterHeading phrases={pricingPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
           </h1>
-          
-          <p className="mt-4 text-base sm:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto">
+
+          <p className="mt-6 sm:mt-8 text-base sm:text-xl lg:text-2xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto font-medium leading-relaxed">
             From one-time custom handovers to continuous monthly retainers starting at ₹3,000–₹4,000/mo. Zero hidden setup fees.
           </p>
         </div>

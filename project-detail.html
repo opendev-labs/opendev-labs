@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Details – OpenDev Platform</title>
+  <meta name="description" content="View deployments, custom domain settings, and environment variables for your project on OpenDev Platform.">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: #09090b;
+      color: #f4f4f5;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+    .dash-topbar {
+      background: #000000;
+      border-bottom: 1px solid #27272a;
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .project-header-bar {
+      background: #0c0c0e;
+      border-bottom: 1px solid #27272a;
+      padding: 24px 32px 0;
+    }
+    .project-tabs {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .project-tab-btn {
+      background: transparent;
+      border: none;
+      color: #a1a1aa;
+      padding: 12px 4px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .project-tab-btn:hover {
+      color: #fff;
+    }
+    .project-tab-btn.active {
+      color: #fff;
+      border-bottom-color: #f42050;
+    }
+    .detail-content {
+      max-width: 1200px;
+      margin: 32px auto;
+      padding: 0 32px;
+    }
+    .preview-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+    }
+    @media (max-width: 800px) {
+      .preview-card { grid-template-columns: 1fr; }
+    }
+    .sandbox-preview-container {
+      height: 380px;
+      background: #000;
+      border-right: 1px solid #27272a;
+    }
+    .sandbox-preview-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    .meta-box {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .history-item {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="dash-topbar">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <a href="dashboard" class="brand-logo" style="text-decoration:none;">
+        <div class="logo-box">
+          <i data-lucide="box" style="width:18px; height:18px; color:#FFF;"></i>
+        </div>
+        <span style="font-weight:800; font-size:1.1rem; color:#fff;">opendev<span style="color:#f42050;">-labs</span></span>
+      </a>
+      <span style="color:#3f3f46;">/</span>
+      <a href="dashboard" style="color:#a1a1aa; text-decoration:none; font-size:0.9rem;">Dashboard</a>
+      <span style="color:#3f3f46;">/</span>
+      <span style="font-size:0.9rem; font-weight:600; color:#fff;" id="proj-breadcrumb-name">ebookstall</span>
+    </div>
+
+    <div style="display:flex; gap:12px;">
+      <button class="btn btn-shadcn-red" style="font-size:0.85rem;" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">View Sandbox</button>
+    </div>
+  </header>
+
+  <!-- Project Header & Tabs -->
+  <div class="project-header-bar">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+      <div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <h1 style="margin:0; font-size:1.8rem; font-weight:800;" id="proj-title">ebookstall</h1>
+          <span class="status-pill live"><span class="status-dot"></span> Ready</span>
+        </div>
+        <a href="javascript:void(0)" style="color:#00f2fe; font-family:monospace; font-size:0.85rem; text-decoration:none; display:inline-flex; align-items:center; gap:4px; margin-top:4px;" id="proj-url-link" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
+          https://ebookstall.opendev.app <i data-lucide="external-link" style="width:12px; height:12px;"></i>
+        </a>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <a href="booking" class="btn btn-shadcn-secondary" style="font-size:0.82rem; text-decoration:none;">Book Custom Engineering</a>
+      </div>
+    </div>
+
+    <div class="project-tabs">
+      <button class="project-tab-btn active" id="tab-btn-overview" onclick="switchDetailTab('overview')">Overview</button>
+      <button class="project-tab-btn" id="tab-btn-deployments" onclick="switchDetailTab('deployments')">Deployments</button>
+      <button class="project-tab-btn" id="tab-btn-domains" onclick="switchDetailTab('domains')">Domains & DNS</button>
+      <button class="project-tab-btn" id="tab-btn-env" onclick="switchDetailTab('env')">Environment Variables</button>
+      <button class="project-tab-btn" id="tab-btn-settings" onclick="switchDetailTab('settings')">Settings</button>
+    </div>
+  </div>
+
+  <!-- Main Detail Content -->
+  <div class="detail-content">
+
+    <!-- Tab 1: Overview -->
+    <div id="detail-tab-overview">
+      <h3 style="margin:0 0 16px; font-size:1.1rem; font-weight:700;">Production Deployment</h3>
+
+      <div class="preview-card">
+        <!-- Live Sandbox Frame View -->
+        <div class="sandbox-preview-container">
+          <iframe src="preview-ebookstall.html" title="EBookStall Live Sandbox"></iframe>
+        </div>
+
+        <!-- Meta Details Box -->
+        <div class="meta-box">
+          <div>
+            <div style="font-size:0.8rem; color:#a1a1aa; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px;">Deployment Info</div>
+            <div style="font-weight:700; font-size:1.1rem; margin-bottom:12px;" id="proj-domain-text">https://ebookstall.opendev.app</div>
+
+            <div style="display:flex; flex-direction:column; gap:8px; font-family:monospace; font-size:0.82rem; color:#a1a1aa;">
+              <div>Status: <strong style="color:#10b981;">● Production Ready</strong></div>
+              <div>Commit: <strong style="color:#00f2fe;">a3f9e1c (Add EBookStall store catalog)</strong></div>
+              <div>Branch: <strong style="color:#fff;">main</strong></div>
+              <div>Build Time: <strong style="color:#10b981;">2.1s</strong></div>
+              <div>Edge Location: <strong style="color:#fff;">sin1 (Singapore)</strong></div>
+            </div>
+          </div>
+
+          <div style="margin-top:20px;">
+            <button class="btn btn-shadcn-red" style="width:100%; font-size:0.85rem;" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">
+              <i data-lucide="eye" style="width:14px; height:14px;"></i> Open Live Sandbox
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Deployments History -->
+    <div id="detail-tab-deployments" style="display:none;">
+      <h3 style="margin:0 0 16px; font-size:1.1rem; font-weight:700;">Deployment History</h3>
+
+      <div class="history-item">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
+            <strong style="color:#fff; font-size:0.95rem;">Production (main)</strong>
+          </div>
+          <div style="font-family:monospace; font-size:0.8rem; color:#a1a1aa; margin-top:4px;">
+            Commit: a3f9e1c • Deployed 2 hours ago by Yash
+          </div>
+        </div>
+        <button class="btn btn-shadcn-secondary" style="font-size:0.8rem;" onclick="openSandboxModal('ebookstall.opendev.app', 'preview-ebookstall.html')">Inspect Build</button>
+      </div>
+
+      <div class="history-item">
+        <div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="status-pill live"><span class="status-dot"></span> Ready</span>
+            <strong style="color:#fff; font-size:0.95rem;">Preview (feat/cart)</strong>
+          </div>
+          <div style="font-family:monospace; font-size:0.8rem; color:#a1a1aa; margin-top:4px;">
+            Commit: c8172df • Deployed 5 hours ago
+          </div>
+        </div>
+        <button class="btn btn-shadcn-secondary" style="font-size:0.8rem;" onclick="alert('Viewing preview build logs for branch feat/cart.')">Inspect Build</button>
+      </div>
+    </div>
+
+    <!-- Tab 3: Domains & DNS -->
+    <div id="detail-tab-domains" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h3 style="margin:0; font-size:1.1rem; font-weight:700;">Domains & DNS Records</h3>
+        <button class="btn btn-shadcn-red" style="font-size:0.85rem;" onclick="addCustomDomainPrompt()">+ Add Custom Domain</button>
+      </div>
+
+      <div class="domain-manage-card">
+        <table class="dns-table">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Record Type</th>
+              <th>Value</th>
+              <th>SSL Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="domain-table-body">
+            <tr>
+              <td><code>digital-store.opendev.app</code></td>
+              <td><code>WILDCARD CNAME</code></td>
+              <td><code>cname.opendev.app</code></td>
+              <td><span class="status-pill live"><span class="status-dot"></span> Active SSL</span></td>
+              <td><button class="btn btn-shadcn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="openSandboxModal('digital-store.opendev.app', 'preview-ebookstall.html')">Sandbox</button></td>
+            </tr>
+            <tr>
+              <td><code>ebookstall.com</code></td>
+              <td><code>CNAME Record</code></td>
+              <td><code>cname.opendev.app</code></td>
+              <td><span class="status-pill live"><span class="status-dot"></span> Active SSL</span></td>
+              <td><button class="btn btn-shadcn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="verifyCustomDns('ebookstall.com')">Verify DNS</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tab 4: Environment Variables -->
+    <div id="detail-tab-env" style="display:none;">
+      <h3 style="margin:0 0 16px; font-size:1.1rem; font-weight:700;">Environment Variables Vault</h3>
+      
+      <div style="background:#18181b; border:1px solid #27272a; border-radius:12px; padding:24px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+          <span style="font-size:0.85rem; color:#a1a1aa;">Keys are encrypted with TLS 1.3 edge vault.</span>
+          <button class="btn btn-shadcn-secondary" style="font-size:0.8rem;" onclick="alert('Added new environment variable key.')">+ Add Secret</button>
+        </div>
+
+        <div style="font-family:monospace; font-size:0.85rem; display:flex; flex-direction:column; gap:12px;">
+          <div style="background:#050507; border:1px solid #27272a; border-radius:6px; padding:10px 14px; display:flex; justify-content:space-between;">
+            <span>OPENROUTER_API_KEY</span>
+            <span style="color:#10b981;">•••••••••••••••• (Encrypted)</span>
+          </div>
+          <div style="background:#050507; border:1px solid #27272a; border-radius:6px; padding:10px 14px; display:flex; justify-content:space-between;">
+            <span>RAZORPAY_KEY_ID</span>
+            <span style="color:#10b981;">rzp_live_•••••••• (Encrypted)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 5: Settings -->
+    <div id="detail-tab-settings" style="display:none;">
+      <h3 style="margin:0 0 16px; font-size:1.1rem; font-weight:700;">Project Settings</h3>
+      
+      <div style="background:#18181b; border:1px solid #27272a; border-radius:12px; padding:24px; max-width:600px;">
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.85rem; color:#a1a1aa; display:block; margin-bottom:6px;">Project Name</label>
+          <input type="text" class="deploy-url-input" style="width:100%;" value="ebookstall">
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:0.85rem; color:#a1a1aa; display:block; margin-bottom:6px;">Framework</label>
+          <input type="text" class="deploy-url-input" style="width:100%;" value="Next.js 16" readonly>
+        </div>
+
+        <button class="btn btn-shadcn-red" style="font-size:0.85rem;" onclick="alert('Project settings saved successfully!')">Save Settings</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Sandbox Modal -->
+  <div class="sandbox-modal-backdrop" id="sandbox-modal">
+    <div class="sandbox-modal-dialog">
+      <div class="sandbox-modal-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="status-pill live"><span class="status-dot"></span> LIVE DEPLOYMENT</span>
+          <span style="font-weight:700; font-size:0.95rem; color:#fff;" id="sandbox-title">ebookstall.opendev.app</span>
+        </div>
+        
+        <div class="sandbox-address-bar">
+          <i data-lucide="lock" style="width:13px; height:13px; color:#10b981;"></i>
+          <span id="sandbox-address-text">https://ebookstall.opendev.app</span>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <a href="preview-ebookstall.html" target="_blank" class="btn btn-shadcn-secondary" style="padding:4px 10px; font-size:0.78rem; text-decoration:none;">Open in New Tab ↗</a>
+          <button class="nav-icon-btn" onclick="closeSandboxModal()"><i data-lucide="x" style="width:16px; height:16px;"></i></button>
+        </div>
+      </div>
+      <div class="sandbox-iframe-container">
+        <iframe src="preview-ebookstall.html" class="sandbox-iframe" id="sandbox-frame"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+  <script>
+    lucide.createIcons();
+    // Parse query param
+    const params = new URLSearchParams(window.location.search);
+    const pName = params.get('p') || 'ebookstall';
+    
+    document.getElementById('proj-title').innerText = pName;
+    document.getElementById('proj-breadcrumb-name').innerText = pName;
+    document.getElementById('proj-domain-text').innerText = `https://${pName}.opendev.app`;
+    document.getElementById('proj-url-link').innerText = `https://${pName}.opendev.app`;
+
+    function switchDetailTab(tabName) {
+      ['overview', 'deployments', 'domains', 'env', 'settings'].forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`detail-tab-${t}`);
+        if (btn) btn.classList.remove('active');
+        if (content) content.style.display = 'none';
+      });
+
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      const activeContent = document.getElementById(`detail-tab-${tabName}`);
+      if (activeBtn) activeBtn.classList.add('active');
+      if (activeContent) activeContent.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

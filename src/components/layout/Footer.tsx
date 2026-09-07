@@ -9,9 +9,9 @@ export const Footer: React.FC = () => {
         
         {/* Brand & Mission */}
         <div className="md:col-span-2 space-y-4">
-          <Link to="/" className="flex items-center gap-2">
-            <img src="/logo-icon.webp" alt="Logo" className="h-7 w-auto" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
-            <span className="font-extrabold text-xl text-zinc-900 dark:text-white">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/logo-icon.webp" alt="Logo" className="h-12 sm:h-14 w-auto object-contain" onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }} />
+            <span className="font-extrabold text-2xl text-zinc-900 dark:text-white">
               opendev<span className="text-blue-600 dark:text-blue-400">-labs</span>
             </span>
           </Link>
@@ -109,8 +109,19 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto pt-12 mt-12 border-t border-zinc-200 dark:border-zinc-800/60 flex flex-col sm:flex-row items-center justify-between text-xs text-zinc-500 gap-4">
-        <div>
-          © {new Date().getFullYear()} OpenDev-Labs & Yash Ramteke. All rights reserved.
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <span>© {new Date().getFullYear()} OpenDev-Labs & Yash Ramteke. All rights reserved.</span>
+          <span className="text-[10px] font-mono text-zinc-400 dark:text-zinc-500 tracking-tight bg-zinc-100 dark:bg-zinc-900 px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800">
+            Partnered by{" "}
+            <a
+              href="https://www.vishwaleader.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-600 dark:text-zinc-300 hover:text-blue-600 dark:hover:text-blue-400 font-bold underline transition-colors"
+            >
+              VLTMPL
+            </a>
+          </span>
         </div>
         <div className="flex items-center gap-6 font-mono text-[11px]">
           <span>POSIX / Bash 5.2</span>

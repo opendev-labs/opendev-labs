@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Bot, Zap, Globe, Smartphone, Shield, Plus, Info, ExternalLink, ChevronRight, ChevronLeft, Check } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/Button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"

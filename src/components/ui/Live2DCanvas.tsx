@@ -50,8 +50,9 @@ export const Live2DCanvas: React.FC<Live2DCanvasProps> = ({
       window.addEventListener('mousemove', handleMouseMove);
     }
 
-    // Initialize particles
-    const particles = Array.from({ length: particleCount }).map(() => ({
+    // Initialize particles (Mobile optimized count)
+    const effectiveCount = width < 640 ? Math.min(particleCount, 18) : particleCount;
+    const particles = Array.from({ length: effectiveCount }).map(() => ({
       x: Math.random() * width,
       y: Math.random() * height,
       vx: (Math.random() - 0.5) * 0.4,
@@ -67,23 +68,27 @@ export const Live2DCanvas: React.FC<Live2DCanvasProps> = ({
 
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle ambient grid
-      const gridSize = 40;
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.025)';
-      ctx.lineWidth = 1;
+      const isDark = document.documentElement.classList.contains('dark');
 
-      for (let x = 0; x < width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-      }
+      // Draw subtle ambient grid on desktop
+      if (width >= 640) {
+        const gridSize = 48;
+        ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.02)' : 'rgba(0, 0, 0, 0.025)';
+        ctx.lineWidth = 1;
 
-      for (let y = 0; y < height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
+        for (let x = 0; x < width; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+
+        for (let y = 0; y < height; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
       }
 
       // Update and draw particles
@@ -99,7 +104,7 @@ export const Live2DCanvas: React.FC<Live2DCanvasProps> = ({
         // Draw particle node
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(10, 10, 10, ${p.baseAlpha})`;
+        ctx.fillStyle = isDark ? `rgba(255, 255, 255, ${p.baseAlpha})` : `rgba(10, 10, 10, ${p.baseAlpha})`;
         ctx.fill();
 
         // Connect nearby particles with delicate lines

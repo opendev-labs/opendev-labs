@@ -117,7 +117,8 @@ export const Live2DWavesCanvas: React.FC<Live2DWavesCanvasProps> = ({
         const phaseShift = mouseOffset * (0.35 + idx * 0.10);
         const yOffset = idx * (verticalBaseStep ? height * verticalBaseStep : 0);
 
-        for (let x = 0; x <= width; x += 3) {
+        const stepSize = width < 640 ? 6 : 3;
+        for (let x = 0; x <= width; x += stepSize) {
           // Primary + harmonic overtones for rich wave curve
           const y =
             centerY +

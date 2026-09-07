@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { SearchIcon, BookOpenIcon, CubeIcon, CommandLineIcon, PuzzlePieceIcon, ClipboardIcon, CheckIcon, CpuChipIcon } from '../common/Icons';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 // --- Reusable Components ---
 

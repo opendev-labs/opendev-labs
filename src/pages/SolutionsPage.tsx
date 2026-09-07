@@ -21,6 +21,17 @@ import { Button } from '../components/ui/Button';
 import { Live2DWavesCanvas } from '../components/ui/Live2DWavesCanvas';
 import { useNavigate } from 'react-router-dom';
 
+import { TypewriterHeading } from '../components/ui/TypewriterHeading';
+
+const heroPhrases = [
+  "Engineering Models Tailored to Your Business Growth",
+  "High-Performance Web Applications Built for Scale",
+  "Full-Stack Codebase Handover with Complete IP Ownership",
+  "Monthly Retainers with 24/7 Automated Backups & Monitoring",
+  "Custom Enterprise Portals & Daily Bash Automation Scripts",
+  "Production-Grade Architecture Delivered on Your Schedule"
+];
+
 export const SolutionsPage: React.FC = () => {
   const navigate = useNavigate();
   const [selectedModel, setSelectedModel] = useState<'handover' | 'retainer'>('retainer');
@@ -48,13 +59,13 @@ export const SolutionsPage: React.FC = () => {
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white transition-colors duration-200">
       <Navbar />
 
-      {/* Hero Banner */}
-      <section className="relative pt-16 pb-20 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
+      {/* Hero Banner - Screen-fit height with typing animated heading */}
+      <section className="relative min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-center items-center pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
         <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-80 z-0" waveCount={5} verticalBaseStart={0.35} />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center my-auto w-full">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 text-xs font-semibold text-blue-600 dark:text-blue-400 mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 mb-4 sm:mb-6 shadow-xs">
               <Zap className="size-3.5" /> High-Performance Software Engineering & Automation
             </span>
           </motion.div>
@@ -63,16 +74,16 @@ export const SolutionsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight text-zinc-900 dark:text-white"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl mx-auto leading-[1.06] text-zinc-900 dark:text-white min-h-[140px] sm:min-h-[180px] flex items-center justify-center"
           >
-            Engineering Models Tailored to Your Business Growth
+            <TypewriterHeading phrases={heroPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed"
+            className="mt-6 sm:mt-8 text-base sm:text-xl lg:text-2xl text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed font-medium"
           >
             Choose between a <span className="font-extrabold text-zinc-900 dark:text-white">One-Time Handover Build</span> or our flagship <span className="font-extrabold text-zinc-900 dark:text-white">Monthly Retainer (₹3,000–₹4,000/mo)</span> for automated backups, 24/7 server health monitoring, and daily bash automation scripts.
           </motion.p>
