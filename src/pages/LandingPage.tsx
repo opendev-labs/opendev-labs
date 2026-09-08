@@ -144,28 +144,28 @@ export const LandingPage: React.FC = () => {
               rel="noreferrer"
               className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
-                {/* Live Scaled Iframe Preview (Desktop) */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
+                {/* Live Scaled Iframe Preview (Mobile & Desktop Compatible) */}
                 <iframe
                   src="https://www.elite-tradinghub.com"
                   title="Elite-Trading Hub Live Site"
-                  className="hidden md:block w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity z-10"
                   style={{
                     width: '1280px',
                     height: '800px',
-                    transform: 'scale(0.32)',
+                    transform: 'scale(calc(100cqw / 1280))',
                     transformOrigin: 'top left',
                   }}
                   loading="lazy"
                 />
-                {/* Mobile & Crisp Responsive Preview Image */}
+                {/* Mobile & Fallback Responsive Preview Image */}
                 <img
                   src="/thumb-elite-tradinghub.png"
                   alt="Elite-Trading Hub Live Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 md:-z-10"
+                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
                 />
               </div>
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-blue-500/40 p-1.5 flex items-center justify-center shrink-0">
                     <img
@@ -195,28 +195,28 @@ export const LandingPage: React.FC = () => {
               rel="noreferrer"
               className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
-                {/* Live Scaled Iframe Preview (Desktop) */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
+                {/* Live Scaled Iframe Preview (Mobile & Desktop Compatible) */}
                 <iframe
                   src="https://www.vishwaleader.com"
                   title="Vishwa Leader Institute Live Site"
-                  className="hidden md:block w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity z-10"
                   style={{
                     width: '1280px',
                     height: '800px',
-                    transform: 'scale(0.32)',
+                    transform: 'scale(calc(100cqw / 1280))',
                     transformOrigin: 'top left',
                   }}
                   loading="lazy"
                 />
-                {/* Mobile & Crisp Responsive Preview Image */}
+                {/* Mobile & Fallback Responsive Preview Image */}
                 <img
                   src="/thumb-vishwaleader.png"
                   alt="Vishwa Leader Institute Live Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 md:-z-10"
+                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
                 />
               </div>
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-amber-500/40 p-1 flex items-center justify-center shrink-0">
                     <img
@@ -246,28 +246,28 @@ export const LandingPage: React.FC = () => {
               rel="noreferrer"
               className="group block rounded-none border border-zinc-300 dark:border-zinc-800 bg-white dark:bg-[#09090b] overflow-hidden hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 shadow-sm hover:shadow-2xl"
             >
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center">
-                {/* Live Scaled Iframe Preview (Desktop) */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
+                {/* Live Scaled Iframe Preview (Mobile & Desktop Compatible) */}
                 <iframe
                   src="https://www.opendev-labs.com"
                   title="OpenDev-Labs Engine Live Site"
-                  className="hidden md:block w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity"
+                  className="w-[1280px] h-[800px] absolute top-0 left-0 origin-top-left pointer-events-none border-0 select-none opacity-90 group-hover:opacity-100 transition-opacity z-10"
                   style={{
                     width: '1280px',
                     height: '800px',
-                    transform: 'scale(0.32)',
+                    transform: 'scale(calc(100cqw / 1280))',
                     transformOrigin: 'top left',
                   }}
                   loading="lazy"
                 />
-                {/* Mobile & Crisp Responsive Preview Image */}
+                {/* Mobile & Fallback Responsive Preview Image */}
                 <img
                   src="/thumb-opendevlabs.png"
                   alt="OpenDev-Labs Engine Live Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 md:-z-10"
+                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
                 />
               </div>
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800">
+              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-10 rounded-none bg-zinc-100 dark:bg-zinc-900 border border-emerald-500/40 p-1 flex items-center justify-center shrink-0">
                     <img
