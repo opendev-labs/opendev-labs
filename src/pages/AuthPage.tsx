@@ -162,154 +162,149 @@ export const AuthPage: React.FC = () => {
             </span>
           </Link>
         </div>
-      </motion.div>
-
-      {/* BOTTOM / LOWER PORTION (Exact 50% Height on Mobile, Side Panel on Desktop) */}
+      </motion.div>      {/* BOTTOM / LOWER PORTION (Exact 50% Height on Mobile, Side Panel on Desktop) */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="w-full h-[50vh] lg:h-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-10 flex flex-col justify-between items-center z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl overflow-y-auto lg:overflow-visible"
       >
-        
-        {/* Main Sign-In Content - Fixed Top Alignment (No vertical shift on toggle) */}
-        <div className="w-full max-w-sm pt-1 sm:pt-4 flex flex-col items-center">
-          {/* Mode Switcher Pill - PINNED AT TOP (Will NEVER jump or shift) */}
-          <div className="flex justify-center mb-2.5 sm:mb-5">
-            <div className="inline-flex p-0.5 sm:p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAdminMode(false);
-                  setEmail('');
-                }}
-                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
-                  !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
-                }`}
-              >
-                Client Gateway
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setIsAdminMode(true);
-                  setEmail('opendev.office@gmail.com');
-                }}
-                className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
-                  isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
-                }`}
-              >
-                Admin Sign In
-              </button>
-            </div>
-          </div>
-          
-          <div className="w-full min-h-[175px] flex flex-col justify-start">
-            {errorMessage && (
-              <motion.div
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="mb-2 p-2 sm:p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-[11px] sm:text-xs font-bold text-center"
-              >
-                {errorMessage}
-              </motion.div>
-            )}
-
-            {/* CLIENT GOOGLE SIGN-IN MODE */}
-            {!isAdminMode ? (
-              <div className="space-y-2 sm:space-y-3 pt-1 text-center">
-                <button
-                  onClick={triggerRealGoogleAuth}
-                  disabled={isAuthenticating}
-                  type="button"
-                  className="gsi-material-button"
-                >
-                  <div className="gsi-material-button-state"></div>
-                  <div className="gsi-material-button-content-wrapper">
-                    {isAuthenticating ? (
-                      <div className="size-4 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <>
-                        <div className="gsi-material-button-icon">
-                          <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlnsXlink="http://www.w3.org/1999/xlink" style={{ display: 'block' }}>
-                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                            <path fill="none" d="M0 0h48v48H0z"></path>
-                          </svg>
-                        </div>
-                        <span className="gsi-material-button-contents">Sign in with Google</span>
-                        <span style={{ display: 'none' }}>Sign in with Google</span>
-                      </>
-                    )}
-                  </div>
-                </button>
-
-                <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-tight font-medium pt-0.5">
-                  Sign in with your Google account to access your live webapp portal.
-                </p>
-              </div>
-            ) : (
-              /* ADMIN SIGN-IN FORM */
-              <form onSubmit={handleSubmit} className="space-y-2 text-xs">
-                <div className="space-y-0.5">
-                  <Input
-                    type="email"
-                    placeholder="Admin Email (opendev.office@gmail.com)"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    className="h-8 sm:h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-0.5">
-                  <div className="flex items-center justify-between">
-                    <label className="font-bold text-zinc-700 dark:text-zinc-300 text-[10px] sm:text-xs">Password</label>
-                    <a href="mailto:opendev.office@gmail.com" className="text-[10px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
-                      Forgot Password?
-                    </a>
-                  </div>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder="••••••••••••"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      className="h-8 sm:h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2 sm:top-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                    >
-                      {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
-                    </button>
-                  </div>
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isAuthenticating}
-                  className="w-full h-8 sm:h-10 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all flex items-center justify-center gap-2 mt-1"
-                >
-                  {isAuthenticating ? (
-                    <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <span>Sign In as Admin</span>
-                      <ArrowRight className="size-3.5" />
-                    </>
-                  )}
-                </Button>
-              </form>
-            )}
+        {/* 1. Mode Switcher Pill - PINNED AT TOP (Fixed position, zero shift on toggle) */}
+        <div className="w-full max-w-sm flex justify-center shrink-0 pt-1 sm:pt-2 lg:pt-4">
+          <div className="inline-flex p-0.5 sm:p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
+            <button
+              type="button"
+              onClick={() => {
+                setIsAdminMode(false);
+                setEmail('');
+              }}
+              className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
+                !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              Client Gateway
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsAdminMode(true);
+                setEmail('opendev.office@gmail.com');
+              }}
+              className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
+                isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
+              }`}
+            >
+              Admin Sign In
+            </button>
           </div>
         </div>
+        
+        {/* 2. Main Form Content - VERTICALLY CENTERED IN THE MIDDLE OF RIGHT SIDE */}
+        <div className="w-full max-w-sm my-auto py-2 flex flex-col justify-center">
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-3 p-2 sm:p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-[11px] sm:text-xs font-bold text-center"
+            >
+              {errorMessage}
+            </motion.div>
+          )}
 
-        {/* Bottom Footer Section (Positioned at bottom of right side panel) */}
+          {/* CLIENT GOOGLE SIGN-IN MODE */}
+          {!isAdminMode ? (
+            <div className="space-y-2 sm:space-y-3 text-center">
+              <button
+                onClick={triggerRealGoogleAuth}
+                disabled={isAuthenticating}
+                type="button"
+                className="gsi-material-button"
+              >
+                <div className="gsi-material-button-state"></div>
+                <div className="gsi-material-button-content-wrapper">
+                  {isAuthenticating ? (
+                    <div className="size-4 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <div className="gsi-material-button-icon">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlnsXlink="http://www.w3.org/1999/xlink" style={{ display: 'block' }}>
+                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
+                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
+                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
+                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
+                          <path fill="none" d="M0 0h48v48H0z"></path>
+                        </svg>
+                      </div>
+                      <span className="gsi-material-button-contents">Sign in with Google</span>
+                      <span style={{ display: 'none' }}>Sign in with Google</span>
+                    </>
+                  )}
+                </div>
+              </button>
+
+              <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-tight font-medium pt-0.5">
+                Sign in with your Google account to access your live webapp portal.
+              </p>
+            </div>
+          ) : (
+            /* ADMIN SIGN-IN FORM */
+            <form onSubmit={handleSubmit} className="space-y-2.5 text-xs">
+              <div className="space-y-1">
+                <Input
+                  type="email"
+                  placeholder="Admin Email (opendev.office@gmail.com)"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-zinc-700 dark:text-zinc-300 text-[11px] sm:text-xs">Password</label>
+                  <a href="mailto:opendev.office@gmail.com" className="text-[10px] sm:text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
+                    Forgot Password?
+                  </a>
+                </div>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••••••"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 sm:top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="size-3.5 sm:size-4" /> : <Eye className="size-3.5 sm:size-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isAuthenticating}
+                className="w-full h-9 sm:h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-1 flex items-center justify-center gap-2"
+              >
+                {isAuthenticating ? (
+                  <div className="size-3.5 sm:size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <span>Sign In as Admin</span>
+                    <ArrowRight className="size-3.5 sm:size-4" />
+                  </>
+                )}
+              </Button>
+            </form>
+          )}
+        </div>
+
+        {/* 3. Bottom Footer Section (Positioned at bottom of right side panel) */}
         <div className="w-full max-w-sm pt-2 sm:pt-4 space-y-1.5 sm:space-y-3 text-center shrink-0">
           {!isAdminMode && (
             <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">
