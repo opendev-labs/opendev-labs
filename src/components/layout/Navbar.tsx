@@ -91,14 +91,6 @@ export const Navbar: React.FC = () => {
               </Link>
             );
           })}
-          <a
-            href="/iamyashramteke/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3.5 py-1.5 rounded-full text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all flex items-center gap-1"
-          >
-            Yash Portfolio <ExternalLink className="size-3 text-zinc-400" />
-          </a>
         </nav>
 
         {/* Right Actions & ALWAYS-VISIBLE TOP-RIGHT END DARK MODE SWITCH */}
@@ -203,16 +195,6 @@ export const Navbar: React.FC = () => {
                 {item.label}
               </Link>
             ))}
-            <a
-              href="/iamyashramteke/"
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 py-4 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors flex items-center justify-between"
-            >
-              <span>Yash Portfolio</span>
-              <ExternalLink className="size-6 text-zinc-400" />
-            </a>
           </div>
 
           {/* Bottom Stack Action Buttons */}

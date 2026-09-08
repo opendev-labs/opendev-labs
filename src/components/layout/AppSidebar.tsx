@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Home,
   Globe,
   PlusCircle,
@@ -27,6 +28,7 @@ import { useClients } from '../../context/ClientContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cn } from '../../lib/utils';
 import { Button } from '../ui/Button';
+import { SettingsModal } from '../modals/SettingsModal';
 
 interface AppSidebarProps {
   collapsed: boolean;
@@ -55,6 +57,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const { user, logout } = useAuth();
   const { clients } = useClients();
   const { theme, toggleTheme } = useTheme();
+
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const overdueCount = clients.filter(c => c.status === 'overdue').length;
   const isDev = user?.role === 'developer';
@@ -203,39 +208,129 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
 
       {/* Bottom User Card */}
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <div className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="size-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center shrink-0">
-              {user?.name ? user.name.charAt(0) : 'Y'}
+      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative">
+        
+        {/* Drop-Up Popover Menu */}
+        {popoverOpen && (
+          <>
+            {/* Backdrop overlay to close menu on outside click */}
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setPopoverOpen(false)}
+            />
+            <div className="absolute bottom-full left-3 right-3 mb-2 p-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 space-y-1">
+              
+              {/* User Profile Header in Drop-Up */}
+              <div className="px-2.5 py-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2.5">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    className="size-8 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="size-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center shrink-0">
+                    {user?.name ? user.name.charAt(0) : 'U'}
+                  </div>
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+                    {user?.name || 'User Account'}
+                  </span>
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
+                    {user?.email || 'Registered User'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Settings Option */}
+              <button
+                onClick={() => {
+                  setPopoverOpen(false);
+                  setSettingsOpen(true);
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-left"
+              >
+                <Settings className="size-4 text-zinc-500" />
+                <span>Settings</span>
+              </button>
+
+              {/* Log Out Option */}
+              <button
+                onClick={() => {
+                  setPopoverOpen(false);
+                  logout();
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors text-left"
+              >
+                <LogOut className="size-4 text-red-500" />
+                <span>Log out</span>
+              </button>
             </div>
+          </>
+        )}
+
+        {/* User Card Content */}
+        <div
+          onClick={() => !collapsed && setPopoverOpen(!popoverOpen)}
+          className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* User Profile Picture Avatar */}
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || 'User'}
+                className="size-8 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700 shrink-0"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="size-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center shrink-0">
+                {user?.name ? user.name.charAt(0) : 'Y'}
+              </div>
+            )}
+
             {!collapsed && (
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">{user?.name || 'Yash Ramteke'}</span>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{user?.email || 'opendev.office@gmail.com'}</span>
+                <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+                  {user?.name || 'Yash Ramteke'}
+                </span>
+                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
+                  {user?.email || 'opendev.office@gmail.com'}
+                </span>
               </div>
             )}
           </div>
+
+          {/* ChevronUp Arrow-Up Toggle Button */}
           {!collapsed && (
-            <div className="flex items-center gap-1">
-              <button
-                onClick={toggleTheme}
-                className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-                title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-              >
-                {theme === 'light' ? <Moon className="size-4 text-zinc-700" /> : <Sun className="size-4 text-amber-400" />}
-              </button>
-              <button
-                onClick={logout}
-                className="text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors p-1"
-                title="Logout"
-              >
-                <ChevronDown className="size-4" />
-              </button>
-            </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPopoverOpen(!popoverOpen);
+              }}
+              className={cn(
+                "p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all",
+                popoverOpen && "bg-zinc-200 dark:bg-zinc-800 text-zinc-900 dark:text-white"
+              )}
+              title="Account Options"
+            >
+              <ChevronUp className="size-4" />
+            </button>
           )}
         </div>
       </div>
+
+      {/* Account Settings Modal */}
+      <SettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+      />
     </aside>
   </>
 );

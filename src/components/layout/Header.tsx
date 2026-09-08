@@ -146,15 +146,6 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient, 
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Dark Mode Toggle Switch - Top Right End */}
-        <button
-          onClick={toggleTheme}
-          className="size-8 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors shrink-0"
-          title={`Switch to ${theme === 'light' ? 'Dark' : 'Light'} Mode`}
-        >
-          {theme === 'light' ? <Moon className="size-4 text-zinc-700" /> : <Sun className="size-4 text-amber-400" />}
-        </button>
       </div>
     </header>
   );

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -17,7 +17,10 @@ import {
   Layers,
   Bot,
   Terminal,
-  Sparkles
+  Sparkles,
+  Cpu,
+  FlaskConical,
+  Laptop
 } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
@@ -27,6 +30,7 @@ import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 import { MiniDesktopPreview } from '../components/ui/MiniDesktopPreview';
 
 import { TypewriterHeading } from '../components/ui/TypewriterHeading';
+import { cn } from '../lib/utils';
 
 const landingPhrases = [
   "Engineering High-Performance Web Applications",
@@ -37,8 +41,133 @@ const landingPhrases = [
   "Trusted by Fast-Growing Startups & Leading Enterprises"
 ];
 
+interface ShowcaseProject {
+  id: string;
+  name: string;
+  url: string;
+  displayUrl: string;
+  category: 'production' | 'experimental';
+  categoryLabel: string;
+  badgeColor: string;
+  logoImg?: string;
+  fallbackImg?: string;
+}
+
+const showcaseProjects: ShowcaseProject[] = [
+  {
+    id: 'elite-tradinghub',
+    name: 'Elite-Trading Hub',
+    url: 'https://www.elite-tradinghub.com',
+    displayUrl: 'www.elite-tradinghub.com',
+    category: 'production',
+    categoryLabel: 'Production Platform',
+    badgeColor: 'hover:border-blue-500',
+    logoImg: '/logo-elite-tradinghub.png',
+    fallbackImg: '/thumb-elite-tradinghub.png',
+  },
+  {
+    id: 'vishwaleader',
+    name: 'Vishwa Leader Institute',
+    url: 'https://www.vishwaleader.com',
+    displayUrl: 'www.vishwaleader.com',
+    category: 'production',
+    categoryLabel: 'EdTech Gateway',
+    badgeColor: 'hover:border-amber-500',
+    logoImg: '/logo-vishwaleader.png',
+    fallbackImg: '/thumb-vishwaleader.png',
+  },
+  {
+    id: 'opendev-labs',
+    name: 'OpenDev-Labs Engine',
+    url: 'https://www.opendev-labs.com',
+    displayUrl: 'www.opendev-labs.com',
+    category: 'production',
+    categoryLabel: 'Engineering Engine',
+    badgeColor: 'hover:border-emerald-500',
+    logoImg: '/logo-opendevlabs.png',
+    fallbackImg: '/thumb-opendevlabs.png',
+  },
+  {
+    id: 'yash-portfolio',
+    name: 'Yash Ramteke Portfolio',
+    url: 'https://www.opendev-labs.com/iamyashramteke',
+    displayUrl: 'opendev-labs.com/iamyashramteke',
+    category: 'production',
+    categoryLabel: 'Lead Engineer Portfolio',
+    badgeColor: 'hover:border-purple-500',
+  },
+  {
+    id: 'agentbash',
+    name: 'AgentBash AI Engine',
+    url: 'https://agentbash.vercel.app/',
+    displayUrl: 'agentbash.vercel.app',
+    category: 'experimental',
+    categoryLabel: 'AI Agent CLI',
+    badgeColor: 'hover:border-cyan-500',
+  },
+  {
+    id: 'esoteric-intelligence',
+    name: 'Esoteric Intelligence',
+    url: 'https://esotericintelligence.vercel.app/',
+    displayUrl: 'esotericintelligence.vercel.app',
+    category: 'experimental',
+    categoryLabel: 'AI Neural Lab',
+    badgeColor: 'hover:border-violet-500',
+  },
+  {
+    id: 'vterm',
+    name: 'vTerm Terminal Engine',
+    url: 'https://vterm.onrender.com/',
+    displayUrl: 'vterm.onrender.com',
+    category: 'experimental',
+    categoryLabel: 'Web Terminal IDE',
+    badgeColor: 'hover:border-green-500',
+  },
+  {
+    id: 'opendev-github',
+    name: 'OpenDev-Labs GitHub Hub',
+    url: 'https://opendev-labs.github.io/',
+    displayUrl: 'opendev-labs.github.io',
+    category: 'experimental',
+    categoryLabel: 'Open Source Hub',
+    badgeColor: 'hover:border-zinc-500',
+  },
+  {
+    id: 'ebookstall',
+    name: 'EbookStall Platform',
+    url: 'https://ebookstall.vercel.app/',
+    displayUrl: 'ebookstall.vercel.app',
+    category: 'experimental',
+    categoryLabel: 'Digital Storefront',
+    badgeColor: 'hover:border-rose-500',
+  },
+  {
+    id: 'nanopi-ai',
+    name: 'NanoPi AI Engine',
+    url: 'https://opendev-labs-nanopi.hf.space',
+    displayUrl: 'opendev-labs-nanopi.hf.space',
+    category: 'experimental',
+    categoryLabel: 'HuggingFace AI Space',
+    badgeColor: 'hover:border-orange-500',
+  },
+  {
+    id: 'qbet-quantum',
+    name: 'QBET Quantum System',
+    url: 'https://opendev-labs.github.io/QBET/',
+    displayUrl: 'opendev-labs.github.io/QBET',
+    category: 'experimental',
+    categoryLabel: 'Quantum Emulation',
+    badgeColor: 'hover:border-teal-500',
+  },
+];
+
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState<'all' | 'production' | 'experimental'>('all');
+
+  const filteredProjects = activeCategory === 'all'
+    ? showcaseProjects
+    : showcaseProjects.filter(p => p.category === activeCategory);
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white transition-colors duration-200">
@@ -119,138 +248,122 @@ export const LandingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* 2.5 Social Proof & v0-Style Featured Work Showcase Cards */}
-      <section className="py-12 sm:py-16 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/30 transition-colors">
+      {/* 2.5 Professional Software Projects & Experimental Labs Showcase Section */}
+      <section className="py-16 sm:py-20 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/30 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8">
-            <span className="text-[11px] sm:text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest block mb-4">
-              Trusted by creators and leading enterprises
+          
+          {/* Professional Header & Subtitle */}
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <span className="inline-block px-3.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-3 border border-blue-500/20">
+              DEPLOYED SYSTEMS & EXPERIMENTAL LABS
             </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+              Featured Projects & Live Production Builds
+            </h2>
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mx-auto">
+              Explore high-performance web applications, interactive web terminal IDEs, neural AI engines, and experimental software systems engineered by OpenDev-Labs.
+            </p>
 
-            <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-12 opacity-80 grayscale hover:grayscale-0 transition-all text-xs sm:text-sm font-mono font-extrabold text-zinc-700 dark:text-zinc-300 tracking-wider">
-              <span>ELITE-TRADING HUB</span>
-              <span>VISHWA LEADER</span>
-              <span>OPENDEV LABS</span>
-              <span>YASH RAMTEKE</span>
+            {/* Interactive Category Filter Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8">
+              <button
+                onClick={() => setActiveCategory('all')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  activeCategory === 'all'
+                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700"
+                )}
+              >
+                All Projects ({showcaseProjects.length})
+              </button>
+              <button
+                onClick={() => setActiveCategory('production')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  activeCategory === 'production'
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50"
+                )}
+              >
+                Production Builds ({showcaseProjects.filter(p => p.category === 'production').length})
+              </button>
+              <button
+                onClick={() => setActiveCategory('experimental')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  activeCategory === 'experimental'
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50"
+                )}
+              >
+                Experimental Labs ({showcaseProjects.filter(p => p.category === 'experimental').length})
+              </button>
             </div>
           </div>
 
-          {/* 3 Live Desktop Miniature Screen Preview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mt-10">
-            
-            {/* Card 1: Elite-Trading Hub */}
-            <a
-              href="https://www.elite-tradinghub.com"
-              target="_blank"
-              rel="noreferrer"
-              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
-            >
-              {/* Miniature Screen Live Preview Container */}
-              <MiniDesktopPreview
-                url="https://www.elite-tradinghub.com"
-                title="Elite-Trading Hub Live Miniature Preview"
-                fallbackImg="/thumb-elite-tradinghub.png"
-              />
+          {/* 11 Live Desktop Miniature Screen Preview Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10">
+            {filteredProjects.map((project) => (
+              <a
+                key={project.id}
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className={cn(
+                  "group block rounded-xl border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1 relative",
+                  project.badgeColor
+                )}
+              >
+                {/* Miniature Screen Live Desktop Preview Container */}
+                <MiniDesktopPreview
+                  url={project.url}
+                  title={`${project.name} Live Miniature Preview`}
+                  fallbackImg={project.fallbackImg}
+                />
 
-              {/* Card Footer Info */}
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-blue-500/40 p-1 flex items-center justify-center shrink-0">
-                    <img
-                      src="/logo-elite-tradinghub.png"
-                      alt="Elite-Trading Hub Black Bull Logo"
-                      className="w-full h-full object-contain dark:invert"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
+                {/* Card Footer Info */}
+                <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {project.logoImg ? (
+                      <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 flex items-center justify-center shrink-0">
+                        <img
+                          src={project.logoImg}
+                          alt={project.name}
+                          className="w-full h-full object-contain dark:invert"
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-1 flex items-center justify-center shrink-0 font-extrabold text-xs font-mono text-blue-500">
+                        {project.name.charAt(0)}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col min-w-0">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="size-1.5 bg-emerald-500 animate-pulse rounded-full shrink-0" />
+                        <span className="font-mono font-bold text-xs text-zinc-900 dark:text-white truncate group-hover:text-blue-500 transition-colors">
+                          {project.name}
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 truncate">
+                        {project.displayUrl}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="size-2 bg-emerald-500 animate-pulse rounded-full shrink-0" />
-                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-blue-500 transition-colors">
-                      www.elite-tradinghub.com
+
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
+                      {project.categoryLabel}
                     </span>
+                    <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors" />
                   </div>
                 </div>
-                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
-              </div>
-            </a>
-
-            {/* Card 2: Vishwa Leader Institute */}
-            <a
-              href="https://www.vishwaleader.com"
-              target="_blank"
-              rel="noreferrer"
-              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
-            >
-              {/* Miniature Screen Live Preview Container */}
-              <MiniDesktopPreview
-                url="https://www.vishwaleader.com"
-                title="Vishwa Leader Institute Live Miniature Preview"
-                fallbackImg="/thumb-vishwaleader.png"
-              />
-
-              {/* Card Footer Info */}
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-amber-500/40 p-1 flex items-center justify-center shrink-0">
-                    <img
-                      src="/logo-vishwaleader.png"
-                      alt="Vishwa Leader Official Logo"
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="size-2 bg-amber-500 animate-pulse rounded-full shrink-0" />
-                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-amber-500 transition-colors">
-                      www.vishwaleader.com
-                    </span>
-                  </div>
-                </div>
-                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
-              </div>
-            </a>
-
-            {/* Card 3: OpenDev-Labs Engine */}
-            <a
-              href="https://www.opendev-labs.com"
-              target="_blank"
-              rel="noreferrer"
-              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
-            >
-              {/* Miniature Screen Live Preview Container */}
-              <MiniDesktopPreview
-                url="https://www.opendev-labs.com"
-                title="OpenDev-Labs Engine Live Miniature Preview"
-                fallbackImg="/thumb-opendevlabs.png"
-              />
-
-              {/* Card Footer Info */}
-              <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-emerald-500/40 p-1 flex items-center justify-center shrink-0">
-                    <img
-                      src="/logo-opendevlabs.png"
-                      alt="OpenDev-Labs Official Logo"
-                      className="w-full h-full object-contain"
-                      onError={(e) => {
-                        (e.target as HTMLElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 truncate">
-                    <span className="size-2 bg-emerald-500 animate-pulse rounded-full shrink-0" />
-                    <span className="font-mono font-bold text-xs sm:text-sm text-zinc-900 dark:text-white truncate group-hover:text-emerald-500 transition-colors">
-                      www.opendev-labs.com
-                    </span>
-                  </div>
-                </div>
-                <ExternalLink className="size-4 text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors shrink-0" />
-              </div>
-            </a>
+              </a>
+            ))}
           </div>
         </div>
       </section>
