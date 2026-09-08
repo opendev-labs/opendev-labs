@@ -24,6 +24,7 @@ import { Footer } from '../components/layout/Footer';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
+import { MiniDesktopPreview } from '../components/ui/MiniDesktopPreview';
 
 import { TypewriterHeading } from '../components/ui/TypewriterHeading';
 
@@ -142,47 +143,16 @@ export const LandingPage: React.FC = () => {
               href="https://www.elite-tradinghub.com"
               target="_blank"
               rel="noreferrer"
-              className="group block rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-md hover:shadow-2xl"
+              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-blue-500 dark:hover:border-blue-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
             >
-              {/* Mini Browser Bar */}
-              <div className="h-6 sm:h-7 bg-zinc-900 border-b border-zinc-800 flex items-center px-3 gap-1.5 shrink-0 z-30">
-                <div className="size-2 sm:size-2.5 rounded-full bg-red-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-amber-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-emerald-500/80" />
-                <div className="ml-2 flex-1 bg-zinc-950/90 rounded-md px-2 py-0.5 text-[9px] font-mono text-zinc-400 truncate flex items-center gap-1.5 border border-zinc-800/80">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span className="truncate">https://www.elite-tradinghub.com</span>
-                </div>
-              </div>
-
               {/* Miniature Screen Live Preview Container */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
-                {/* Live Scaled Miniature Iframe Preview (Mobile & Desktop Compatible) */}
-                <iframe
-                  src="https://www.elite-tradinghub.com"
-                  title="Elite-Trading Hub Live Miniature Preview"
-                  className="w-[1440px] h-[900px] absolute top-0 left-0 pointer-events-none border-0 select-none opacity-95 group-hover:opacity-100 transition-opacity z-10"
-                  style={{
-                    width: '1440px',
-                    height: '900px',
-                    minWidth: '1440px',
-                    minHeight: '900px',
-                    maxWidth: '1440px',
-                    maxHeight: '900px',
-                    transform: 'scale(calc(100cqw / 1440))',
-                    transformOrigin: 'top left',
-                  }}
-                  loading="lazy"
-                />
-                {/* Fallback Miniature Preview Image */}
-                <img
-                  src="/thumb-elite-tradinghub.png"
-                  alt="Elite-Trading Hub Miniature Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
-                />
-              </div>
+              <MiniDesktopPreview
+                url="https://www.elite-tradinghub.com"
+                title="Elite-Trading Hub Live Miniature Preview"
+                fallbackImg="/thumb-elite-tradinghub.png"
+              />
 
-              {/* Card Footer info */}
+              {/* Card Footer Info */}
               <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-blue-500/40 p-1 flex items-center justify-center shrink-0">
@@ -211,47 +181,16 @@ export const LandingPage: React.FC = () => {
               href="https://www.vishwaleader.com"
               target="_blank"
               rel="noreferrer"
-              className="group block rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-md hover:shadow-2xl"
+              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-amber-500 dark:hover:border-amber-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
             >
-              {/* Mini Browser Bar */}
-              <div className="h-6 sm:h-7 bg-zinc-900 border-b border-zinc-800 flex items-center px-3 gap-1.5 shrink-0 z-30">
-                <div className="size-2 sm:size-2.5 rounded-full bg-red-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-amber-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-emerald-500/80" />
-                <div className="ml-2 flex-1 bg-zinc-950/90 rounded-md px-2 py-0.5 text-[9px] font-mono text-zinc-400 truncate flex items-center gap-1.5 border border-zinc-800/80">
-                  <span className="size-1.5 rounded-full bg-amber-500 animate-pulse shrink-0" />
-                  <span className="truncate">https://www.vishwaleader.com</span>
-                </div>
-              </div>
-
               {/* Miniature Screen Live Preview Container */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
-                {/* Live Scaled Miniature Iframe Preview (Mobile & Desktop Compatible) */}
-                <iframe
-                  src="https://www.vishwaleader.com"
-                  title="Vishwa Leader Institute Live Miniature Preview"
-                  className="w-[1440px] h-[900px] absolute top-0 left-0 pointer-events-none border-0 select-none opacity-95 group-hover:opacity-100 transition-opacity z-10"
-                  style={{
-                    width: '1440px',
-                    height: '900px',
-                    minWidth: '1440px',
-                    minHeight: '900px',
-                    maxWidth: '1440px',
-                    maxHeight: '900px',
-                    transform: 'scale(calc(100cqw / 1440))',
-                    transformOrigin: 'top left',
-                  }}
-                  loading="lazy"
-                />
-                {/* Fallback Miniature Preview Image */}
-                <img
-                  src="/thumb-vishwaleader.png"
-                  alt="Vishwa Leader Institute Miniature Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
-                />
-              </div>
+              <MiniDesktopPreview
+                url="https://www.vishwaleader.com"
+                title="Vishwa Leader Institute Live Miniature Preview"
+                fallbackImg="/thumb-vishwaleader.png"
+              />
 
-              {/* Card Footer info */}
+              {/* Card Footer Info */}
               <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-amber-500/40 p-1 flex items-center justify-center shrink-0">
@@ -280,47 +219,16 @@ export const LandingPage: React.FC = () => {
               href="https://www.opendev-labs.com"
               target="_blank"
               rel="noreferrer"
-              className="group block rounded-2xl border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 shadow-md hover:shadow-2xl"
+              className="group block rounded-lg border border-zinc-300 dark:border-zinc-800 bg-[#09090b] overflow-hidden hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 shadow-md hover:shadow-2xl hover:-translate-y-1"
             >
-              {/* Mini Browser Bar */}
-              <div className="h-6 sm:h-7 bg-zinc-900 border-b border-zinc-800 flex items-center px-3 gap-1.5 shrink-0 z-30">
-                <div className="size-2 sm:size-2.5 rounded-full bg-red-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-amber-500/80" />
-                <div className="size-2 sm:size-2.5 rounded-full bg-emerald-500/80" />
-                <div className="ml-2 flex-1 bg-zinc-950/90 rounded-md px-2 py-0.5 text-[9px] font-mono text-zinc-400 truncate flex items-center gap-1.5 border border-zinc-800/80">
-                  <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-                  <span className="truncate">https://www.opendev-labs.com</span>
-                </div>
-              </div>
-
               {/* Miniature Screen Live Preview Container */}
-              <div className="relative aspect-[16/10] overflow-hidden bg-zinc-950 flex items-center justify-center [container-type:inline-size]">
-                {/* Live Scaled Miniature Iframe Preview (Mobile & Desktop Compatible) */}
-                <iframe
-                  src="https://www.opendev-labs.com"
-                  title="OpenDev-Labs Engine Live Miniature Preview"
-                  className="w-[1440px] h-[900px] absolute top-0 left-0 pointer-events-none border-0 select-none opacity-95 group-hover:opacity-100 transition-opacity z-10"
-                  style={{
-                    width: '1440px',
-                    height: '900px',
-                    minWidth: '1440px',
-                    minHeight: '900px',
-                    maxWidth: '1440px',
-                    maxHeight: '900px',
-                    transform: 'scale(calc(100cqw / 1440))',
-                    transformOrigin: 'top left',
-                  }}
-                  loading="lazy"
-                />
-                {/* Fallback Miniature Preview Image */}
-                <img
-                  src="/thumb-opendevlabs.png"
-                  alt="OpenDev-Labs Engine Miniature Preview"
-                  className="w-full h-full object-cover object-top absolute inset-0 z-0"
-                />
-              </div>
+              <MiniDesktopPreview
+                url="https://www.opendev-labs.com"
+                title="OpenDev-Labs Engine Live Miniature Preview"
+                fallbackImg="/thumb-opendevlabs.png"
+              />
 
-              {/* Card Footer info */}
+              {/* Card Footer Info */}
               <div className="p-3.5 sm:p-4 flex items-center justify-between gap-3 border-t border-zinc-200 dark:border-zinc-800 relative z-20 bg-white dark:bg-[#09090b]">
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="size-9 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-emerald-500/40 p-1 flex items-center justify-center shrink-0">
