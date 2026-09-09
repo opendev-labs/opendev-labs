@@ -64,7 +64,7 @@ export const Navbar: React.FC = () => {
             }}
           />
           <div className="flex flex-col">
-            <span className="font-extrabold text-lg tracking-tight text-zinc-900 dark:text-white flex items-center gap-1">
+            <span className="font-extrabold text-lg tracking-tight text-zinc-900 dark:text-white">
               opendev<span className="text-blue-600 dark:text-blue-400">-labs</span>
             </span>
             <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 font-semibold -mt-1 tracking-wider uppercase">
@@ -174,7 +174,8 @@ export const Navbar: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed top-16 left-0 right-0 bottom-0 z-40 bg-white/98 dark:bg-zinc-950/98 backdrop-blur-xl border-b border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto text-zinc-900 dark:text-zinc-100 md:hidden"
+          className="fixed top-16 left-0 right-0 bottom-0 z-50 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto text-zinc-900 dark:text-zinc-100 md:hidden opacity-100"
+          style={{ backgroundColor: theme === 'dark' ? '#09090b' : '#ffffff' }}
         >
           {/* Menu List - Runway Typography Style */}
           <div className="flex flex-col my-auto py-2">
@@ -201,47 +202,47 @@ export const Navbar: React.FC = () => {
           <div className="pt-4 space-y-3">
             {isAuthenticated && user ? (
               <>
-                <Button
+                <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     navigate(user.role === 'developer' ? '/dashboard' : '/client/portal');
                   }}
-                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm rounded-xl shadow-md"
+                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm uppercase tracking-widest rounded-xl shadow-md flex items-center justify-center transition-transform active:scale-95"
                 >
                   My {user.role === 'developer' ? 'Studio Dashboard' : 'Client Portal'}
-                </Button>
-                <Button
-                  variant="outline"
+                </button>
+                <button
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full h-12 border-zinc-300 dark:border-zinc-700 text-red-600 dark:text-red-400 font-bold text-sm rounded-xl"
+                  className="w-full h-12 bg-white text-black hover:bg-zinc-100 font-extrabold text-sm uppercase tracking-widest rounded-xl border border-zinc-300 shadow-md flex items-center justify-center transition-transform active:scale-95"
+                  style={{ backgroundColor: '#ffffff', color: '#000000' }}
                 >
                   Sign Out
-                </Button>
+                </button>
               </>
             ) : (
               <>
-                <Button
+                <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     navigate('/auth');
                   }}
-                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm rounded-xl shadow-md"
+                  className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm uppercase tracking-widest rounded-xl shadow-md flex items-center justify-center transition-transform active:scale-95"
                 >
                   Get Started
-                </Button>
-                <Button
-                  variant="outline"
+                </button>
+                <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     navigate('/auth');
                   }}
-                  className="w-full h-12 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold text-sm rounded-xl"
+                  className="w-full h-12 bg-white text-black hover:bg-zinc-100 font-extrabold text-sm uppercase tracking-widest rounded-xl border border-zinc-300 shadow-md flex items-center justify-center transition-transform active:scale-95"
+                  style={{ backgroundColor: '#ffffff', color: '#000000' }}
                 >
                   Login
-                </Button>
+                </button>
               </>
             )}
           </div>
