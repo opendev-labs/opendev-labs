@@ -50,9 +50,9 @@ export function ChatSessionView({
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const [chatPanelWidth, setChatPanelWidth] = useState<number>(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth / 2;
+      return Math.min(390, Math.floor(window.innerWidth * 0.32));
     }
-    return 600;
+    return 390;
   });
   const chatViewRef = useRef<HTMLDivElement>(null);
   const isResizingRef = useRef(false);
@@ -106,8 +106,8 @@ export function ChatSessionView({
     function onMouseMove(mouseMoveEvent: MouseEvent) {
       if (!isResizingRef.current) return;
       const newWidth = startWidth + mouseMoveEvent.clientX - startPosition;
-      const minWidth = 400;
-      const maxWidth = window.innerWidth - 400;
+      const minWidth = 300;
+      const maxWidth = 550;
       if (newWidth >= minWidth && newWidth <= maxWidth) {
         setChatPanelWidth(newWidth);
       }
@@ -126,96 +126,99 @@ export function ChatSessionView({
   }, [chatPanelWidth]);
 
   return (
-    <div className="flex flex-col h-full bg-background text-muted-foreground selection:bg-primary/20 selection:text-foreground overflow-hidden">
-      {/* 🏗️ UNIFIED WORKSPACE HEADER */}
-      <header className="h-[52px] border-b border-border bg-background flex items-center justify-between px-4 z-40">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <h1 className="text-sm font-medium text-foreground transition-all cursor-default">{session.title || 'Untitled Session'}</h1>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-900 border border-border rounded-md">
-               <span className="text-[11px] font-medium text-muted-foreground">Public</span>
-            </div>
-            <button className="text-muted-foreground hover:text-foreground transition-colors">
-              <ChevronsRightIcon className="w-4 h-4" />
-            </button>
+    <div className="flex flex-col h-full bg-[#050505] text-zinc-100 selection:bg-[#00f2fe]/30 selection:text-white overflow-hidden">
+      {/* 🏗️ OPENSTUDIO $1M MINIMAL WORKSPACE HEADER */}
+      <header className="h-11 border-b border-zinc-900 bg-[#050505] flex items-center justify-between px-3 z-40 shrink-0 select-none">
+        {/* LEFT: LOGO BADGE, SESSION TITLE & LIVE VM STATUS */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-6 h-6 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300 shrink-0">
+            <CodeIcon className="w-3.5 h-3.5 text-[#00f2fe]" />
+          </div>
+          <h1 className="text-xs font-semibold text-white tracking-tight truncate max-w-[160px] sm:max-w-[280px]">
+            {session.title || 'Create a login page'}
+          </h1>
+          <div className="hidden md:flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-bold text-emerald-400 shrink-0">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>CodeDevBox VM</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          {/* VIEW TOGGLES */}
-          <div className="flex items-center bg-black border border-border rounded-lg p-1">
+        {/* RIGHT: CODE | PREVIEW TOGGLE, EXPORT, SPLIT ICON, PUBLISH BUTTON */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* CODE / PREVIEW TAB PILL */}
+          <div className="flex items-center bg-zinc-900/90 border border-zinc-800/80 rounded-lg p-0.5">
             <button
-               onClick={() => setActiveTab('preview')}
-               className={`px-3 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'preview' ? 'bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-zinc-300'}`}
+              onClick={() => setActiveTab('code')}
+              className={`px-3 py-0.5 text-[11px] font-bold rounded transition-all cursor-pointer ${
+                activeTab === 'code' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}
             >
-               Preview
+              CODE
             </button>
             <button
-               onClick={() => setActiveTab('code')}
-               className={`px-2 py-1 text-[12px] font-medium rounded-md transition-all ${activeTab === 'code' ? 'bg-zinc-800 text-foreground shadow-sm' : 'text-muted-foreground hover:text-zinc-300'}`}
+              onClick={() => setActiveTab('preview')}
+              className={`px-3 py-0.5 text-[11px] font-bold rounded transition-all cursor-pointer ${
+                activeTab === 'preview' 
+                  ? 'bg-white text-black shadow-sm' 
+                  : 'text-zinc-400 hover:text-white'
+              }`}
             >
-               <CodeIcon className="w-4 h-4" />
+              PREVIEW
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={async () => {
-                if (!isLinked) {
-                  const success = await LocalSyncService.linkFolder();
-                  if (success) {
-                    setIsLinked(true);
-                    toast.success(`Linked to local folder: ${LocalSyncService.getLinkedFolderName()}`);
-                    LocalSyncService.syncToLocal(session.fileTree);
-                  }
-                }
-              }}
-              className={`px-3 py-1.5 transition-colors flex items-center gap-2 text-[11px] font-medium border rounded-md ${isLinked ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'text-muted-foreground hover:text-foreground border-border hover:bg-zinc-800'}`}
-              title="Sync to Local Folder"
-            >
-              {isLinked ? 'Syncing Active' : 'Link Folder'}
-            </button>
-            {isLinked && (
-              <button
-                onClick={async () => {
-                  const files = await LocalSyncService.pullFromLocal();
-                  if (files && files.length > 0) {
-                    onReplaceFileTree(files);
-                    toast.success(`Pulled ${files.length} files from local folder.`);
-                  } else {
-                    toast.error("Failed to pull files or folder is empty.");
-                  }
-                }}
-                className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-foreground text-[11px] font-medium rounded-md transition-colors border border-zinc-700"
-                title="Pull from Local Folder"
-              >
-                Pull
-              </button>
-            )}
-            <button
-              onClick={async () => {
-                if (!user || !profile) { toast.error('Login required to share.'); return; }
-                try {
-                  const content = `🚀 Built "${session.title}" with OpenStudio!\n\n${session.fileTree.length} files generated. Check it out!\n\n#OpenStudio #WebDev`;
-                  await hubService.shareToHub(user, profile, content, session.title);
-                  toast.success('Shared to OpenHub!');
-                } catch (e) {
-                  toast.error('Failed to share.');
-                }
-              }}
-              className="text-muted-foreground hover:text-foreground p-2 transition-colors"
-              title="Share to OpenHub"
-            >
-              <ShareIcon className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => setShowDeployDialog(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-zinc-100 transition-colors text-black rounded-lg text-[12px] font-bold ml-1 shadow-2xl"
-            >
-              <DeployIcon className="w-3.5 h-3.5" />
-              Deploy
-            </button>
-          </div>
+          {/* EXPORT PROJECT BUTTON */}
+          <button
+            onClick={() => {
+              try {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session.fileTree, null, 2));
+                const downloadAnchor = document.createElement('a');
+                downloadAnchor.setAttribute("href", dataStr);
+                downloadAnchor.setAttribute("download", `${(session.title || 'openstudio-project').toLowerCase().replace(/[^a-z0-9]/g, '-')}-files.json`);
+                document.body.appendChild(downloadAnchor);
+                downloadAnchor.click();
+                downloadAnchor.remove();
+                toast.success('Workspace files exported successfully!');
+              } catch (e) {
+                toast.error('Export failed.');
+              }
+            }}
+            className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-300 hover:text-white transition-all cursor-pointer"
+            title="Export Project Files JSON"
+          >
+            <span>⬇ Export</span>
+          </button>
+
+          {/* SPLIT TOGGLE ICON */}
+          <button
+            onClick={() => setIsCodeViewVisible(!isCodeViewVisible)}
+            className="p-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            title="Toggle Split View"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17V7m6 10V7M3 5h18v14H3V5z" />
+            </svg>
+          </button>
+
+          {/* PUBLISH BUTTON */}
+          <button
+            onClick={async () => {
+              if (!user || !profile) { toast.error('Login required to publish.'); return; }
+              try {
+                const content = `🚀 Published "${session.title}" on OpenStudio!\n\n${session.fileTree.length} files materialized.`;
+                await hubService.shareToHub(user, profile, content, session.title);
+                toast.success('Project published successfully!');
+              } catch (e) {
+                toast.error('Failed to publish project.');
+              }
+            }}
+            className="flex items-center gap-1 px-3 py-1 bg-[#f02050] hover:bg-[#d01840] text-white font-extrabold rounded-lg text-[11px] shadow-[0_0_12px_rgba(240,32,80,0.3)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <span>☆</span>
+            <span>PUBLISH</span>
+          </button>
         </div>
       </header>
 
@@ -224,7 +227,7 @@ export function ChatSessionView({
         {/* CHAT PANEL */}
         <motion.div
           ref={chatViewRef}
-          className="h-full bg-background overflow-hidden relative"
+          className="h-full bg-[#09090b] overflow-hidden relative border-r border-zinc-800/60"
           initial={false}
           animate={{ width: isCodeViewVisible ? `${chatPanelWidth}px` : '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -245,17 +248,16 @@ export function ChatSessionView({
         <AnimatePresence>
           {isCodeViewVisible && (
             <>
-              {/* SUBTLE RESIZER — `relative` so the hit-area child stays scoped */}
+              {/* SUBTLE RESIZER */}
               <div
                 onMouseDown={startResizing}
-                className="relative w-[5px] h-full cursor-col-resize bg-zinc-900 hover:bg-zinc-600 transition-colors flex-shrink-0 z-30"
+                className="relative w-[6px] h-full cursor-col-resize bg-zinc-900 hover:bg-[#f02050] transition-colors flex-shrink-0 z-30"
               >
-                {/* Expanded invisible hit-area — cursor-col-resize keeps cursor consistent */}
                 <div className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize z-10" />
               </div>
 
               <motion.div
-                className="flex-1 h-full bg-background relative overflow-hidden"
+                className="flex-1 h-full bg-[#09090b] relative overflow-hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

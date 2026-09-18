@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Steakies Luxury Grill — Curated by opendev-labs</title>
+  <link rel="canonical" href="https://www.opendev-labs.com/templates/food/steakies/index.html">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            steak: '#0c0a09',
+            amberGold: '#d97706',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-steak text-zinc-200 font-sans selection:bg-amber-600 selection:text-white">
+
+  <!-- Header -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-black/80 backdrop-blur-md border-b border-amber-900/30">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="flex flex-col">
+        <span class="font-serif text-2xl font-bold tracking-widest text-amber-500 uppercase">Steakies</span>
+        <span class="text-[9px] uppercase tracking-widest text-zinc-400">Luxury Grill & Prime Cuts</span>
+      </a>
+
+      <nav class="hidden md:flex items-center space-x-8 text-xs uppercase tracking-widest text-zinc-400 font-medium">
+        <a href="#about" class="hover:text-amber-500 transition">Our Story</a>
+        <a href="#menu" class="hover:text-amber-500 transition">Prime Menu</a>
+        <a href="#chefs" class="hover:text-amber-500 transition">Master Chefs</a>
+        <a href="#reserve" class="hover:text-amber-500 transition">Reserve Table</a>
+      </nav>
+
+      <a href="#reserve" class="px-6 py-2.5 rounded-full text-xs uppercase font-bold tracking-wider bg-amber-600 hover:bg-amber-500 text-black transition shadow-lg">
+        Book Table
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="about" class="relative min-h-screen flex items-center pt-28 pb-16 px-6 max-w-7xl mx-auto">
+    <div class="grid lg:grid-cols-12 gap-12 items-center w-full">
+      <div class="lg:col-span-7 space-y-6">
+        <span class="px-4 py-1.5 rounded-full bg-amber-950/80 border border-amber-600/40 text-amber-400 text-xs font-bold uppercase tracking-widest inline-block">
+          Prime Dry-Aged Steaks & Fine Wine
+        </span>
+
+        <h1 class="font-serif text-5xl sm:text-7xl font-bold leading-tight text-white">
+          Where Fire Meets <br><span class="italic text-amber-500">Culinary Perfection.</span>
+        </h1>
+
+        <p class="text-zinc-400 text-base sm:text-lg max-w-xl font-light leading-relaxed">
+          Savor hand-selected USDA Prime steaks, wood-fired seafood, and rare vintage wines in an atmospheric luxury setting.
+        </p>
+
+        <div class="flex flex-wrap gap-4 pt-4">
+          <a href="#reserve" class="px-8 py-4 rounded-full bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase text-xs tracking-wider transition shadow-xl">
+            Reserve Your Table Now
+          </a>
+          <a href="#menu" class="px-8 py-4 rounded-full border border-zinc-700 hover:bg-zinc-900 text-white font-bold uppercase text-xs tracking-wider transition">
+            Explore Menu
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 relative">
+        <div class="relative aspect-[4/5] rounded-3xl overflow-hidden border border-amber-500/30 shadow-2xl">
+          <img src="https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop" alt="Grilled Steak" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+          <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-black/80 backdrop-blur-md border border-amber-900/40">
+            <p class="font-serif text-lg text-white">Ribeye 45-Day Dry Aged</p>
+            <p class="text-xs text-amber-400 mt-1">Wood-fired over white oak charcoal</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="py-24 px-6 border-t border-zinc-900 bg-zinc-950">
+    <div class="max-w-6xl mx-auto text-center mb-16">
+      <span class="text-xs uppercase tracking-widest text-amber-500 font-bold">Curated Selection</span>
+      <h2 class="font-serif text-4xl sm:text-5xl font-bold text-white mt-2">Signature Cuts & Offerings</h2>
+    </div>
+
+    <div class="max-w-4xl mx-auto grid sm:grid-cols-2 gap-8">
+      <div class="p-6 rounded-2xl bg-zinc-900/60 border border-amber-950 flex justify-between items-start">
+        <div>
+          <h4 class="font-serif text-xl text-white font-bold">Tomahawk Ribeye 32oz</h4>
+          <p class="text-xs text-zinc-400 mt-1 font-light">USDA Prime, roasted garlic herb butter, smoked salt</p>
+        </div>
+        <span class="font-serif text-xl text-amber-400 font-bold">$125</span>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-zinc-900/60 border border-amber-950 flex justify-between items-start">
+        <div>
+          <h4 class="font-serif text-xl text-white font-bold">A5 Japanese Wagyu Striploin</h4>
+          <p class="text-xs text-zinc-400 mt-1 font-light">Miyazaki prefecture, served on volcanic hot stone</p>
+        </div>
+        <span class="font-serif text-xl text-amber-400 font-bold">$185</span>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-zinc-900/60 border border-amber-950 flex justify-between items-start">
+        <div>
+          <h4 class="font-serif text-xl text-white font-bold">Filet Mignon 8oz</h4>
+          <p class="text-xs text-zinc-400 mt-1 font-light">Center-cut tenderloin, truffle demi-glace</p>
+        </div>
+        <span class="font-serif text-xl text-amber-400 font-bold">$78</span>
+      </div>
+
+      <div class="p-6 rounded-2xl bg-zinc-900/60 border border-amber-950 flex justify-between items-start">
+        <div>
+          <h4 class="font-serif text-xl text-white font-bold">Chilean Sea Bass</h4>
+          <p class="text-xs text-zinc-400 mt-1 font-light">Pan-seared, miso glaze, roasted asparagus</p>
+        </div>
+        <span class="font-serif text-xl text-amber-400 font-bold">$68</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reservation Section -->
+  <section id="reserve" class="py-24 px-6 max-w-4xl mx-auto text-center">
+    <div class="p-8 sm:p-12 rounded-3xl bg-zinc-900 border border-amber-900/40">
+      <span class="text-xs uppercase tracking-widest text-amber-500 font-bold">Instant Booking</span>
+      <h2 class="font-serif text-3xl sm:text-4xl text-white font-bold mt-2">Reserve Your Table</h2>
+      <form onsubmit="event.preventDefault(); alert('Reservation submitted! We look forward to hosting you.');" class="mt-8 space-y-4 text-xs text-left">
+        <div class="grid sm:grid-cols-2 gap-4">
+          <input type="text" placeholder="Full Name" required class="p-3 rounded-xl bg-black border border-zinc-800 text-white focus:outline-none focus:border-amber-500">
+          <input type="email" placeholder="Email Address" required class="p-3 rounded-xl bg-black border border-zinc-800 text-white focus:outline-none focus:border-amber-500">
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <input type="date" required class="p-3 rounded-xl bg-black border border-zinc-800 text-white focus:outline-none focus:border-amber-500">
+          <select class="p-3 rounded-xl bg-black border border-zinc-800 text-white focus:outline-none focus:border-amber-500">
+            <option>2 Guests</option>
+            <option>4 Guests</option>
+            <option>6+ Guests (VIP Table)</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full py-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold uppercase tracking-wider text-xs transition">
+          Confirm Table Reservation
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 border-t border-zinc-900 text-center text-xs text-zinc-500">
+    Crafted with open-source excellence by <a href="https://www.opendev-labs.com/templates" class="text-amber-500 font-bold hover:underline">opendev-labs</a> — Free &amp; Production Ready.
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

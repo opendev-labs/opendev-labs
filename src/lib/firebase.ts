@@ -35,8 +35,16 @@ if (apiKey && apiKey.length > 10) {
   try {
     app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     auth = getAuth(app);
-    const dbId = getEnv("DATABASE_ID") || "opendev-labs-data";
-    db = getFirestore(app, dbId);
+    try {
+      const dbId = getEnv("DATABASE_ID") || "opendev-labs-databse";
+      db = dbId ? getFirestore(app, dbId) : getFirestore(app);
+    } catch (dbErr) {
+      try {
+        db = getFirestore(app);
+      } catch (e) {
+        console.warn("Firestore default fallback error:", e);
+      }
+    }
     storage = getStorage(app);
 
     if (typeof window !== "undefined") {

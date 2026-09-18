@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client, PaymentRecord, Invoice, MaintenanceTicket, NotificationItem, ProjectRequest, ChangelogItem, PaymentNotification } from '../types';
+import { Client, PaymentRecord, Invoice, MaintenanceTicket, NotificationItem, ProjectRequest, ChangelogItem, PaymentNotification, CustomAgent } from '../types';
+import { db } from '../lib/firebase';
+import { collection, doc, setDoc, deleteDoc, onSnapshot } from 'firebase/firestore';
 
 interface ClientContextType {
   clients: Client[];
@@ -10,6 +12,7 @@ interface ClientContextType {
   projectRequests: ProjectRequest[];
   changelogs: ChangelogItem[];
   paymentNotifications: PaymentNotification[];
+  customAgents: CustomAgent[];
   addClient: (client: Omit<Client, 'id' | 'joinedDate'>) => Client;
   updateClient: (client: Client) => void;
   deleteClient: (id: string) => void;
@@ -32,7 +35,123 @@ interface ClientContextType {
   rejectPaymentNotification: (id: string) => void;
 }
 
-const INITIAL_CLIENTS: Client[] = [];
+const INITIAL_CLIENTS: Client[] = [
+  {
+    id: 'client-1',
+    name: 'Elite Trading Hub',
+    company: 'Elite Trading Systems Ltd',
+    email: 'rahul.sharma@elite-trading.com',
+    phone: '+91 98765 43210',
+    websiteUrl: 'https://elite-tradinghub.com',
+    domain: 'elite-tradinghub.com',
+    websiteStatus: 'completed',
+    advancePaid: true,
+    advanceAmount: 25000,
+    previewUrl: 'https://elite-tradinghub.com',
+    billingType: 'monthly_retainer',
+    monthlyFee: 45000,
+    currency: 'INR',
+    billingCycleDay: 5,
+    nextPaymentDue: '2026-10-05',
+    status: 'paid',
+    joinedDate: '2026-08-10',
+    razorpayPaymentLink: 'https://rzp.io/l/elitetradinghub',
+    notes: 'High-frequency algorithmic trading web application with real-time WebSocket charts.',
+    clientCode: 'ELITE2026',
+    password: 'client123',
+  },
+  {
+    id: 'client-2',
+    name: 'Vishwa Leader Corp',
+    company: 'Vishwa Leader Global Enterprises',
+    email: 'priya.patel@techfirm.io',
+    phone: '+91 98123 45678',
+    websiteUrl: 'https://vishwaleadr.com',
+    domain: 'vishwaleadr.com',
+    websiteStatus: 'completed',
+    advancePaid: true,
+    advanceAmount: 35000,
+    previewUrl: 'https://vishwaleadr.com',
+    billingType: 'monthly_retainer',
+    monthlyFee: 65000,
+    currency: 'INR',
+    billingCycleDay: 10,
+    nextPaymentDue: '2026-10-10',
+    status: 'paid',
+    joinedDate: '2026-08-15',
+    razorpayPaymentLink: 'https://rzp.io/l/vishwaleadr',
+    notes: 'Global leadership news, analytics & community portal built with Next.js & Firebase.',
+    clientCode: 'VISHWA2026',
+    password: 'client123',
+  },
+  {
+    id: 'client-3',
+    name: 'OpenDev-Labs Architecture',
+    company: 'OpenDev-Labs Sovereign Agency',
+    email: 'opendev.office@gmail.com',
+    phone: '+91 91234 56789',
+    websiteUrl: 'https://opendev-labs.com',
+    domain: 'opendev-labs.com',
+    websiteStatus: 'completed',
+    advancePaid: true,
+    advanceAmount: 50000,
+    previewUrl: 'https://opendev-labs.com',
+    billingType: 'monthly_retainer',
+    monthlyFee: 120000,
+    currency: 'INR',
+    billingCycleDay: 1,
+    nextPaymentDue: '2026-10-01',
+    status: 'paid',
+    joinedDate: '2026-08-01',
+    razorpayPaymentLink: 'https://rzp.io/l/opendevlabs',
+    notes: 'Primary agency infrastructure, Void IDE terminal, and custom AI agent execution suite.',
+    clientCode: 'OPENDEV2026',
+    password: 'client123',
+  }
+];
+
+const INITIAL_CUSTOM_AGENTS: CustomAgent[] = [
+  {
+    id: 'agent-1',
+    name: 'QBET Trading Execution Agent',
+    model: 'Gemini 1.5 Pro',
+    projectKey: 'qbet-trading',
+    targetDomain: 'elite-tradinghub.com',
+    status: 'active',
+    requests24h: 18450,
+    latencyMs: 32,
+    accuracyRate: '99.4%',
+    description: 'Executes sub-second orderbook risk checks and automated stop-loss adjustments.',
+    lastTrained: '2026-09-08 14:30',
+  },
+  {
+    id: 'agent-2',
+    name: 'VishwaLead Intelligence Bot',
+    model: 'Gemini 1.5 Flash',
+    projectKey: 'vishwa-ai',
+    targetDomain: 'vishwaleadr.com',
+    status: 'active',
+    requests24h: 12100,
+    latencyMs: 45,
+    accuracyRate: '98.9%',
+    description: 'Summarizes global leadership news, extracts entity sentiment, and auto-posts feeds.',
+    lastTrained: '2026-09-09 09:15',
+  },
+  {
+    id: 'agent-3',
+    name: 'AgentBash Infrastructure Agent',
+    model: 'Gemini 2.0 Flash',
+    projectKey: 'agentbash-core',
+    targetDomain: 'opendev-labs.com',
+    status: 'active',
+    requests24h: 39200,
+    latencyMs: 18,
+    accuracyRate: '99.8%',
+    description: 'Autonomous POSIX bash script generation, AST validation, and auto-healing runner.',
+    lastTrained: '2026-09-09 17:00',
+  }
+];
+
 const INITIAL_PAYMENTS: PaymentRecord[] = [];
 const INITIAL_INVOICES: Invoice[] = [];
 const INITIAL_TICKETS: MaintenanceTicket[] = [];
@@ -45,9 +164,11 @@ const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [clients, setClients] = useState<Client[]>(() => {
-    const saved = localStorage.getItem('opendev_clients_v5');
+    const saved = localStorage.getItem('opendev_clients_v6');
     return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
   });
+
+  const [customAgents] = useState<CustomAgent[]>(INITIAL_CUSTOM_AGENTS);
 
   const [payments, setPayments] = useState<PaymentRecord[]>(() => {
     const saved = localStorage.getItem('opendev_payments_v5');
@@ -84,8 +205,54 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return saved ? JSON.parse(saved) : INITIAL_PAYMENT_NOTIFICATIONS;
   });
 
+  // 1. Real-time Firestore Clients Listener & Auto-Seeding
   useEffect(() => {
-    localStorage.setItem('opendev_clients_v5', JSON.stringify(clients));
+    if (!db) return;
+
+    const unsubClients = onSnapshot(collection(db, "clients"), async (snapshot) => {
+      if (snapshot.empty) {
+        // Automatically seed INITIAL_CLIENTS into Firestore
+        try {
+          for (const c of INITIAL_CLIENTS) {
+            await setDoc(doc(db, "clients", c.id), c);
+          }
+        } catch (seedErr) {
+          console.warn("Error seeding clients into Firestore:", seedErr);
+        }
+        return;
+      }
+
+      const firestoreClients: Client[] = snapshot.docs.map(d => ({
+        id: d.id,
+        ...(d.data() as Omit<Client, 'id'>)
+      }));
+
+      setClients(firestoreClients);
+    }, (err) => {
+      console.warn("Clients onSnapshot error:", err);
+    });
+
+    const unsubPayments = onSnapshot(collection(db, "payments"), (snapshot) => {
+      if (!snapshot.empty) {
+        const firestorePayments: PaymentRecord[] = snapshot.docs.map(d => ({
+          id: d.id,
+          ...(d.data() as Omit<PaymentRecord, 'id'>)
+        }));
+        setPayments(firestorePayments);
+      }
+    }, (err) => {
+      console.warn("Payments onSnapshot error:", err);
+    });
+
+    return () => {
+      unsubClients();
+      unsubPayments();
+    };
+  }, []);
+
+  // Local Storage Backups
+  useEffect(() => {
+    localStorage.setItem('opendev_clients_v6', JSON.stringify(clients));
   }, [clients]);
 
   useEffect(() => {
@@ -93,15 +260,15 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [payments]);
 
   useEffect(() => {
-    localStorage.setItem('opendev_invoices_v4', JSON.stringify(invoices));
+    localStorage.setItem('opendev_invoices_v5', JSON.stringify(invoices));
   }, [invoices]);
 
   useEffect(() => {
-    localStorage.setItem('opendev_tickets_v4', JSON.stringify(tickets));
+    localStorage.setItem('opendev_tickets_v5', JSON.stringify(tickets));
   }, [tickets]);
 
   useEffect(() => {
-    localStorage.setItem('opendev_notifications_v4', JSON.stringify(notifications));
+    localStorage.setItem('opendev_notifications_v5', JSON.stringify(notifications));
   }, [notifications]);
 
   useEffect(() => {
@@ -109,72 +276,103 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [paymentNotifications]);
 
   const addClient = (clientData: Omit<Client, 'id' | 'joinedDate'>): Client => {
+    const newId = `client-${Date.now()}`;
     const newClient: Client = {
       ...clientData,
-      id: `client-${Date.now()}`,
+      id: newId,
       joinedDate: new Date().toISOString().split('T')[0],
       razorpayPaymentLink: clientData.razorpayPaymentLink || `https://rzp.io/l/opendev-${clientData.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
     };
+
     setClients(prev => [...prev, newClient]);
+
+    if (db) {
+      setDoc(doc(db, "clients", newId), newClient).catch(err => {
+        console.warn("Error adding client to Firestore:", err);
+      });
+    }
+
     return newClient;
   };
 
   const updateClient = (updatedClient: Client) => {
     setClients(prev => prev.map(c => (c.id === updatedClient.id ? updatedClient : c)));
+
+    if (db) {
+      setDoc(doc(db, "clients", updatedClient.id), updatedClient, { merge: true }).catch(err => {
+        console.warn("Error updating client in Firestore:", err);
+      });
+    }
   };
 
   const deleteClient = (id: string) => {
     setClients(prev => prev.filter(c => c.id !== id));
+
+    if (db) {
+      deleteDoc(doc(db, "clients", id)).catch(err => {
+        console.warn("Error deleting client from Firestore:", err);
+      });
+    }
   };
 
   const clearAllClients = () => {
+    clients.forEach(c => {
+      if (db) deleteDoc(doc(db, "clients", c.id)).catch(() => {});
+    });
     setClients([]);
   };
 
   const markPaymentStatus = (clientId: string, month: string, status: 'paid' | 'pending' | 'overdue') => {
+    const client = clients.find(c => c.id === clientId);
+    const payStatus = status === 'paid' ? 'paid' : status === 'overdue' ? 'overdue' : 'pending';
+
     setClients(prev =>
       prev.map(c => {
         if (c.id === clientId) {
           return {
             ...c,
-            status: status === 'paid' ? 'paid' : status === 'overdue' ? 'overdue' : 'pending',
+            status: payStatus,
           };
         }
         return c;
       })
     );
 
+    if (db && client) {
+      setDoc(doc(db, "clients", clientId), { status: payStatus }, { merge: true }).catch(() => {});
+    }
+
+    const payId = `pay-${clientId}-${month.replace(/[^a-zA-Z0-9]/g, '_')}`;
+    const paymentRecord: PaymentRecord = {
+      id: payId,
+      clientId,
+      clientName: client?.name || 'Client',
+      month,
+      amount: client?.monthlyFee || 4000,
+      dueDate: client?.nextPaymentDue || '2026-10-05',
+      paidDate: status === 'paid' ? new Date().toISOString().split('T')[0] : undefined,
+      status,
+    };
+
     setPayments(prev => {
-      const existingIndex = prev.findIndex(p => p.clientId === clientId && p.month === month);
-      const client = clients.find(c => c.id === clientId);
-      if (existingIndex >= 0) {
-        const updated = [...prev];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          status,
-          paidDate: status === 'paid' ? new Date().toISOString().split('T')[0] : undefined,
-        };
-        return updated;
-      } else if (client) {
-        return [
-          ...prev,
-          {
-            id: `pay-${Date.now()}`,
-            clientId,
-            clientName: client.name,
-            month,
-            amount: client.monthlyFee,
-            dueDate: client.nextPaymentDue,
-            paidDate: status === 'paid' ? new Date().toISOString().split('T')[0] : undefined,
-            status,
-          },
-        ];
+      const idx = prev.findIndex(p => p.clientId === clientId && p.month === month);
+      if (idx >= 0) {
+        const copy = [...prev];
+        copy[idx] = paymentRecord;
+        return copy;
       }
-      return prev;
+      return [paymentRecord, ...prev];
     });
+
+    if (db) {
+      setDoc(doc(db, "payments", payId), paymentRecord, { merge: true }).catch(() => {});
+    }
   };
 
   const offboardClient = (clientId: string) => {
+    const target = clients.find(c => c.id === clientId);
+    const updatedNotes = (target?.notes || '') + ' [One-Time Handover Completed]';
+
     setClients(prev =>
       prev.map(c => {
         if (c.id === clientId) {
@@ -182,12 +380,20 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             ...c,
             status: 'offboarded',
             billingType: 'one_time_build',
-            notes: (c.notes || '') + ' [One-Time Handover Completed]',
+            notes: updatedNotes,
           };
         }
         return c;
       })
     );
+
+    if (db) {
+      setDoc(doc(db, "clients", clientId), {
+        status: 'offboarded',
+        billingType: 'one_time_build',
+        notes: updatedNotes,
+      }, { merge: true }).catch(() => {});
+    }
   };
 
   const reactivateClient = (clientId: string) => {
@@ -203,6 +409,13 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         return c;
       })
     );
+
+    if (db) {
+      setDoc(doc(db, "clients", clientId), {
+        status: 'paid',
+        billingType: 'monthly_retainer',
+      }, { merge: true }).catch(() => {});
+    }
   };
 
   const addTicket = (ticketData: Omit<MaintenanceTicket, 'id' | 'createdAt' | 'status'>) => {
@@ -343,6 +556,7 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         projectRequests,
         changelogs,
         paymentNotifications,
+        customAgents,
         addClient,
         updateClient,
         deleteClient,

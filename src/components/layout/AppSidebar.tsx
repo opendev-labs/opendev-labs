@@ -21,7 +21,8 @@ import {
   CreditCard,
   Zap,
   Activity,
-  Key
+  Key,
+  Building
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useClients } from '../../context/ClientContext';
@@ -54,7 +55,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onCloseMobile,
 }) => {
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user, registeredUsers, logout } = useAuth();
   const { clients } = useClients();
   const { theme, toggleTheme } = useTheme();
 
@@ -66,22 +67,30 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
   const devNavItems: NavItem[] = [
     { title: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { title: 'Clients CRM', path: '/dashboard/clients', icon: Users, badge: clients.length },
+    { title: 'Clients CRM', path: '/dashboard/clients', icon: Building },
+    { title: 'Registered Users', path: '/dashboard/clients?tab=users', icon: Users, badge: registeredUsers.length },
     { title: 'Payment Reminders', path: '/dashboard/reminders', icon: BellRing, badge: overdueCount > 0 ? `${overdueCount}` : undefined, badgeVariant: 'destructive' },
     { title: 'Invoices & Ledger', path: '/dashboard/invoices', icon: ReceiptText },
     { title: 'Settings', path: '/dashboard/settings', icon: Settings },
   ];
 
+  const userNavItems: NavItem[] = [
+    { title: 'Profile', path: '/client/profile', icon: Users },
+    { title: 'Client Portal', path: '/client/convert', icon: Key },
+    { title: 'Security & Info', path: '/client/security', icon: Settings },
+  ];
+
   const clientNavItems: NavItem[] = [
     { title: 'Dashboard & Specs', path: '/client/portal', icon: LayoutDashboard },
-    { title: 'Payments & GPay Notify', path: '/client/payments', icon: CreditCard },
+    { title: 'Payments & Retainer', path: '/client/payments', icon: CreditCard },
     { title: 'Invoices & Receipts', path: '/client/invoices', icon: ReceiptText },
     { title: 'Support & Tickets', path: '/client/support', icon: HelpCircle },
     { title: 'Milestones & Roadmap', path: '/client/milestones', icon: Zap },
     { title: 'Vault Credentials', path: '/client/credentials', icon: Key },
+    { title: 'User Profile', path: '/client/profile', icon: Users },
   ];
 
-  const navItems = isDev ? devNavItems : clientNavItems;
+  const navItems = isDev ? devNavItems : user?.role === 'user' ? userNavItems : clientNavItems;
 
   return (
     <>
@@ -95,43 +104,78 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
       <aside
         className={cn(
-          'flex flex-col h-screen border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-all duration-300 z-50 select-none shrink-0',
-          'fixed inset-y-0 left-0 md:relative md:translate-x-0',
-          mobileOpen ? 'translate-x-0 w-64 shadow-2xl' : '-translate-x-full md:translate-x-0',
+          'flex flex-col h-screen border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-[width] duration-300 ease-in-out z-30 select-none shrink-0 overflow-x-hidden',
+          'fixed inset-y-0 left-0 md:relative',
+          mobileOpen ? 'translate-x-0 w-64 shadow-2xl' : '-translate-x-full md:transform-none',
           collapsed ? 'md:w-16' : 'md:w-60'
         )}
       >
         {/* Top Logo Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-zinc-200 dark:border-zinc-800">
-          <Link to="/" onClick={onCloseMobile} className="flex items-center gap-3 overflow-hidden">
-            <img src="/logo-icon.webp" alt="OpenDev-Labs" className="h-11 w-auto object-contain shrink-0" onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }} />
-            {(!collapsed || mobileOpen) && (
-              <div className="flex flex-col truncate">
-                <span className="font-extrabold text-xs tracking-wider uppercase text-zinc-900 dark:text-white leading-tight">
-                  OPENDEV-LABS
-                </span>
-                <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
-                  {isDev ? 'Developer Portal' : user?.role === 'user' ? 'Registered Gateway' : 'Client Gateway'}
-                </span>
-              </div>
-            )}
-          </Link>
-
-          {/* Mobile Close Button */}
-          {mobileOpen && (
+        <div className={cn(
+          "flex items-center h-16 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 relative shrink-0",
+          collapsed && !mobileOpen ? "justify-center px-2" : "justify-between px-4"
+        )}>
+          {collapsed && !mobileOpen ? (
             <button
-              onClick={onCloseMobile}
-              className="md:hidden p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              onClick={onToggleCollapse}
+              className="group flex items-center justify-center p-1 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all relative cursor-pointer"
+              title="Expand Sidebar"
             >
-              <ChevronLeft className="size-5" />
+              <img
+                src="/logo-icon.webp"
+                alt="OpenDev-Labs"
+                className="h-11 w-auto max-h-11 object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+
+              {/* Floating Hover Tooltip for Logo Header in Collapsed Mode */}
+              <div className="fixed left-16 top-4 ml-3 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-95 pointer-events-none z-50 transition-all duration-150 ease-out border border-zinc-800 dark:border-zinc-200 flex items-center gap-1.5 after:content-[''] after:absolute after:right-full after:top-1/2 after:-translate-y-1/2 after:border-4 after:border-transparent after:border-r-zinc-900 dark:after:border-r-zinc-100">
+                <span>Expand Sidebar</span>
+                <kbd className="px-1.5 py-0.5 rounded bg-zinc-800 dark:bg-zinc-200 text-zinc-300 dark:text-zinc-700 text-[9px] font-mono">⌘B</kbd>
+              </div>
             </button>
+          ) : (
+            <>
+              <Link to="/" onClick={onCloseMobile} className="flex items-center gap-3 overflow-hidden">
+                <img src="/logo-icon.webp" alt="OpenDev-Labs" className="h-9 w-auto object-contain shrink-0" onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }} />
+                <div className="flex flex-col truncate">
+                  <span className="font-extrabold text-xs tracking-wider uppercase text-zinc-900 dark:text-white leading-tight">
+                    OPENDEV-LABS
+                  </span>
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">
+                    {isDev ? 'Developer Portal' : user?.role === 'user' ? 'Registered Gateway' : 'Client Gateway'}
+                  </span>
+                </div>
+              </Link>
+
+              {/* Desktop Collapse / Expand Button */}
+              <button
+                onClick={onToggleCollapse}
+                className="hidden md:flex p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                title="Close Sidebar"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+
+              {/* Mobile Close Button */}
+              {mobileOpen && (
+                <button
+                  onClick={onCloseMobile}
+                  className="md:hidden p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                >
+                  <ChevronLeft className="size-5" />
+                </button>
+              )}
+            </>
           )}
         </div>
 
         {/* Navigation List */}
-        <div className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden py-4 px-2 sm:px-3 space-y-6">
           
           {/* Menu Section */}
           <div>
@@ -141,24 +185,32 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               </div>
             )}
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               {navItems.map(item => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.path;
+                const fullPath = location.pathname + location.search;
+                const isActive = fullPath === item.path || (item.path === '/dashboard/clients' && location.pathname === '/dashboard/clients' && !location.search.includes('tab=users'));
                 return (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={onCloseMobile}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all relative group',
-                      isActive
-                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
-                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white'
+                      'flex items-center text-xs font-semibold transition-all relative group rounded-xl',
+                      collapsed && !mobileOpen
+                        ? 'justify-center size-10 mx-auto hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                        : isActive
+                          ? 'gap-3 px-3 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-sm'
+                          : 'gap-3 px-3 py-2.5 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white'
                     )}
                   >
-                    <Icon className={cn('size-4 shrink-0', isActive ? 'text-white dark:text-zinc-900' : 'text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white')} />
-                    {(!collapsed || mobileOpen) && <span className="truncate flex-1">{item.title}</span>}
+                    <Icon className={cn(
+                      collapsed && !mobileOpen
+                        ? isActive ? 'size-5 text-black dark:text-white stroke-[2.5] scale-110 transition-all' : 'size-4 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white transition-all'
+                        : isActive ? 'size-4 text-white dark:text-zinc-900 shrink-0' : 'size-4 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-white shrink-0'
+                    )} />
+                    
+                    {(!collapsed || mobileOpen) && <span className="truncate whitespace-nowrap flex-1">{item.title}</span>}
 
                     {(!collapsed || mobileOpen) && item.badge !== undefined && (
                       <span className={cn(
@@ -170,47 +222,53 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                         {item.badge}
                       </span>
                     )}
+
+                    {/* Notification Badge Dot for Collapsed Mode */}
+                    {collapsed && !mobileOpen && item.badge !== undefined && (
+                      <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-zinc-950 animate-pulse" />
+                    )}
+
+                    {/* Professional Floating Hover Tooltip with Pointer Arrow for Collapsed Sidebar */}
+                    {collapsed && !mobileOpen && (
+                      <div className="fixed left-16 ml-3 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-95 pointer-events-none z-50 transition-all duration-150 ease-out flex items-center gap-2 border border-zinc-800 dark:border-zinc-200 after:content-[''] after:absolute after:right-full after:top-1/2 after:-translate-y-1/2 after:border-4 after:border-transparent after:border-r-zinc-900 dark:after:border-r-zinc-100">
+                        <span>{item.title}</span>
+                        {item.badge !== undefined && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] bg-red-500 text-white font-mono">
+                            {item.badge}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </Link>
                 );
               })}
             </div>
+
+            {/* Bottom Rail Expand Button in Collapsed Mode */}
+            {collapsed && !mobileOpen && (
+              <div className="pt-3 border-t border-zinc-100 dark:border-zinc-800/80 mt-3">
+                <button
+                  onClick={onToggleCollapse}
+                  className="flex items-center justify-center size-10 mx-auto rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all relative group"
+                  title="Expand Sidebar"
+                >
+                  <ChevronRight className="size-4" />
+                  <div className="fixed left-16 ml-3 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-95 pointer-events-none z-50 transition-all duration-150 ease-out border border-zinc-800 dark:border-zinc-200 flex items-center gap-1.5 after:content-[''] after:absolute after:right-full after:top-1/2 after:-translate-y-1/2 after:border-4 after:border-transparent after:border-r-zinc-900 dark:after:border-r-zinc-100">
+                    <span>Expand Sidebar</span>
+                  </div>
+                </button>
+              </div>
+            )}
           </div>
-
-        {/* Quick External Links */}
-        {!collapsed && (
-          <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
-            <div className="px-2 mb-2 text-[10px] font-bold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-              PORTFOLIO & SITE
-            </div>
-
-            <Link
-              to="/"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-all"
-            >
-              <Home className="size-4 shrink-0 text-zinc-500" />
-              <span>Agency Homepage</span>
-            </Link>
-
-            <a
-              href="/iamyashramteke/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 hover:text-zinc-900 dark:hover:text-white transition-all"
-            >
-              <Globe className="size-4 shrink-0 text-zinc-900 dark:text-white" />
-              <span className="truncate flex items-center justify-between flex-1">
-                Yash Portfolio
-                <ExternalLink className="size-3 text-zinc-400" />
-              </span>
-            </a>
-          </div>
-        )}
-      </div>
+        </div>
 
       {/* Bottom User Card */}
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative">
+      <div className={cn(
+        "border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 relative transition-all duration-300 shrink-0 overflow-x-hidden",
+        collapsed && !mobileOpen ? "p-2" : "p-3"
+      )}>
         
-        {/* Drop-Up Popover Menu */}
+        {/* Drop-Up Popover / Flyout Menu */}
         {popoverOpen && (
           <>
             {/* Backdrop overlay to close menu on outside click */}
@@ -218,7 +276,12 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               className="fixed inset-0 z-40"
               onClick={() => setPopoverOpen(false)}
             />
-            <div className="absolute bottom-full left-3 right-3 mb-2 p-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 animate-in fade-in slide-in-from-bottom-2 space-y-1">
+            <div className={cn(
+              "p-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 animate-in fade-in space-y-1 min-w-[210px]",
+              collapsed && !mobileOpen
+                ? "fixed left-16 bottom-3 ml-3 slide-in-from-left-2"
+                : "absolute left-3 right-3 bottom-full mb-2 slide-in-from-bottom-2"
+            )}>
               
               {/* User Profile Header in Drop-Up */}
               <div className="px-2.5 py-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2.5">
@@ -275,10 +338,13 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
         {/* User Card Content */}
         <div
-          onClick={() => !collapsed && setPopoverOpen(!popoverOpen)}
-          className="p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-colors"
+          onClick={() => setPopoverOpen(!popoverOpen)}
+          className={cn(
+            "rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-between cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all group relative",
+            collapsed && !mobileOpen ? "size-10 mx-auto p-1 justify-center" : "p-2.5"
+          )}
         >
-          <div className="flex items-center gap-2.5 min-w-0">
+          <div className={cn("flex items-center min-w-0 relative", collapsed && !mobileOpen ? "justify-center" : "gap-2.5")}>
             {/* User Profile Picture Avatar */}
             {user?.avatar ? (
               <img
@@ -295,7 +361,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
               </div>
             )}
 
-            {!collapsed && (
+            {/* Online Status Dot */}
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-zinc-950" />
+
+            {(!collapsed || mobileOpen) && (
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
                   {user?.name || 'Yash Ramteke'}
@@ -307,8 +376,8 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             )}
           </div>
 
-          {/* ChevronUp Arrow-Up Toggle Button */}
-          {!collapsed && (
+          {/* ChevronUp Arrow-Up Toggle Button when Expanded */}
+          {(!collapsed || mobileOpen) && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -322,6 +391,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             >
               <ChevronUp className="size-4" />
             </button>
+          )}
+
+          {/* Floating Tooltip for User Avatar in Collapsed Mode */}
+          {collapsed && !mobileOpen && (
+            <div className="fixed left-16 ml-3 px-3 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-bold shadow-xl whitespace-nowrap opacity-0 group-hover:opacity-100 group-hover:scale-100 scale-95 pointer-events-none z-50 transition-all duration-150 ease-out border border-zinc-800 dark:border-zinc-200 flex items-center gap-1.5 after:content-[''] after:absolute after:right-full after:top-1/2 after:-translate-y-1/2 after:border-4 after:border-transparent after:border-r-zinc-900 dark:after:border-r-zinc-100">
+              <span>{user?.name || 'User Profile'}</span>
+              <span className="text-[10px] opacity-75 font-mono">Options</span>
+            </div>
           )}
         </div>
       </div>

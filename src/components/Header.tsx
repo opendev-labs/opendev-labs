@@ -19,6 +19,7 @@ export const Header: React.FC = () => {
     if (isOpenStudioRoute) return null;
 
     const navItems = [
+        { label: 'OpenStudio AI ⚡', href: '/open-studio', reactPath: '/open-studio', icon: Cpu },
         { label: 'Software Services', href: '/booking.html', reactPath: '/booking', icon: Code },
         { label: 'Templates', href: '/marketplace.html', reactPath: '/marketplace', icon: ShoppingBag },
         { label: 'Web-AI & Vercel', href: '/ai-cloud.html', reactPath: '/ai-cloud', icon: Cpu },
@@ -90,7 +91,7 @@ export const Header: React.FC = () => {
                                 </Button>
                             </div>
                         ) : (
-                            <Link to="/auth" className="inline-flex items-center justify-center rounded-xl bg-[#f02050] hover:bg-[#d01840] text-white px-4 h-9 text-xs font-bold shadow-md shadow-[#f02050]/20 transition-all">
+                            <Link to="/auth" className="inline-flex items-center justify-center rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 px-5 h-9 text-xs font-extrabold shadow-md transition-all hover:scale-105">
                                 Sign In
                             </Link>
                         )}

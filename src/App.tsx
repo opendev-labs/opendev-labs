@@ -7,6 +7,7 @@ import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
 import { PricingStandalonePage } from './pages/PricingStandalonePage';
 import { SolutionsPage } from './pages/SolutionsPage';
+import { TemplatesPage } from './pages/TemplatesPage';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { DeveloperDashboard } from './pages/DeveloperDashboard';
 import { ClientsManager } from './pages/ClientsManager';
@@ -18,6 +19,10 @@ import { ClientSupportPage } from './pages/ClientSupportPage';
 import { ClientMilestonesPage } from './pages/ClientMilestonesPage';
 import { ClientCredentialsPage } from './pages/ClientCredentialsPage';
 import { ProfileSettings } from './pages/ProfileSettings';
+import { OpenStudioPage } from './pages/OpenStudioPage';
+import { UserProfilePage } from './pages/UserProfilePage';
+import { ClientConversionPage } from './pages/ClientConversionPage';
+import { UserSecurityPage } from './pages/UserSecurityPage';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -41,6 +46,9 @@ export function App() {
             <Routes>
               {/* Public Pages */}
               <Route path="/" element={<LandingPage />} />
+              <Route path="/open-studio" element={<OpenStudioPage />} />
+              <Route path="/studio" element={<OpenStudioPage />} />
+              <Route path="/templates" element={<TemplatesPage />} />
               <Route path="/solutions" element={<SolutionsPage />} />
               <Route path="/pricing" element={<PricingStandalonePage />} />
               <Route path="/auth" element={<AuthPage />} />
@@ -77,6 +85,9 @@ export function App() {
                 <Route path="support" element={<ClientSupportPage />} />
                 <Route path="milestones" element={<ClientMilestonesPage />} />
                 <Route path="credentials" element={<ClientCredentialsPage />} />
+                <Route path="profile" element={<UserProfilePage />} />
+                <Route path="convert" element={<ClientConversionPage />} />
+                <Route path="security" element={<UserSecurityPage />} />
               </Route>
 
               {/* Fallback */}

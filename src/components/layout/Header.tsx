@@ -49,11 +49,12 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient, 
       
       {/* Left: Mobile Sidebar Trigger & Breadcrumb & Ticker Pills */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {/* Mobile Hamburger Menu Toggle Button */}
+        {/* Sidebar Toggle Button (Desktop & Mobile) */}
         <button
           onClick={onToggleMobileSidebar}
-          className="md:hidden p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
-          aria-label="Toggle Mobile Navigation"
+          className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors flex items-center justify-center"
+          aria-label="Toggle Navigation Sidebar"
+          title="Open / Close Sidebar"
         >
           <Menu className="size-5" />
         </button>

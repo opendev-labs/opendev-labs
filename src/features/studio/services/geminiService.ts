@@ -1,16 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { Message, ModelConfig } from '../types';
 
-const TARS_SYSTEM_INSTRUCTION_GEMINI = `You are open-studio, an elite AI development orchestrator. When generating code:
+const TARS_SYSTEM_INSTRUCTION_GEMINI = `You are open-studio, an elite AI development orchestrator for OpenDev Labs.
 
-CRITICAL FORMATTING RULES:
-- Your response MUST be valid JSON with this exact structure:
+CRITICAL CODE GENERATION LAWS:
+1. NEVER output trivial 'Hello World' placeholders or basic starters. Build full, complete, production-grade applications matching the user prompt in rich detail.
+2. For React applications, ALWAYS write complete, fully styled code in \`src/App.tsx\` and \`src/index.css\` with interactive state, mock data, and smooth micro-interactions.
+3. Your response MUST be valid JSON with this exact structure:
 {
-  "conversation": "Your conversational response here",
+  "conversation": "I understand your vision for [x]. Materializing workspace components now...",
   "files": [
     {
-      "path": "src/components/Button.tsx",
-      "content": "// file content here",
+      "path": "src/App.tsx",
+      "content": "// full production code here",
       "action": "created"
     }
   ]
@@ -20,11 +22,8 @@ MODIFICATION GUIDELINES:
 1. For NEW files: Use "action": "created"
 2. For EXISTING files being changed: Use "action": "modified"  
 3. For files to REMOVE: Use "action": "deleted" (content can be empty)
-4. Always include the full file content, not just diffs
-5. Do not include files that are not changed.
-6. The 'content' value must be a single string with properly escaped newlines (\\n), tabs (\\t), and quotes (\\").
-7. If there are no file changes, return an empty array for the "files" key.
-`;
+4. Always include the full file content, not just diffs or snippets.
+5. The 'content' value must be a single string with properly escaped newlines (\\n), tabs (\\t), and quotes (\\").`;
 
 const toGeminiHistory = (messages: Message[]) => {
     return messages
@@ -47,10 +46,11 @@ export async function* streamGeminiResponse(
         { role: 'user', parts: [{ text: fullPrompt }] }
     ];
 
+    const validModelId = (modelConfig.apiIdentifier && modelConfig.apiIdentifier !== 'gemini-1.5-pro') ? modelConfig.apiIdentifier : 'gemini-2.0-flash';
+
     // If a manual API key is provided, call Google directly from the browser
     if (manualApiKey) {
-        const modelId = modelConfig.apiIdentifier || 'gemini-1.5-flash';
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:streamGenerateContent?alt=sse&key=${manualApiKey}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${validModelId}:streamGenerateContent?alt=sse&key=${manualApiKey}`;
         
         const response = await fetch(url, {
             method: 'POST',
@@ -78,7 +78,7 @@ export async function* streamGeminiResponse(
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            model: modelConfig.apiIdentifier || 'gemini-1.5-flash',
+            model: validModelId,
             contents: contents,
             systemInstruction: TARS_SYSTEM_INSTRUCTION_GEMINI
         })

@@ -1,0 +1,379 @@
+[
+  {
+    "id": "vercel-commerce",
+    "name": "Vercel Next.js Commerce",
+    "tagline": "Billion-Dollar Headless Retail Storefront Standard",
+    "category": "Vercel & Next.js",
+    "oneTimePrice": "₹30,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "https://demo.vercel.store/",
+    "isFeatured": true,
+    "badge": "Vercel Official Store",
+    "description": "The global gold-standard headless e-commerce template with Firebase Database & Google Auth integration built on Next.js App Router for ultra-fast DTC brands.",
+    "features": [
+      "Firebase Database & Google Auth Integration",
+      "Instant Cart Drawer & Variant Selection",
+      "Shopify & Stripe Backend Integration Ready"
+    ],
+    "repository": "https://github.com/vercel/commerce"
+  },
+  {
+    "id": "food-grilli",
+    "name": "Grilli Fine Dining",
+    "tagline": "Modern Luxury Restaurant & Reservation System",
+    "category": "Food & Hospitality",
+    "oneTimePrice": "₹25,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/food/grilli/index.html",
+    "badge": "Fine Dining",
+    "description": "Dark luxury restaurant template with online reservation forms, chef showcases, and dish menu sliders.",
+    "features": [
+      "Parallax Hero & Smooth Scroll Navigation",
+      "Reservation Request Form with Date & Time Picker",
+      "Categorized Food & Wine Menu Display"
+    ],
+    "repository": "https://github.com/codewithsadee/grilli"
+  },
+  {
+    "id": "food-restoran",
+    "name": "Restoran Bistro",
+    "tagline": "Casual Dining & Bistro Website Template",
+    "category": "Food & Hospitality",
+    "oneTimePrice": "₹30,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/food/restoran/index.html",
+    "badge": "Bistro & Cafe",
+    "description": "Bootstrap 5 animated dining website with table booking modals and master chef team grid.",
+    "features": [
+      "AOS Animate-on-Scroll Micro-Animations",
+      "Interactive Table Reservation Modal",
+      "Master Chefs Team Grid"
+    ],
+    "repository": "https://github.com/codewithshabbir/Restoran"
+  },
+  {
+    "id": "ecommerce-furni",
+    "name": "Furni Modern Living",
+    "tagline": "Boutique Furniture & Interior Store",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹30,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/ecommerce/furni/index.html",
+    "badge": "Boutique Store",
+    "description": "Minimalist high-end lifestyle furniture & home decor boutique template with responsive product galleries.",
+    "features": [
+      "Clean Product Showcase Grid",
+      "Interactive Customer Testimonials",
+      "Blog & Interior Decor Journal"
+    ],
+    "repository": "https://github.com/untree-co/furni-free-bootstrap-template"
+  },
+  {
+    "id": "next-enterprise-commerce",
+    "name": "Next.js Enterprise Commerce",
+    "tagline": "High-Scale B2B & Enterprise Storefront Architecture",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹40,000",
+    "monthlyRetainer": "₹5,000/mo",
+    "previewUrl": "https://next-enterprise-commerce.vercel.app/",
+    "badge": "Enterprise Commerce",
+    "description": "Enterprise-grade Next.js e-commerce architecture built with Blazingly Fast Turbopack, Stripe Checkout, and Algolia InstantSearch.",
+    "features": [
+      "Stripe Checkout & Subscription Flow",
+      "Algolia InstantSearch & Filtering",
+      "Turbopack & App Router Performance"
+    ],
+    "repository": "https://github.com/Blazity/next-enterprise"
+  },
+  {
+    "id": "saleor-storefront",
+    "name": "Saleor GraphQL Commerce Engine",
+    "tagline": "Enterprise GraphQL Headless E-Commerce Portal",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹50,000",
+    "monthlyRetainer": "₹5,000/mo",
+    "previewUrl": "https://storefront.saleor.io/en/default",
+    "badge": "GraphQL Engine",
+    "description": "Next.js 15 & Saleor GraphQL storefront built for global brands needing real-time inventory management and multi-channel sales.",
+    "features": [
+      "Saleor GraphQL API Integration",
+      "Global Multi-Currency & Internationalization",
+      "Stripe & Adyen Payment Gateway Ready"
+    ],
+    "repository": "https://github.com/saleor/storefront"
+  },
+  {
+    "id": "shopware-commerce",
+    "name": "Shopware Vercel React Commerce",
+    "tagline": "European Enterprise Headless Retail Platform",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹60,000",
+    "monthlyRetainer": "₹6,000/mo",
+    "previewUrl": "https://shopware-vercel-commerce-react.vercel.app/",
+    "badge": "Shopware Enterprise",
+    "description": "Shopware 6 headless e-commerce starter built for Next.js App Router and Vercel Deployment, with automated multi-lang support.",
+    "features": [
+      "Shopware 6 API Integration",
+      "Next.js App Router Architecture",
+      "Multi-Language & Multi-Currency Engine"
+    ],
+    "repository": "https://github.com/shopware/frontends"
+  },
+  {
+    "id": "mua-aurora",
+    "name": "Aurora Studio MUA",
+    "tagline": "Luxury Makeup Artist & Bridal Booking Website",
+    "category": "Beauty & Lifestyle",
+    "oneTimePrice": "₹10,000",
+    "monthlyRetainer": "₹3,000/mo",
+    "previewUrl": "/templates/mua/index.html",
+    "badge": "Flagship MUA Template",
+    "description": "A high-converting, aesthetic website template engineered for Makeup Artists (MUA), bridal studios, and beauty professionals.",
+    "features": [
+      "Interactive Before & After Image Comparison Slider",
+      "Instant Pricing Calculator & Package Estimator",
+      "Multi-Step Modal Appointment Booking Form",
+      "Smooth Trailing Cursor & Ambient Particle Animation",
+      "3D Tilt Portfolio Cards & Lightbox Modal"
+    ],
+    "repository": "https://github.com/opendev-labs/mua-aurora"
+  },
+  {
+    "id": "portfolio-bedimcode",
+    "name": "Bedimcode Developer Portfolio",
+    "tagline": "Interactive Designer & Developer Portfolio",
+    "category": "Portfolio & Creative",
+    "oneTimePrice": "₹10,000",
+    "monthlyRetainer": "₹3,000/mo",
+    "previewUrl": "/templates/portfolio/bedimcode/index.html",
+    "badge": "Developer Portfolio",
+    "description": "Sleek dark-mode personal portfolio with mixitup project filters and smooth scroll animation.",
+    "features": [
+      "Light/Dark Mode Theme Toggle",
+      "MixItUp Work Filter System",
+      "ScrollReveal.js Micro-Animations"
+    ],
+    "repository": "https://github.com/bedimcode/portfolio-responsive-complete"
+  },
+  {
+    "id": "portfolio-vcard",
+    "name": "vCard Personal Portfolio",
+    "tagline": "Personal Branding & Digital Card",
+    "category": "Portfolio & Creative",
+    "oneTimePrice": "₹10,000",
+    "monthlyRetainer": "₹3,000/mo",
+    "previewUrl": "/templates/portfolio/vcard/index.html",
+    "badge": "Personal Branding",
+    "description": "Modern vCard portfolio with interactive tab switching, project gallery, and contact form.",
+    "features": [
+      "Tabbed Navigation Interface",
+      "Skills & Certifications Showcase",
+      "Interactive Contact Form"
+    ],
+    "repository": "https://github.com/codewithsadee/vcard-personal-portfolio"
+  },
+  {
+    "id": "portfolio-resume",
+    "name": "Resume & Freelancer Profile",
+    "tagline": "Executive Resume & Consultant Profile",
+    "category": "Portfolio & Creative",
+    "oneTimePrice": "₹10,000",
+    "monthlyRetainer": "₹3,000/mo",
+    "previewUrl": "/templates/portfolio/resume/dist/index.html",
+    "badge": "Resume Profile",
+    "description": "Sticky sidebar resume website highlighting career history, skills, and certifications.",
+    "features": [
+      "Vertical Sticky Navigation Bar",
+      "Timeline Education & Experience Grid",
+      "Social Icon Links & Badges"
+    ],
+    "repository": "https://github.com/StartBootstrap/startbootstrap-resume"
+  },
+  {
+    "id": "nextra-docs",
+    "name": "Nextra Documentation Portal",
+    "tagline": "Vercel Official Nextra & MDX Documentation Engine",
+    "category": "Vercel & Next.js",
+    "oneTimePrice": "₹11,000",
+    "monthlyRetainer": "₹3,000/mo",
+    "previewUrl": "https://nextra-docs-template.vercel.app/",
+    "badge": "Vercel Docs Standard",
+    "description": "Nextra MDX-driven documentation template created by Vercel for high-performance developer portals, API references, and knowledge bases.",
+    "features": [
+      "Full-Text FlexSearch Engine",
+      "Automatic Dark & Light Theme Switcher",
+      "MDX 3 & React Server Components"
+    ],
+    "repository": "https://github.com/shuding/nextra-docs-template"
+  },
+  {
+    "id": "gemini-vercel-ai",
+    "name": "Gemini AI Studio Interface",
+    "tagline": "Vercel AI SDK & Google Gemini 1.5 Flash Suite",
+    "category": "Vercel & Next.js",
+    "oneTimePrice": "₹80,000",
+    "monthlyRetainer": "₹8,000/mo",
+    "previewUrl": "https://gemini.vercel.ai/",
+    "badge": "Google Gemini AI",
+    "description": "Official Vercel & Google Gemini AI playground interface featuring real-time streaming, multimodal image analysis, and code generation.",
+    "features": [
+      "Google Gemini 1.5 Flash Integration",
+      "Multimodal Image & Code Analysis",
+      "Vercel Edge Streaming UI"
+    ],
+    "repository": "https://github.com/vercel/gemini-ai-chatbot"
+  },
+  {
+    "id": "community-agent",
+    "name": "Vercel Community AI Agent",
+    "tagline": "Vercel Labs Autonomous AI Agent Portal",
+    "category": "Vercel & Next.js",
+    "oneTimePrice": "₹80,000",
+    "monthlyRetainer": "₹6,000/mo",
+    "previewUrl": "https://community-agent.labs.vercel.dev/",
+    "badge": "Vercel Labs Agent",
+    "description": "Experimental Vercel Labs autonomous AI agent for community support, automatic issue resolution, and vector search indexing.",
+    "features": [
+      "Autonomous Task Execution",
+      "Vector Database Indexing & RAG",
+      "Interactive AI Chat Workspace"
+    ],
+    "repository": "https://github.com/vercel-labs/community-agent"
+  },
+  {
+    "id": "medusa-commerce",
+    "name": "Medusa.js Headless E-Commerce",
+    "tagline": "Open-Source Shopify Alternative Storefront",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹30,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "https://next.medusajs.com/dk",
+    "badge": "Open-Source Medusa",
+    "description": "Medusa.js 2.0 Next.js storefront for modular, headless e-commerce with multi-region currency support and automated cart management.",
+    "features": [
+      "Multi-Region Currency & Tax Rates",
+      "Medusa.js 2.0 Backend Integration",
+      "Instant Cart Drawer & Checkout"
+    ],
+    "repository": "https://github.com/medusajs/nextjs-starter-medusa"
+  },
+  {
+    "id": "catalyst-commerce",
+    "name": "BigCommerce Catalyst Next.js",
+    "tagline": "BigCommerce Modern React Storefront Architecture",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹60,000",
+    "monthlyRetainer": "₹6,000/mo",
+    "previewUrl": "https://catalyst-demo.site/",
+    "badge": "BigCommerce Catalyst",
+    "description": "Official BigCommerce Catalyst Next.js storefront engineered for enterprise performance, headless flexibility, and SEO dominance.",
+    "features": [
+      "BigCommerce GraphQL Engine",
+      "Tailwind CSS & Radix Components",
+      "Core Web Vitals Optimized 100/100"
+    ],
+    "repository": "https://github.com/bigcommerce/catalyst"
+  },
+  {
+    "id": "food-steakies",
+    "name": "Steakies Luxury Grill",
+    "tagline": "High-End Fine Dining & Lounge Experience",
+    "category": "Food & Hospitality",
+    "oneTimePrice": "₹10,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/food/steakies/index.html",
+    "badge": "Luxury Steakhouse",
+    "description": "High-end fine-dining steakhouse website with gold accents, full-screen media, and table booking workflow.",
+    "features": [
+      "Gold Accents & Dark Luxury Aesthetic",
+      "Full-Screen Hero Media & Dish Showcase",
+      "Online Table Booking Workflow"
+    ],
+    "repository": "https://github.com/codewithsadee/steakies"
+  },
+  {
+    "id": "food-koffee",
+    "name": "Koffee Artisanal Roastery",
+    "tagline": "Artisanal Specialty Cafe & Roastery",
+    "category": "Food & Hospitality",
+    "oneTimePrice": "₹20,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/food/koffee/index.html",
+    "badge": "Artisanal Cafe",
+    "description": "Warm specialty coffee house landing page with bean selection grids and interactive drink pricing.",
+    "features": [
+      "Warm Artisanal Aesthetic",
+      "Specialty Coffee Menu Grid",
+      "Location & Roastery Hours Display"
+    ],
+    "repository": "https://github.com/codewithsadee/koffee"
+  },
+  {
+    "id": "ecommerce-shop",
+    "name": "Shop Homepage Retail",
+    "tagline": "Versatile Retail & Product Landing Page",
+    "category": "E-Commerce",
+    "oneTimePrice": "₹13,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/ecommerce/shop-homepage/dist/index.html",
+    "badge": "Retail Base",
+    "description": "Versatile MIT-licensed Bootstrap 5 retail shop homepage ready for payment integration.",
+    "features": [
+      "Clean Product Cards & Rating Stars",
+      "Top Navigation Bar with Cart Badge",
+      "Responsive Layout Grid"
+    ],
+    "repository": "https://github.com/StartBootstrap/startbootstrap-shop-homepage"
+  },
+  {
+    "id": "agency-cruip-open",
+    "name": "Cruip Open AI / SaaS",
+    "tagline": "Dark Neon Linear-Style Startup & AI Landing",
+    "category": "Agency & Business",
+    "oneTimePrice": "₹25,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "https://open.cruip.com/",
+    "badge": "$1M Startup Vibe",
+    "description": "Dark neon minimalism, glowing gradients, Linear/Raycast aesthetic tailored for AI startups, devtools, and modern SaaS.",
+    "features": [
+      "Linear-Style Dark Mode & Glow Effects",
+      "Interactive Feature Highlights & Video Lightbox",
+      "Responsive Pricing Cards & FAQ Accordion"
+    ],
+    "repository": "https://github.com/cruip/open-react-template"
+  },
+  {
+    "id": "agency-creative",
+    "name": "Creative Agency Studio",
+    "tagline": "Digital Studio & Creative Agency Portfolio",
+    "category": "Agency & Business",
+    "oneTimePrice": "₹20,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "/templates/agency/creative/dist/index.html",
+    "badge": "Agency Studio",
+    "description": "Full-width one-page agency portfolio template with project galleries, interactive scroll, and contact forms.",
+    "features": [
+      "Full-bleed Header Hero Banner",
+      "Responsive Image Gallery Lightbox",
+      "Lead Contact Form"
+    ],
+    "repository": "https://github.com/StartBootstrap/startbootstrap-creative"
+  },
+  {
+    "id": "agency-landing",
+    "name": "Startup Launch Landing",
+    "tagline": "Modern Product Launch & Business Landing Page",
+    "category": "Agency & Business",
+    "oneTimePrice": "₹8,000",
+    "monthlyRetainer": "₹2,000/mo",
+    "previewUrl": "/templates/agency/landing-page/dist/index.html",
+    "badge": "Product Launch",
+    "description": "Clean Bootstrap 5 product launch landing page with email newsletter subscription and feature grids.",
+    "features": [
+      "Newsletter Intake Form",
+      "Grid Feature Testimonials",
+      "Clean Responsive Header"
+    ],
+    "repository": "https://github.com/StartBootstrap/startbootstrap-landing-page"
+  }
+]

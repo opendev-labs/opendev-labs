@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../lib/firebase';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 import { promptGoogleSignIn } from '../services/googleAuth';
 import {
   Eye,
@@ -58,17 +59,29 @@ export const AuthPage: React.FC = () => {
           setErrorMessage('Invalid admin username or password. Use registered studio credentials.');
         }
       } else {
-        const cleanEmail = email.trim().toLowerCase();
+        const cleanInput = email.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        
+        // Search client by domain name, email, or clientCode
         const foundClient = clients.find(
-          c => c.email.toLowerCase() === cleanEmail ||
-               c.name.toLowerCase().includes(cleanEmail)
+          c => (c.domain && c.domain.toLowerCase() === cleanInput) ||
+               (c.email.toLowerCase() === cleanInput) ||
+               (c.clientCode && c.clientCode.toLowerCase() === cleanInput)
         );
+
         if (foundClient) {
-          loginAsClient(foundClient.id);
+          // Check password if provided
+          if (password && foundClient.password && foundClient.password !== password) {
+            setErrorMessage('Invalid password for this domain. Please check your credentials.');
+            setIsAuthenticating(false);
+            return;
+          }
+
+          loginAsClient(foundClient.id, foundClient.name, foundClient.email);
+          navigate('/client/portal');
         } else {
-          loginWithGoogle(cleanEmail, cleanEmail.split('@')[0]);
+          loginWithGoogle(cleanInput, cleanInput.split('@')[0]);
+          navigate('/client/profile');
         }
-        navigate('/client/portal');
       }
       setIsAuthenticating(false);
     }, 400);
@@ -78,29 +91,91 @@ export const AuthPage: React.FC = () => {
     setIsAuthenticating(true);
     setErrorMessage('');
     try {
+      let loggedUserEmail = '';
+
       // 1. Try Firebase Auth popup if Firebase auth is initialized
       if (auth) {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await signInWithPopup(auth, provider);
         const googleUser = result.user;
+        loggedUserEmail = (googleUser.email || '').toLowerCase().trim();
+
+        // Persist real user into Firestore users collection
+        if (db && googleUser) {
+          try {
+            const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
+            await setDoc(doc(db, "users", googleUser.uid), {
+              id: googleUser.uid,
+              name: googleUser.displayName || (googleUser.email ? googleUser.email.split('@')[0] : 'Google User'),
+              email: googleUser.email || '',
+              avatar: googleUser.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
+              role: isLeadDev ? 'developer' : 'user',
+              authMethod: 'google',
+              online: true,
+              lastSeen: serverTimestamp(),
+              joinedAt: serverTimestamp(),
+              team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
+              location: 'Mumbai, IN',
+            }, { merge: true });
+          } catch (fsErr) {
+            console.warn("Error saving user to Firestore:", fsErr);
+          }
+        }
+
         loginWithGoogle(
           googleUser.email || undefined,
           googleUser.displayName || undefined,
           googleUser.photoURL || undefined
         );
-        navigate('/client/portal');
+
+        // Check if existing user is already a converted client
+        const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
+        if (matchedClient || loggedUserEmail === 'opendev.office@gmail.com') {
+          navigate(loggedUserEmail === 'opendev.office@gmail.com' ? '/dashboard' : '/client/portal');
+        } else {
+          navigate('/client/profile');
+        }
         return;
       }
 
       // 2. Direct Google Identity Services (GSI) OAuth 2.0 popup
       const googleProfile = await promptGoogleSignIn();
+      loggedUserEmail = (googleProfile?.email || '').toLowerCase().trim();
+      if (db && googleProfile) {
+        try {
+          const pseudoId = `gsi-${(googleProfile.email || '').replace(/[^a-zA-Z0-9]/g, '_')}`;
+          const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
+          await setDoc(doc(db, "users", pseudoId), {
+            id: pseudoId,
+            name: googleProfile.name || googleProfile.email.split('@')[0],
+            email: googleProfile.email,
+            avatar: googleProfile.picture || 'https://lh3.googleusercontent.com/a/default-user',
+            role: isLeadDev ? 'developer' : 'user',
+            authMethod: 'google',
+            online: true,
+            lastSeen: serverTimestamp(),
+            joinedAt: serverTimestamp(),
+            team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
+            location: 'Mumbai, IN',
+          }, { merge: true });
+        } catch (fsErr) {
+          console.warn("Error saving GSI user to Firestore:", fsErr);
+        }
+      }
+
       loginWithGoogle(
         googleProfile.email,
         googleProfile.name,
         googleProfile.picture
       );
-      navigate('/client/portal');
+
+      const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
+      if (matchedClient || loggedUserEmail === 'opendev.office@gmail.com') {
+        navigate(loggedUserEmail === 'opendev.office@gmail.com' ? '/dashboard' : '/client/portal');
+      } else {
+        navigate('/client/profile');
+      }
     } catch (err: any) {
       console.error('Google Auth Error:', err);
       if (err?.message && !err.message.includes('closed_by_user')) {

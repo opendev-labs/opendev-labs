@@ -14,9 +14,9 @@ export const Card: React.FC<CardProps> = ({
     hover = true,
     glass = true
 }) => {
-    const baseStyles = "relative overflow-hidden border transition-all duration-500 rounded-none";
-    const glassStyles = glass ? "bg-zinc-950/40 border-zinc-900 backdrop-blur-3xl" : "bg-black border-zinc-900";
-    const hoverStyles = hover ? "hover:border-zinc-700/50 hover:bg-zinc-900/40" : "";
+    const baseStyles = "relative overflow-hidden border transition-all duration-300 rounded-3xl shadow-xl shadow-black/5 dark:shadow-black/20";
+    const glassStyles = glass ? "bg-white/80 dark:bg-zinc-900/60 border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-2xl text-zinc-900 dark:text-zinc-100" : "bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100";
+    const hoverStyles = hover ? "hover:border-zinc-300 dark:hover:border-zinc-700 hover:shadow-2xl hover:-translate-y-1" : "";
 
     return (
         <motion.div

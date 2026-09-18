@@ -26,6 +26,7 @@ export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
 
   const navItems = [
+    { label: 'Templates', path: '/templates' },
     { label: 'Solutions', path: '/solutions' },
     { label: 'Pricing', path: '/pricing' },
   ];
@@ -50,7 +51,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800/80 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md transition-colors duration-200">
+      <header className="fixed top-0 left-0 right-0 z-50 w-full border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl transition-all duration-300">
         <div className="max-w-7xl mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         
         {/* Left: Brand Logo */}
@@ -65,26 +66,26 @@ export const Navbar: React.FC = () => {
           />
           <div className="flex flex-col">
             <span className="font-extrabold text-lg tracking-tight text-zinc-900 dark:text-white">
-              opendev<span className="text-blue-600 dark:text-blue-400">-labs</span>
+              opendev<span className="text-zinc-500 dark:text-zinc-400">-labs</span>
             </span>
-            <span className="text-[10px] font-mono text-zinc-500 dark:text-zinc-400 font-semibold -mt-1 tracking-wider uppercase">
+            <span className="text-[10px] font-semibold text-zinc-500 dark:text-zinc-400 -mt-0.5 tracking-wider uppercase">
               Engineering & Automation
             </span>
           </div>
         </Link>
 
         {/* Desktop Center Navigation Links */}
-        <nav className="hidden md:flex items-center gap-1.5 text-xs font-semibold">
+        <nav className="hidden md:flex items-center gap-1.5 text-xs font-semibold p-1 rounded-full bg-zinc-100/70 dark:bg-zinc-900/70 border border-zinc-200/60 dark:border-zinc-800/60 backdrop-blur-md">
           {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`px-3.5 py-1.5 rounded-full transition-all duration-200 ${
+                className={`px-4 py-1.5 rounded-full transition-all duration-200 ${
                   active
-                    ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold shadow-xs'
-                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900'
+                    ? 'bg-black dark:bg-white text-white dark:text-black font-bold shadow-md'
+                    : 'text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200/50 dark:hover:bg-zinc-800/50'
                 }`}
               >
                 {item.label}
@@ -103,7 +104,7 @@ export const Navbar: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => navigate(user.role === 'developer' ? '/dashboard' : '/client/portal')}
-                  className="text-xs font-extrabold h-9 px-4 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full shadow-sm transition-transform hover:scale-105 flex items-center gap-2"
+                  className="text-xs font-extrabold h-9 px-4 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full shadow-md transition-transform hover:scale-105 flex items-center gap-2"
                 >
                   {user.avatar ? (
                     <img src={user.avatar} alt={user.name} className="size-4 rounded-full object-cover" />
@@ -132,7 +133,7 @@ export const Navbar: React.FC = () => {
                 <Button
                   size="sm"
                   onClick={() => navigate('/auth')}
-                  className="text-xs font-extrabold h-9 px-4.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-transform hover:scale-105"
+                  className="text-xs font-extrabold h-9 px-4.5 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full shadow-md transition-transform hover:scale-105"
                 >
                   Get Started
                 </Button>
@@ -143,10 +144,10 @@ export const Navbar: React.FC = () => {
           {/* Mobile Menu Hamburger / Dropdown Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="md:hidden p-2 rounded-full text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
             aria-label="Toggle Navigation Menu"
           >
-            {mobileMenuOpen ? <X className="size-5 text-blue-600 dark:text-blue-400" /> : <Menu className="size-5" />}
+            {mobileMenuOpen ? <X className="size-5 text-zinc-900 dark:text-white" /> : <Menu className="size-5" />}
           </button>
 
           {/* TOP RIGHT END DARK MODE ICON TOGGLE */}

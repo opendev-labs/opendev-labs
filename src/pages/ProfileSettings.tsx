@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import {
   User,
   Mail,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
+import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 
 export const ProfileSettings: React.FC = () => {
   const [name, setName] = useState('Yash Shirish Ramteke');
@@ -29,15 +31,30 @@ export const ProfileSettings: React.FC = () => {
   };
 
   return (
-    <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto text-zinc-900 dark:text-zinc-100">
-      <div className="border-b border-zinc-200 dark:border-zinc-800 pb-5">
-        <h1 className="text-2xl font-extrabold tracking-tight text-zinc-900 dark:text-white flex items-center gap-2">
-          <User className="size-6 text-black dark:text-white" /> Lead Developer Profile & Contact Settings
-        </h1>
-        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-1 font-medium">
-          Official contact details displayed across invoices, automated WhatsApp payment reminders, and sitemap schema.
-        </p>
-      </div>
+    <div className="p-4 md:p-8 space-y-6 max-w-4xl mx-auto text-zinc-900 dark:text-zinc-100 font-sans">
+      {/* Executive Hero Banner Card (Black Rectangle Welcome Card Header) */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-black text-white relative overflow-hidden shadow-xl"
+      >
+        <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 z-0" particleCount={30} />
+
+        <div className="relative z-10 space-y-2 max-w-2xl">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-md">
+              Lead Owner Credentials
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <User className="size-7 text-white shrink-0" /> Lead Developer Profile & Contact Settings
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed">
+            Official contact details displayed across invoices, automated WhatsApp payment reminders, and sitemap schema.
+          </p>
+        </div>
+      </motion.div>
 
       {saved && (
         <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
@@ -66,7 +83,7 @@ export const ProfileSettings: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-bold text-zinc-700 dark:text-zinc-300">Official Phone / WhatsApp</label>
+            <label className="font-bold text-zinc-700 dark:text-zinc-300">Phone / WhatsApp Number</label>
             <Input
               value={phone}
               onChange={e => setPhone(e.target.value)}
@@ -84,8 +101,8 @@ export const ProfileSettings: React.FC = () => {
           </div>
         </div>
 
-        <div className="space-y-1.5 pt-2">
-          <label className="font-bold text-zinc-700 dark:text-zinc-300">Official Agency Domain</label>
+        <div className="space-y-1.5">
+          <label className="font-bold text-zinc-700 dark:text-zinc-300">Official Web Domain</label>
           <Input
             value={website}
             onChange={e => setWebsite(e.target.value)}
@@ -93,18 +110,12 @@ export const ProfileSettings: React.FC = () => {
           />
         </div>
 
-        <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-          <a
-            href="/iamyashramteke/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-bold text-black dark:text-white hover:underline flex items-center gap-1"
+        <div className="pt-2 flex justify-end">
+          <Button
+            type="submit"
+            className="bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-extrabold text-xs h-10 px-6 rounded-full gap-2 shadow-xs"
           >
-            View Yash Ramteke Showcase <ExternalLink className="size-3.5" />
-          </a>
-
-          <Button type="submit" className="bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-extrabold text-xs h-10 rounded-full px-6 shadow-xs">
-            <Save className="size-3.5 mr-1.5" /> Save Changes
+            <Save className="size-4" /> Save Profile Details
           </Button>
         </div>
       </form>

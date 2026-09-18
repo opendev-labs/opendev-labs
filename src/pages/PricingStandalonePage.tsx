@@ -36,7 +36,7 @@ export const PricingStandalonePage: React.FC = () => {
             Simple, Transparent Web & Automation Plans
           </span>
           
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.06] min-h-[140px] sm:min-h-[180px] flex items-center justify-center">
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.06] h-[210px] sm:h-[250px] lg:h-[270px] flex items-center justify-center text-center overflow-hidden">
             <TypewriterHeading phrases={pricingPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
           </h1>
 

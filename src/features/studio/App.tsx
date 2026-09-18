@@ -19,6 +19,213 @@ const generateId = () => Date.now().toString() + Math.random().toString(36).subs
 
 type GeneratedFileObject = { path: string; content?: string; action: 'created' | 'modified' | 'deleted' };
 
+// 4-Stage Fail-Safe AI Response Extractor for HeroChatUI / OpenStudio
+function extractFilesFromAIResponse(text: string): { conversation: string; files: GeneratedFileObject[] } {
+  let cleanText = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  let generatedFiles: GeneratedFileObject[] = [];
+  let conversation = "Materialized requested web app components.";
+
+  if (!cleanText) {
+    return { conversation: "No content generated.", files: [] };
+  }
+
+  // STAGE 1: Standard JSON Parse
+  let jsonString = '';
+  const jsonBlockMatch = cleanText.match(/```json\n([\s\S]*?)\n```/i);
+  if (jsonBlockMatch && jsonBlockMatch[1]) {
+    jsonString = jsonBlockMatch[1].trim();
+  } else {
+    const firstBrace = cleanText.indexOf('{');
+    const lastBrace = cleanText.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      jsonString = cleanText.substring(firstBrace, lastBrace + 1).trim();
+    }
+  }
+
+  if (jsonString) {
+    try {
+      const sanitized = jsonString.replace(/[\u0000-\u001F]+/g, (match) => {
+        if (match === '\n') return '\\n';
+        if (match === '\r') return '\\r';
+        if (match === '\t') return '\\t';
+        return '';
+      });
+      const parsed = JSON.parse(sanitized);
+      if (parsed.conversation) conversation = parsed.conversation;
+      if (parsed.files && Array.isArray(parsed.files)) {
+        generatedFiles = parsed.files
+          .filter((f: any) => f && f.path && (f.content !== undefined || f.action))
+          .map((f: any) => ({
+            path: f.path,
+            content: f.content || '',
+            action: f.action || 'created'
+          }));
+      }
+    } catch (e) {
+      console.warn("Stage 1 JSON parse failed, moving to Stage 2 regex extraction.", e);
+    }
+  }
+
+  // STAGE 2: Loose Regex JSON Field Extractor (handles unescaped quotes/newlines in code strings)
+  if (generatedFiles.length === 0 && jsonString) {
+    try {
+      const fileRegex = /"path"\s*:\s*"([^"]+)"[\s\S]*?"content"\s*:\s*"((?:\\.|[^"\\])*)"/g;
+      let fileMatch;
+      while ((fileMatch = fileRegex.exec(jsonString)) !== null) {
+        const filePath = fileMatch[1];
+        let fileContent = fileMatch[2]
+          .replace(/\\n/g, '\n')
+          .replace(/\\r/g, '\r')
+          .replace(/\\t/g, '\t')
+          .replace(/\\"/g, '"')
+          .replace(/\\\\/g, '\\');
+        if (filePath && fileContent) {
+          generatedFiles.push({
+            path: filePath.trim(),
+            content: fileContent,
+            action: 'created'
+          });
+        }
+      }
+      const convMatch = jsonString.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"/);
+      if (convMatch && convMatch[1]) {
+        conversation = convMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+      }
+    } catch (e) {
+      console.warn("Stage 2 Regex extraction failed, moving to Stage 3.", e);
+    }
+  }
+
+  // STAGE 3: Markdown Code Block Extractor
+  if (generatedFiles.length === 0) {
+    const fileBlockRegex = /(?:###?\s+`?([a-zA-Z0-9_./\-]+)`?[\s\S]*?)?```([a-zA-Z0-9_\-+.]+)?\n([\s\S]*?)```/g;
+    let match;
+    let fileIndex = 1;
+
+    while ((match = fileBlockRegex.exec(cleanText)) !== null) {
+      const headerPath = match[1];
+      const lang = (match[2] || '').toLowerCase();
+      const code = match[3];
+
+      let path = headerPath;
+      if (!path) {
+        if (lang === 'tsx' || lang === 'jsx') path = fileIndex === 1 ? 'src/App.tsx' : `src/components/Component${fileIndex}.tsx`;
+        else if (lang === 'html') path = 'index.html';
+        else if (lang === 'css') path = 'src/index.css';
+        else if (lang === 'js' || lang === 'ts') path = `src/script${fileIndex}.js`;
+        else path = `src/file${fileIndex}.txt`;
+      }
+
+      if (code && code.trim()) {
+        generatedFiles.push({
+          path: path.trim(),
+          content: code.trim(),
+          action: 'created'
+        });
+        fileIndex++;
+      }
+    }
+
+    if (generatedFiles.length > 0) {
+      const textNoCode = cleanText.replace(/```[\s\S]*?```/g, '').trim();
+      if (textNoCode) conversation = textNoCode;
+    }
+  }
+
+  // STAGE 4: Raw Code Catch-All Fallback (Wraps raw React code directly into src/App.tsx)
+  if (generatedFiles.length === 0 && (cleanText.includes('import ') || cleanText.includes('export ') || cleanText.includes('<div') || cleanText.includes('function '))) {
+    console.log("Stage 4: Raw React code detected, assigning directly to src/App.tsx");
+    generatedFiles.push({
+      path: 'src/App.tsx',
+      content: cleanText,
+      action: 'created'
+    });
+    conversation = "Materialized code directly into src/App.tsx";
+  }
+
+  return { conversation, files: generatedFiles };
+}
+
+// Helper to extract clean conversational text during streaming without code or JSON leakage
+function getCleanStreamConversation(text: string): string {
+  if (!text) return '';
+
+  // 1. Remove thinking blocks <think>...</think> or unclosed <think>...
+  let clean = text.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
+  if (!clean) return '';
+
+  // 2. Check for JSON "conversation" key (handles standard JSON format)
+  const convMatch = clean.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"?/);
+  if (convMatch && convMatch[1]) {
+    const unescaped = convMatch[1]
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, '\t')
+      .replace(/\\\\/g, '\\');
+    return unescaped.trim();
+  }
+
+  // 3. If streaming starts with JSON '{' or '```json' before conversation key arrives
+  if (clean.startsWith('{') || clean.startsWith('```json')) {
+    return '';
+  }
+
+  // 4. Strip markdown code blocks including unclosed streaming code blocks
+  clean = clean.replace(/```[a-zA-Z0-9_\-+.]*(\n[\s\S]*?(?:```|$)|[\s\S]*?$)/g, '').trim();
+
+  // 5. Strip raw JSON blocks
+  clean = clean.replace(/\{[\s\S]*?\}/g, '').trim();
+
+  // 6. Check if text is raw code imports or functions
+  if (/^(import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/m.test(clean)) {
+    return "Materializing requested components into the live workspace...";
+  }
+
+  return clean;
+}
+
+// Helper to extract file paths from AI response during streaming
+function extractStreamFilePaths(text: string): GenerationFile[] {
+  const files: GenerationFile[] = [];
+  const seenPaths = new Set<string>();
+
+  // 1. JSON "path" fields
+  const jsonPathRegex = /"path"\s*:\s*"([^"]+)"/g;
+  let jsonMatch;
+  while ((jsonMatch = jsonPathRegex.exec(text)) !== null) {
+    const p = jsonMatch[1].trim();
+    if (p && !seenPaths.has(p)) {
+      seenPaths.add(p);
+      files.push({ path: p, action: 'created', status: 'generating' });
+    }
+  }
+
+  // 2. Markdown code block headers or filename hints
+  if (files.length === 0) {
+    const mdBlockRegex = /(?:###?\s+`?([a-zA-Z0-9_./\-]+)`?[\s\S]*?)?```([a-zA-Z0-9_\-+.]+)?/g;
+    let mdMatch;
+    let fileIdx = 1;
+    while ((mdMatch = mdBlockRegex.exec(text)) !== null) {
+      const headerPath = mdMatch[1];
+      const lang = (mdMatch[2] || '').toLowerCase();
+      let path = headerPath;
+      if (!path && lang) {
+        if (lang === 'tsx' || lang === 'jsx') path = fileIdx === 1 ? 'src/App.tsx' : `src/components/Component${fileIdx}.tsx`;
+        else if (lang === 'html') path = 'index.html';
+        else if (lang === 'css') path = 'src/index.css';
+        else if (lang === 'js' || lang === 'ts') path = `src/script${fileIdx}.js`;
+      }
+      if (path && !seenPaths.has(path)) {
+        seenPaths.add(path);
+        files.push({ path, action: 'created', status: 'generating' });
+        fileIdx++;
+      }
+    }
+  }
+
+  return files;
+}
+
 function App() {
   const [view, setView] = useState<View>('new-chat');
   const [sessions, setSessions] = useState<ChatSession[]>([]);
@@ -35,8 +242,11 @@ function App() {
   useEffect(() => {
     try {
       const savedModel = localStorage.getItem('opendev-selectedModelId');
-      if (savedModel) {
+      if (savedModel && savedModel !== 'gemini-1.5-pro') {
         setSelectedModelId(savedModel);
+      } else {
+        setSelectedModelId(SUPPORTED_MODELS[0].id);
+        localStorage.setItem('opendev-selectedModelId', SUPPORTED_MODELS[0].id);
       }
     } catch (error) {
       console.error("Failed to load settings from localStorage", error);
@@ -336,7 +546,11 @@ function App() {
     }));
   };
 
+  const isThinkingRef = useRef(false);
+
   const handleSendMessage = async (prompt: string) => {
+    if (isThinkingRef.current) return;
+    isThinkingRef.current = true;
     setIsThinking(true);
 
     let currentSessionId = activeSessionId;
@@ -410,150 +624,93 @@ function App() {
       for await (const chunk of stream) {
         fullResponse += chunk.text;
 
-        // Heuristic to stream conversational part before full JSON is valid
-        const conversationMatch = fullResponse.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)/);
-        if (conversationMatch && conversationMatch[1]) {
-          const newConversationText = conversationMatch[1]
-            .replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\t/g, '\t').replace(/\\\\/g, '\\');
+        const cleanText = getCleanStreamConversation(fullResponse);
+        const streamFiles = extractStreamFilePaths(fullResponse);
 
-          if (newConversationText !== conversationText) {
-            conversationText = newConversationText;
-            setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages: s.messages.map(m => m.id === openStudioMessageId ? { ...m, content: conversationText } : m) } : s));
-          }
-        } else if (!conversationText && !fullResponse.includes('"conversation"')) {
-          // If it's not looking like JSON, it could be an error message. Show it directly.
-          setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages: s.messages.map(m => m.id === openStudioMessageId ? { ...m, content: fullResponse } : m) } : s));
+        if (cleanText && cleanText !== conversationText) {
+          conversationText = cleanText;
         }
-      }
-
-      // Process the complete response
-      let generatedFileObjects: GeneratedFileObject[] = [];
-      let finalConversationalPart = "Sorry, I encountered an issue generating a response.";
-
-      if (fullResponse) {
-        let jsonString = '';
-        const jsonMatch = fullResponse.match(/```json\n([\s\S]*?)\n```/);
-
-        if (jsonMatch && jsonMatch[1]) {
-          jsonString = jsonMatch[1];
-        } else {
-          const firstBrace = fullResponse.indexOf('{');
-          const lastBrace = fullResponse.lastIndexOf('}');
-          if (firstBrace !== -1 && lastBrace > firstBrace) {
-            jsonString = fullResponse.substring(firstBrace, lastBrace + 1);
-          }
-        }
-
-        if (jsonString) {
-          try {
-            const parsed = JSON.parse(jsonString);
-            finalConversationalPart = parsed.conversation || "(Nexus did not provide a conversational response.)";
-            if (parsed.files && Array.isArray(parsed.files)) {
-              generatedFileObjects = parsed.files.filter((f: any) => f.path && f.action);
-            }
-          } catch (e) {
-            console.error("Failed to parse final JSON from response", e);
-            finalConversationalPart = "I tried to generate a response, but it wasn't in the correct format. The raw response is shown below.";
-            setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages: s.messages.map(m => m.id === openStudioMessageId ? { ...m, content: fullResponse } : m) } : s));
-          }
-        } else {
-          console.warn("No valid JSON found in the final response. Treating as pure conversation.");
-          finalConversationalPart = fullResponse;
-        }
-      }
-
-      // Update the Nexus message with the FINAL conversational part and file changes list
-      setSessions(prev => prev.map(s => {
-        if (s.id === currentSessionId) {
-          const finalGenerationFiles: GenerationFile[] = generatedFileObjects.map(f => ({
-            path: f.path,
-            action: f.action,
-            status: 'generating',
-          }));
-          const messages = s.messages.map(msg => {
-            if (msg.id === openStudioMessageId) {
-              return {
-                ...msg,
-                content: finalConversationalPart,
-                generationInfo: {
-                  status: 'generating' as const,
-                  files: finalGenerationFiles,
-                },
-              };
-            }
-            return msg;
-          });
-          return { ...s, messages };
-        }
-        return s;
-      }));
-
-      // Apply file changes and animate status sequentially
-      for (const file of generatedFileObjects) {
-        if (file.action === 'created' || file.action === 'modified') {
-          setSessions(prev => prev.map(s => {
-            if (s.id !== currentSessionId) return s;
-
-            const fileExists = s.fileTree.some(f => f.path === file.path);
-            const updatedFile: FileNode = { path: file.path, content: file.content || '' };
-
-            const newFileTree = fileExists
-              ? s.fileTree.map(f => f.path === file.path ? updatedFile : f)
-              : [...s.fileTree, updatedFile];
-
-            // Set the last processed file as the active one for immediate feedback.
-            const newActiveFile = updatedFile;
-
-            return { ...s, fileTree: newFileTree, activeFile: newActiveFile };
-          }));
-
-        } else if (file.action === 'deleted') {
-          setSessions(prev => prev.map(s => {
-            if (s.id !== currentSessionId) return s;
-            const newFileTree = s.fileTree.filter(f => f.path !== file.path);
-            const newActiveFile = (s.activeFile?.path === file.path) ? null : s.activeFile;
-            return { ...s, fileTree: newFileTree, activeFile: newActiveFile };
-          }));
-        }
-
-        // A short delay for visual pacing of the status checkmarks
-        await new Promise(r => setTimeout(r, 200));
 
         setSessions(prev => prev.map(s => {
           if (s.id !== currentSessionId) return s;
-          const messages = s.messages.map(msg => {
-            if (msg.id === openStudioMessageId && msg.generationInfo) {
-              const files = msg.generationInfo.files.map(f =>
-                f.path === file.path ? { ...f, status: 'complete' as const } : f
-              );
-              return { ...msg, generationInfo: { ...msg.generationInfo, files } };
-            }
-            return msg;
-          });
-          return { ...s, messages };
+          return {
+            ...s,
+            messages: s.messages.map(m => {
+              if (m.id !== openStudioMessageId) return m;
+              return {
+                ...m,
+                content: conversationText || m.content,
+                generationInfo: {
+                  status: 'generating' as const,
+                  files: streamFiles.length > 0 ? streamFiles : (m.generationInfo?.files || [])
+                }
+              };
+            })
+          };
         }));
       }
 
-      // After all files are processed, if the active file was deleted, select a new one.
-      setSessions(prev => prev.map(s => {
-        if (s.id === currentSessionId && !s.activeFile && s.fileTree.length > 0) {
-          const preferredFile = s.fileTree.find(f => /index\.(tsx|jsx)$/.test(f.path)) || s.fileTree[0];
-          return { ...s, activeFile: preferredFile };
-        }
-        return s;
-      }));
+      // Process the complete response using our 4-stage robust file extraction engine
+      let { conversation: finalConversationalPart, files: generatedFileObjects } = extractFilesFromAIResponse(fullResponse);
 
-      setSessions(prevSessions => prevSessions.map(s => {
-        if (s.id === currentSessionId) {
-          const messages = s.messages.map(msg => {
-            if (msg.id === openStudioMessageId && msg.generationInfo) {
-              return { ...msg, generationInfo: { ...msg.generationInfo, status: 'complete' as const } };
+      // Perform a single atomic state update to apply all file changes and update the message state without re-render flicker
+      setSessions(prev => prev.map(s => {
+        if (s.id !== currentSessionId) return s;
+
+        let updatedFileTree = [...s.fileTree];
+        let newActiveFile = s.activeFile;
+
+        for (const file of generatedFileObjects) {
+          if (file.action === 'created' || file.action === 'modified') {
+            const updatedFile: FileNode = { path: file.path, content: file.content || '' };
+            const fileIndex = updatedFileTree.findIndex(f => f.path === file.path);
+            if (fileIndex !== -1) {
+              updatedFileTree[fileIndex] = updatedFile;
+            } else {
+              updatedFileTree.push(updatedFile);
             }
-            return msg;
-          });
-          return { ...s, messages };
+            if (!newActiveFile || file.path === 'src/App.tsx' || file.path.endsWith('App.tsx')) {
+              newActiveFile = updatedFile;
+            }
+          } else if (file.action === 'deleted') {
+            updatedFileTree = updatedFileTree.filter(f => f.path !== file.path);
+            if (newActiveFile?.path === file.path) {
+              newActiveFile = null;
+            }
+          }
         }
-        return s;
+
+        if (!newActiveFile && updatedFileTree.length > 0) {
+          newActiveFile = updatedFileTree.find(f => /App\.(tsx|jsx)$/.test(f.path)) || updatedFileTree[0];
+        }
+
+        const completedGenerationFiles: GenerationFile[] = generatedFileObjects.map(f => ({
+          path: f.path,
+          action: f.action,
+          status: 'complete' as const,
+        }));
+
+        const updatedMessages = s.messages.map(msg => {
+          if (msg.id === openStudioMessageId) {
+            return {
+              ...msg,
+              content: finalConversationalPart,
+              generationInfo: {
+                status: 'complete' as const,
+                files: completedGenerationFiles,
+              },
+            };
+          }
+          return msg;
+        });
+
+        return {
+          ...s,
+          fileTree: updatedFileTree,
+          activeFile: newActiveFile,
+          messages: updatedMessages,
+          lastUpdated: Date.now(),
+        };
       }));
 
       if (generatedFileObjects.length > 0) {
@@ -580,6 +737,7 @@ function App() {
         return s;
       }));
     } finally {
+      isThinkingRef.current = false;
       setIsThinking(false);
     }
   };
@@ -594,10 +752,6 @@ function App() {
     selectedModelId,
     onModelChange: handleModelChange,
   };
-
-  if (view === 'new-chat' && !activeSessionId) {
-    return <WelcomeScreen {...commonProps} />;
-  }
 
   return (
     <div className="flex h-screen w-screen bg-background text-muted-foreground selection:bg-primary/20 selection:text-foreground overflow-hidden">
@@ -659,7 +813,7 @@ function App() {
                 </button>
               </div>
             )}
-            {view === 'all-chats' && <div className="p-8"><AllChatsView sessions={sessions} onSelectChat={handleSelectChat} onDeleteSession={handleDeleteSession} onNavigate={handleNavigate} /></div>}
+            {view === 'all-chats' && <div className="h-full"><AllChatsView sessions={sessions} onSelectChat={handleSelectChat} onDeleteSession={handleDeleteSession} onNavigate={handleNavigate} /></div>}
             {view === 'settings' && <div className="h-full"><SettingsView /></div>}
           </div>
         </div>

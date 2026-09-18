@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aurora Studio Makeup Artist MUA — Curated by opendev-labs</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Clean Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            noir: '#0a0908',
+            charcoal: '#141210',
+            gold: {
+              100: '#fdf7eb',
+              300: '#f5d8a0',
+              400: '#e5b869',
+              500: '#c59a3f',
+              600: '#9d7728',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- opendev-labs Ecosystem Metadata -->
+  <link rel="canonical" href="https://www.opendev-labs.com/templates/mua/index.html">
+  <meta property="og:site_name" content="opendev-labs">
+  <meta property="og:title" content="Aurora Studio Makeup Artist MUA — Curated by opendev-labs">
+  <meta property="og:url" content="https://www.opendev-labs.com/templates/mua/index.html">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body class="bg-noir text-[#eae5df] font-sans antialiased overflow-x-hidden selection:bg-gold-500 selection:text-noir">
+
+  <!-- Trailing Cursor -->
+  <div class="cursor-dot hidden md:block" id="cursorDot"></div>
+  <div class="cursor-ring hidden md:block" id="cursorRing"></div>
+
+  <!-- Background Particle Canvas -->
+  <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+  <!-- Ambient Glow -->
+  <div class="fixed -top-40 -left-40 w-[500px] h-[500px] bg-gold-500/10 rounded-full blur-[140px] pointer-events-none -z-10"></div>
+  <div class="fixed top-1/2 -right-40 w-[500px] h-[500px] bg-gold-400/10 rounded-full blur-[150px] pointer-events-none -z-10"></div>
+
+  <!-- Header -->
+  <header class="fixed top-0 left-0 right-0 z-40 glass-nav transition-all duration-300" id="mainHeader">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="flex flex-col items-start">
+        <span class="font-serif text-2xl tracking-[0.2em] text-white uppercase font-normal">Aurora Studio</span>
+        <span class="text-[10px] tracking-[0.3em] text-gold-400 uppercase font-sans">Professional Makeup Artist</span>
+      </a>
+
+      <nav class="hidden lg:flex items-center space-x-8 text-xs uppercase tracking-widest text-[#b8afa6]">
+        <a href="#about" class="hover:text-gold-300 transition">About</a>
+        <a href="#transformation" class="hover:text-gold-300 transition">Before & After</a>
+        <a href="#portfolio" class="hover:text-gold-300 transition">Portfolio</a>
+        <a href="#services" class="hover:text-gold-300 transition">Services</a>
+        <a href="#calculator" class="hover:text-gold-300 transition">Pricing Calculator</a>
+        <a href="#reviews" class="hover:text-gold-300 transition">Reviews</a>
+      </nav>
+
+      <button onclick="openBookingModal('General Appointment')" class="px-6 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold border border-gold-400/50 hover:bg-gold-400 hover:text-noir transition">
+        Book Appointment
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="about" class="relative min-h-screen flex items-center pt-28 pb-16 px-6 max-w-7xl mx-auto z-10">
+    <div class="grid lg:grid-cols-12 gap-12 items-center w-full">
+      <div class="lg:col-span-7 space-y-8">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-gold-400/30 text-xs tracking-wider uppercase text-gold-300">
+          <span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>
+          Now Booking For Current & Upcoming Season
+        </div>
+
+        <h1 class="font-serif text-5xl sm:text-6xl md:text-7xl font-light leading-tight text-white reveal-on-scroll">
+          Enhancing your <br>
+          <span class="italic text-gradient-gold">natural beauty</span> for every special day.
+        </h1>
+
+        <p class="text-[#a89f91] max-w-xl text-base md:text-lg leading-relaxed font-light reveal-on-scroll delay-100">
+          Professional makeup services for weddings, photoshoots, and special occasions. We focus on long-lasting results, healthy skin prep, and looks that photograph cleanly in any light.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 reveal-on-scroll delay-200">
+          <button onclick="openBookingModal('Bridal Makeup Package')" class="px-8 py-4 rounded-full bg-gold-400 hover:bg-gold-500 text-noir font-semibold tracking-wider uppercase text-xs transition text-center shadow-lg">
+            Book Bridal Service
+          </button>
+          <a href="#transformation" class="px-8 py-4 rounded-full glass-card hover:bg-white/5 transition tracking-wider uppercase text-xs text-center border border-white/15 flex items-center justify-center gap-2">
+            See Work Results <i data-lucide="arrow-down-right" class="w-4 h-4"></i>
+          </a>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="pt-8 border-t border-white/10 grid grid-cols-3 gap-6 reveal-on-scroll delay-300">
+          <div>
+            <p class="font-serif text-3xl font-light text-white">400+</p>
+            <p class="text-xs uppercase tracking-wider text-[#8b8377] mt-1">Clients Served</p>
+          </div>
+          <div>
+            <p class="font-serif text-3xl font-light text-white">8+ Years</p>
+            <p class="text-xs uppercase tracking-wider text-[#8b8377] mt-1">Experience</p>
+          </div>
+          <div>
+            <p class="font-serif text-3xl font-light text-white">16-Hour</p>
+            <p class="text-xs uppercase tracking-wider text-[#8b8377] mt-1">Wear Guarantee</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Card Image -->
+      <div class="lg:col-span-5 relative">
+        <div class="tilt-card relative w-full max-w-md mx-auto aspect-[3/4] rounded-3xl p-3 glass-card border border-gold-400/30 shadow-2xl" data-tilt>
+          <div class="tilt-card-inner w-full h-full rounded-2xl overflow-hidden relative">
+            <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?q=80&w=1200&auto=format&fit=crop" 
+                 alt="Bridal Makeup Example" 
+                 class="w-full h-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-t from-noir/80 via-transparent to-transparent"></div>
+            
+            <div class="absolute bottom-6 left-6 right-6 p-5 glass-card rounded-2xl border border-white/10 backdrop-blur-md">
+              <p class="font-serif text-xl text-white">Luminous Bridal Finish</p>
+              <p class="text-xs text-gold-400 mt-1">Lightweight, smudge-proof, and comfortable</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Before / After Slider -->
+  <section id="transformation" class="py-24 px-6 border-t border-white/5 bg-charcoal/30 relative z-10">
+    <div class="max-w-5xl mx-auto text-center mb-12">
+      <span class="text-xs uppercase tracking-widest text-gold-400">Real Results</span>
+      <h2 class="font-serif text-4xl md:text-5xl font-light text-white mt-2">Before & After</h2>
+      <p class="text-[#a89f91] mt-3 font-light text-sm max-w-md mx-auto">
+        Slide left and right to compare skin before prep and the complete finished look.
+      </p>
+    </div>
+
+    <div class="max-w-4xl mx-auto relative h-[460px] md:h-[540px] rounded-3xl overflow-hidden glass-card border border-gold-400/20 select-none shadow-2xl" id="comparisonBox">
+      <!-- After Image -->
+      <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1400&auto=format&fit=crop" 
+           alt="Finished Makeup" 
+           class="absolute inset-0 w-full h-full object-cover">
+      <div class="absolute top-6 right-6 glass-card px-4 py-1.5 rounded-full text-xs uppercase tracking-wider text-white border border-white/10">
+        Finished Look
+      </div>
+
+      <!-- Before Image Container -->
+      <div id="beforeContainer" class="absolute inset-0 w-1/2 overflow-hidden border-r-2 border-gold-400">
+        <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1400&auto=format&fit=crop" 
+             alt="Before Makeup" 
+             class="absolute inset-0 w-[896px] max-w-none h-full object-cover grayscale brightness-90">
+        <div class="absolute top-6 left-6 glass-card px-4 py-1.5 rounded-full text-xs uppercase tracking-wider text-white border border-white/10">
+          Before Application
+        </div>
+      </div>
+
+      <!-- Range Slider Controller -->
+      <input type="range" min="0" max="100" value="50" id="sliderRange" 
+             aria-label="Before and after comparison slider"
+             class="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize z-30">
+      
+      <!-- Divider Handle -->
+      <div id="sliderHandle" class="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 pointer-events-none z-20 flex items-center justify-center">
+        <div class="w-9 h-9 rounded-full bg-gold-400 text-noir flex items-center justify-center shadow-lg">
+          <i data-lucide="chevrons-left-right" class="w-4 h-4 text-noir"></i>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Portfolio Section -->
+  <section id="portfolio" class="py-24 px-6 max-w-7xl mx-auto relative z-10">
+    <div class="text-center max-w-2xl mx-auto mb-12">
+      <span class="text-xs uppercase tracking-widest text-gold-400">Recent Projects</span>
+      <h2 class="font-serif text-4xl md:text-5xl font-light text-white mt-2">Selected Portfolio</h2>
+      
+      <!-- Filters -->
+      <div class="flex flex-wrap justify-center gap-3 mt-8">
+        <button class="portfolio-filter active px-5 py-2 rounded-full text-xs uppercase tracking-wider transition-all" data-filter="all">All Work</button>
+        <button class="portfolio-filter px-5 py-2 rounded-full text-xs uppercase tracking-wider transition-all" data-filter="bridal">Bridal</button>
+        <button class="portfolio-filter px-5 py-2 rounded-full text-xs uppercase tracking-wider transition-all" data-filter="events">Events</button>
+        <button class="portfolio-filter px-5 py-2 rounded-full text-xs uppercase tracking-wider transition-all" data-filter="photoshoots">Photoshoots</button>
+      </div>
+    </div>
+
+    <!-- Gallery Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="portfolioGrid">
+      <div class="portfolio-item bridal group relative aspect-[4/5] rounded-2xl overflow-hidden glass-card cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=1200&auto=format&fit=crop', 'Classic Bridal Look', 'Bridal')">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" alt="Bridal client">
+        <div class="absolute inset-0 bg-gradient-to-t from-noir/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-6">
+          <span class="text-xs text-gold-300 uppercase tracking-widest">Bridal</span>
+          <h4 class="font-serif text-2xl text-white">Classic Bridal Look</h4>
+        </div>
+      </div>
+
+      <div class="portfolio-item photoshoots group relative aspect-[4/5] rounded-2xl overflow-hidden glass-card cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=1200&auto=format&fit=crop', 'Studio Portrait Session', 'Photoshoots')">
+        <img src="https://images.unsplash.com/photo-1509967419530-da38b4704bc6?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" alt="Studio makeup portrait">
+        <div class="absolute inset-0 bg-gradient-to-t from-noir/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-6">
+          <span class="text-xs text-gold-300 uppercase tracking-widest">Photoshoots</span>
+          <h4 class="font-serif text-2xl text-white">Studio Portrait Session</h4>
+        </div>
+      </div>
+
+      <div class="portfolio-item events group relative aspect-[4/5] rounded-2xl overflow-hidden glass-card cursor-pointer" onclick="openLightbox('https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1200&auto=format&fit=crop', 'Evening Gala Makeup', 'Events')">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop" class="w-full h-full object-cover transition duration-500 group-hover:scale-105" alt="Evening makeup">
+        <div class="absolute inset-0 bg-gradient-to-t from-noir/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex flex-col justify-end p-6">
+          <span class="text-xs text-gold-300 uppercase tracking-widest">Events</span>
+          <h4 class="font-serif text-2xl text-white">Evening Gala Makeup</h4>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services & Pricing Packages -->
+  <section id="services" class="py-24 px-6 max-w-7xl mx-auto relative z-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+      <div>
+        <span class="text-xs uppercase tracking-widest text-gold-400">Clear Pricing</span>
+        <h2 class="font-serif text-4xl md:text-5xl font-light text-white mt-2">Services & Packages</h2>
+      </div>
+      <p class="text-[#a89f91] max-w-md font-light text-sm">
+        All bookings include comprehensive skin prep, custom false lashes, and professional touch-up supplies.
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <!-- Service 1 -->
+      <div class="tilt-card glass-card rounded-3xl p-8 flex flex-col justify-between border border-white/10 hover:border-gold-400/40 group" data-tilt>
+        <div>
+          <div class="w-12 h-12 rounded-full bg-gold-400/10 flex items-center justify-center text-gold-400 mb-6 group-hover:bg-gold-400 group-hover:text-noir transition">
+            <i data-lucide="crown" class="w-6 h-6"></i>
+          </div>
+          <p class="text-xs uppercase tracking-widest text-gold-400 font-medium">Most Comprehensive</p>
+          <h3 class="font-serif text-2xl text-white mt-1">Full Bridal Package</h3>
+          <p class="text-[#999083] text-sm mt-3 font-light leading-relaxed">
+            Includes deep skin preparation, complete bridal makeup, lash application, emergency touch-up pouch, and veil setting.
+          </p>
+          <div class="mt-6 font-serif text-4xl text-gold-300 font-light">$650</div>
+        </div>
+        <button onclick="openBookingModal('Full Bridal Package')" class="mt-8 w-full py-3.5 rounded-xl border border-gold-400/40 text-gold-300 text-xs uppercase tracking-widest hover:bg-gold-400 hover:text-noir transition font-medium">
+          Choose Package
+        </button>
+      </div>
+
+      <!-- Service 2 -->
+      <div class="tilt-card glass-card rounded-3xl p-8 flex flex-col justify-between border-2 border-gold-400/70 relative group shadow-xl" data-tilt>
+        <div class="absolute -top-3.5 right-8 bg-gold-400 text-noir text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-full">
+          Popular
+        </div>
+        <div>
+          <div class="w-12 h-12 rounded-full bg-gold-400/20 flex items-center justify-center text-gold-300 mb-6 group-hover:bg-gold-400 group-hover:text-noir transition">
+            <i data-lucide="camera" class="w-6 h-6"></i>
+          </div>
+          <p class="text-xs uppercase tracking-widest text-gold-400 font-medium">Single Occasion</p>
+          <h3 class="font-serif text-2xl text-white mt-1">Event & Party Glam</h3>
+          <p class="text-[#999083] text-sm mt-3 font-light leading-relaxed">
+            Long-lasting full face makeup suited for celebrations, proms, red carpets, and guest appearances with custom lash sets.
+          </p>
+          <div class="mt-6 font-serif text-4xl text-gold-300 font-light">$350</div>
+        </div>
+        <button onclick="openBookingModal('Event & Party Glam')" class="mt-8 w-full py-3.5 rounded-xl bg-gold-400 text-noir text-xs uppercase tracking-widest font-semibold hover:bg-gold-500 transition">
+          Choose Package
+        </button>
+      </div>
+
+      <!-- Service 3 -->
+      <div class="tilt-card glass-card rounded-3xl p-8 flex flex-col justify-between border border-white/10 hover:border-gold-400/40 group" data-tilt>
+        <div>
+          <div class="w-12 h-12 rounded-full bg-gold-400/10 flex items-center justify-center text-gold-400 mb-6 group-hover:bg-gold-400 group-hover:text-noir transition">
+            <i data-lucide="sparkles" class="w-6 h-6"></i>
+          </div>
+          <p class="text-xs uppercase tracking-widest text-gold-400 font-medium">Educational</p>
+          <h3 class="font-serif text-2xl text-white mt-1">1-on-1 Makeup Lesson</h3>
+          <p class="text-[#999083] text-sm mt-3 font-light leading-relaxed">
+            A 2.5-hour hands-on lesson. We review your current makeup bag, select suitable shades, and practice everyday-to-night transitions.
+          </p>
+          <div class="mt-6 font-serif text-4xl text-gold-300 font-light">$450</div>
+        </div>
+        <button onclick="openBookingModal('1-on-1 Makeup Lesson')" class="mt-8 w-full py-3.5 rounded-xl border border-gold-400/40 text-gold-300 text-xs uppercase tracking-widest hover:bg-gold-400 hover:text-noir transition font-medium">
+          Choose Package
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cost Estimator Calculator -->
+  <section id="calculator" class="py-24 px-6 border-t border-white/5 bg-noir relative z-10">
+    <div class="max-w-4xl mx-auto glass-card rounded-3xl p-8 md:p-12 border border-gold-400/30">
+      <div class="text-center max-w-xl mx-auto mb-10">
+        <span class="text-xs uppercase tracking-widest text-gold-400">Price Estimator</span>
+        <h2 class="font-serif text-3xl md:text-4xl text-white mt-2">Calculate Your Total</h2>
+        <p class="text-[#a89f91] text-sm font-light mt-2">Choose your primary service and add-ons for an accurate price.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-8 items-center">
+        <div class="space-y-5">
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gold-300 mb-2 font-medium">Primary Service</label>
+            <select id="calcBase" onchange="calculateTotal()" class="w-full bg-[#171412] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white">
+              <option value="650">Full Bridal Package ($650)</option>
+              <option value="350">Event & Party Glam ($350)</option>
+              <option value="450">1-on-1 Makeup Lesson ($450)</option>
+            </select>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs uppercase tracking-widest text-gold-300 mb-2">
+              <span>Additional Attendants / Bridesmaids</span>
+              <span id="attendeeDisplay" class="font-semibold text-white">0 Guests</span>
+            </div>
+            <input type="range" id="calcAttendees" min="0" max="8" value="0" step="1" oninput="calculateTotal()" class="w-full accent-gold-400 cursor-pointer">
+            <span class="text-xs text-[#81776a]">+ $150 per extra person</span>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="addonTrial" onchange="calculateTotal()" class="w-4 h-4 rounded accent-gold-400">
+              <span class="text-sm text-[#ded6cc]">Bridal Makeup Trial Session (+$220)</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="addonTouchup" onchange="calculateTotal()" class="w-4 h-4 rounded accent-gold-400">
+              <span class="text-sm text-[#ded6cc]">3-Hour On-Site Touchup Support (+$300)</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="addonAirbrush" onchange="calculateTotal()" class="w-4 h-4 rounded accent-gold-400">
+              <span class="text-sm text-[#ded6cc]">Airbrush Base Upgrade (+$80)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Calculated Summary Box -->
+        <div class="glass-card rounded-2xl p-8 text-center flex flex-col justify-center items-center border border-white/10">
+          <span class="text-xs uppercase tracking-widest text-gold-400">Estimated Total</span>
+          <div class="font-serif text-5xl md:text-6xl text-white font-light my-4" id="totalDisplay">$650</div>
+          <p class="text-xs text-[#8a8073] mb-6">Includes standard local travel, lashes, and preparation.</p>
+          <button onclick="openBookingFromCalculator()" class="w-full py-3.5 rounded-full bg-gold-400 hover:bg-gold-500 text-noir uppercase tracking-widest text-xs font-semibold transition">
+            Book With This Estimate
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Client Reviews -->
+  <section id="reviews" class="py-24 px-6 max-w-7xl mx-auto relative z-10">
+    <div class="text-center mb-16">
+      <span class="text-xs uppercase tracking-widest text-gold-400">Testimonials</span>
+      <h2 class="font-serif text-4xl md:text-5xl text-white mt-2">What Clients Say</h2>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="glass-card p-8 rounded-2xl border border-white/10">
+        <div class="flex text-gold-400 gap-1 mb-4">
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+        </div>
+        <p class="text-sm font-serif italic text-[#d6cec3] leading-relaxed">
+          "My wedding day makeup held up through the heat, happy tears, and hours of dancing. It still looked fresh in the evening photos."
+        </p>
+        <div class="mt-6">
+          <p class="text-xs uppercase tracking-widest font-semibold text-white">Elena R.</p>
+          <p class="text-xs text-gold-400">Bridal Client</p>
+        </div>
+      </div>
+
+      <div class="glass-card p-8 rounded-2xl border border-white/10">
+        <div class="flex text-gold-400 gap-1 mb-4">
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+        </div>
+        <p class="text-sm font-serif italic text-[#d6cec3] leading-relaxed">
+          "Very professional, punctual, and attentive to what I wanted. My makeup looked smooth without feeling heavy on my skin."
+        </p>
+        <div class="mt-6">
+          <p class="text-xs uppercase tracking-widest font-semibold text-white">Camille L.</p>
+          <p class="text-xs text-gold-400">Editorial Client</p>
+        </div>
+      </div>
+
+      <div class="glass-card p-8 rounded-2xl border border-white/10">
+        <div class="flex text-gold-400 gap-1 mb-4">
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+        </div>
+        <p class="text-sm font-serif italic text-[#d6cec3] leading-relaxed">
+          "Aurora brought so much calm to our busy bridal morning. All five of my bridesmaids loved their looks as well."
+        </p>
+        <div class="mt-6">
+          <p class="text-xs uppercase tracking-widest font-semibold text-white">Sienna M.</p>
+          <p class="text-xs text-gold-400">Bridal Client</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-white/10 py-12 px-6 glass-nav text-center relative z-10">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-left">
+        <span class="font-serif text-xl tracking-widest text-white uppercase">Aurora Studio</span>
+        <p class="text-xs text-[#7d7367] mt-1 font-sans">Professional Makeup Artist & Bridal Services.</p>
+      </div>
+
+      <div class="flex space-x-6 text-xs tracking-wider uppercase text-[#968d80]">
+        <a href="#" class="hover:text-gold-300 transition">Instagram</a>
+        <a href="#" class="hover:text-gold-300 transition">TikTok</a>
+        <a href="#" class="hover:text-gold-300 transition">Pinterest</a>
+      </div>
+
+      <p class="text-xs text-[#5c544c]">
+        &copy; <span id="year"></span> Aurora Studio. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+  <!-- Lightbox Modal -->
+  <div id="lightboxModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+    <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white/70 hover:text-white p-2" aria-label="Close">
+      <i data-lucide="x" class="w-8 h-8"></i>
+    </button>
+    <div class="max-w-3xl w-full text-center">
+      <img id="lightboxImage" src="" alt="Portfolio view" class="max-h-[75vh] mx-auto rounded-xl object-contain border border-gold-400/20">
+      <h3 id="lightboxTitle" class="font-serif text-3xl text-white mt-4"></h3>
+      <p id="lightboxCategory" class="text-xs uppercase tracking-widest text-gold-400 mt-1"></p>
+    </div>
+  </div>
+
+  <!-- Multi-Step Booking Modal -->
+  <div id="bookingModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+    <div class="glass-card max-w-lg w-full rounded-3xl p-8 border border-gold-400/40 relative scale-95 transition-transform duration-300" id="modalBox">
+      <button onclick="closeBookingModal()" class="absolute top-6 right-6 text-[#9a9083] hover:text-white" aria-label="Close">
+        <i data-lucide="x" class="w-6 h-6"></i>
+      </button>
+
+      <div class="mb-6">
+        <span class="text-xs uppercase tracking-widest text-gold-400">Appointment Request</span>
+        <h3 class="font-serif text-3xl text-white mt-1">Book Your Date</h3>
+        
+        <!-- Steps Bar -->
+        <div class="flex items-center gap-2 mt-4">
+          <div id="stepDot1" class="h-1 flex-1 bg-gold-400 rounded-full transition-all"></div>
+          <div id="stepDot2" class="h-1 flex-1 bg-white/20 rounded-full transition-all"></div>
+        </div>
+      </div>
+
+      <form id="bookingForm" onsubmit="handleFormSubmit(event)">
+        <!-- Step 1: Contact Details -->
+        <div id="formStep1" class="space-y-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Your Name</label>
+            <input type="text" id="custName" required class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" placeholder="Jane Doe">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Email or Phone Number</label>
+            <input type="text" id="custContact" required class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" placeholder="jane@example.com / +1 (555) 000-0000">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Selected Service</label>
+            <input type="text" id="modalServiceInput" class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" value="Full Bridal Package">
+          </div>
+          <button type="button" onclick="nextFormStep()" class="w-full py-3.5 rounded-xl bg-gold-400 text-noir uppercase tracking-wider text-xs font-semibold hover:bg-gold-500 transition mt-4">
+            Next: Event Details &rarr;
+          </button>
+        </div>
+
+        <!-- Step 2: Event Information -->
+        <div id="formStep2" class="space-y-4 hidden">
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Date & Location / Venue</label>
+            <input type="text" id="eventLoc" required class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" placeholder="September 24, City Center Hotel">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Number of People Requiring Makeup</label>
+            <input type="text" id="partySize" class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" placeholder="e.g. Bride + 3 Bridesmaids">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-[#9d9284] mb-1">Notes or Skin Allergies</label>
+            <textarea id="skinNotes" rows="2" class="w-full bg-[#1a1614] border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-gold-400 text-white" placeholder="Sensitive skin, matte finish preferred..."></textarea>
+          </div>
+          <div class="flex gap-3 mt-4">
+            <button type="button" onclick="prevFormStep()" class="w-1/3 py-3 rounded-xl border border-white/20 text-white uppercase tracking-wider text-xs hover:bg-white/5 transition">
+              Back
+            </button>
+            <button type="submit" class="w-2/3 py-3 rounded-xl bg-gold-400 text-noir uppercase tracking-wider text-xs font-semibold hover:bg-gold-500 transition">
+              Submit Request
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

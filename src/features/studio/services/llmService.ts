@@ -3,54 +3,87 @@ import type { Message, FileNode, ModelConfig } from '../types';
 import { SUPPORTED_MODELS } from '../constants';
 import { streamGeminiResponse } from "./geminiService";
 
-// Helper to get API key from manual input or Vite environment variables
+// Safe helper to check process.env without throwing ReferenceError in browser
+const getSafeProcessEnv = (key: string): string | undefined => {
+    try {
+        if (typeof process !== 'undefined' && process && process.env) {
+            return (process.env as any)[key];
+        }
+    } catch (e) {
+        // ignore in browser
+    }
+    return undefined;
+};
+
+// Helper to get API key from manual input or Vite/process environment variables
 const getApiKeyFromEnv = (provider: string): string | undefined => {
     switch (provider) {
         case 'Google':
-            return import.meta.env.VITE_GEMINI_API_KEY;
+            return (
+                localStorage.getItem('opendev-geminiApiKey') ||
+                import.meta.env.VITE_GEMINI_API_KEY ||
+                getSafeProcessEnv('GEMINI_API_KEY') ||
+                undefined
+            );
         case 'OpenRouter':
-            return import.meta.env.VITE_OPENROUTER_API_KEY;
+            return (
+                localStorage.getItem('opendev-openRouterApiKey') ||
+                import.meta.env.VITE_OPENROUTER_API_KEY ||
+                import.meta.env.OPENROUTER_API_KEY ||
+                getSafeProcessEnv('VITE_OPENROUTER_API_KEY') ||
+                getSafeProcessEnv('OPENROUTER_API_KEY') ||
+                getSafeProcessEnv('SECURE_OPENROUTER_API_KEY') ||
+                undefined
+            );
         case 'OpenAI':
-            return import.meta.env.VITE_OPENAI_API_KEY;
+            return (
+                localStorage.getItem('opendev-openaiApiKey') ||
+                import.meta.env.VITE_OPENAI_API_KEY ||
+                getSafeProcessEnv('OPENAI_API_KEY') ||
+                undefined
+            );
         case 'DeepSeek':
-            return import.meta.env.VITE_DEEPSEEK_API_KEY;
+            return (
+                localStorage.getItem('opendev-deepseekApiKey') ||
+                import.meta.env.VITE_DEEPSEEK_API_KEY ||
+                getSafeProcessEnv('DEEPSEEK_API_KEY') ||
+                undefined
+            );
         default:
             return undefined;
     }
 };
 
-const TARS_SYSTEM_INSTRUCTION_GENERIC = `You are open-studio v2026, an elite full-stack development assistant.
+const TARS_SYSTEM_INSTRUCTION_GENERIC = `You are OpenStudio Intelligence v2026 — official AI Web Generator & Designer for OpenDev Labs. You are an elite $1M AI Master Engineer, Principal Web Designer, and Full-Stack Architect.
 
-CREATIVE DIRECTION (THE PULSE):
-- Capability: You build full Next.js applications (App Router, API routes), React SPA, Node.js backends, and vanilla web apps.
-- Libraries: Use TailwindCSS, Three.js, @react-three/fiber, anime.js, Framer Motion for highly interactive 3D simulations and UI.
-- Aesthetic: Max Fidelity. Use glassmorphism, cinematic depth, liquid animations, responsive WebGL, and modern 2026 aesthetics.
-- Architecture: Provide multi-file architectures. If asked for Next.js, create 'app/page.tsx', 'app/layout.tsx', 'next.config.js' etc.
-- Bold Typography: Use tracking-tighter, uppercase, and creative weights for impact.
+YOUR DOMAIN MASTERY & CAPABILITIES:
+1. VANILLA WEB EXPERT (HTML5 + CSS3 + JS ES6+):
+   - You build pure, ultra-clean HTML5, responsive CSS3 (Flexbox, CSS Grid, CSS Variables, Glassmorphism, Neumorphism, CSS Keyframe Animations), and Vanilla Modern JS (DOM APIs, Canvas, SVG, Fetch API).
+2. REACT & NEXT.JS EXPERT:
+   - You build production-grade React 18/19 Single-Page Apps & Next.js Applications.
+   - Use TailwindCSS classes, Lucide Icons, interactive state, and modern component architecture.
+3. PRINCIPAL WEB DESIGNER & AESTHETICS MASTER:
+   - Max Visual Fidelity: Cinematic dark mode, glassmorphism, glowing accents, smooth micro-interactions, responsive mobile-first layouts, and typography hierarchy.
 
-RESPONSE FORMAT:
-- Your response MUST be a single, valid JSON object and nothing else.
-- DO NOT wrap the JSON in markdown backticks like \`\`\`json.
-- DO NOT add any text before or after the JSON object.
+CRITICAL CODE GENERATION RULES:
+1. ALWAYS provide full, complete, production-ready code — NEVER use diff snippets, placeholders, or "// TODO" comments.
+2. For React web applications, ALWAYS provide complete, fully styled, working code in \`src/App.tsx\` and \`src/index.css\`.
+3. Ensure every UI component is fully dynamic with state (\`useState\`, \`useEffect\`), interactive controls (buttons, inputs, tabs, search, forms), realistic mock data, and high-fidelity styling.
 
-The JSON object must have this exact structure:
+RESPONSE FORMAT RULES:
+1. ALWAYS begin with a concise conversational statement in natural language explaining what you are building (e.g., "I understand you want a modern login page. I am materializing src/App.tsx with glassmorphism and animations now...").
+2. NEVER include code dumps, raw JSON brackets, or raw code blocks in the conversational bubble.
+3. Provide your output as a valid JSON object with "conversation" and "files" array:
 {
-  "conversation": "Your conversational response here. Keep it concise and maintain a 'Sovereign Architect' tone.",
+  "conversation": "I understand your requirement for [x]. Materializing components now...",
   "files": [
     {
-      "path": "src/components/CoolComponent.tsx",
-      "content": "// The full, complete file content goes here.",
+      "path": "src/App.tsx",
+      "content": "// Full production code here",
       "action": "created"
     }
   ]
-}
-
-MODIFICATION GUIDELINES:
-1. For NEW files, use "action": "created".
-2. For CHANGING existing files, use "action": "modified".
-3. For REMOVING files, use "action": "deleted".
-4. Always provide the FULL file content.
-5. If no files are changed, "files" MUST be an empty array: [].`;
+}`;
 
 // Helper to convert app's message format to a generic format.
 const toGenericHistory = (messages: Message[]) => {
@@ -358,10 +391,10 @@ export async function* streamChatResponse(
         return;
     }
 
-    // Resolve Effective API Key: User Profile > Mesh Env Vars
-    let effectiveApiKey: string | undefined = undefined;
-    
-    if (userProfile) {
+    // Resolve Effective API Key: LocalStorage > User Profile > Env Vars
+    let effectiveApiKey: string | undefined = localStorage.getItem(`opendev-${modelConfig.provider.toLowerCase()}ApiKey`) || undefined;
+
+    if (!effectiveApiKey && userProfile) {
         const { decryptApiKey } = await import('../../../lib/crypto');
         switch (modelConfig.provider) {
             case 'Google':
@@ -379,7 +412,7 @@ export async function* streamChatResponse(
         }
     }
 
-    // Fallback to Env Vars if profile key not set
+    // Fallback to Env Vars if profile/localStorage key not set
     if (!effectiveApiKey) {
         effectiveApiKey = getApiKeyFromEnv(modelConfig.provider);
     }
@@ -406,7 +439,23 @@ export async function* streamChatResponse(
                 break;
 
             case 'Google':
-                yield* streamGeminiResponse(fullPrompt, history, modelConfig, effectiveApiKey);
+                try {
+                    yield* streamGeminiResponse(fullPrompt, history, modelConfig, effectiveApiKey);
+                } catch (geminiErr) {
+                    console.warn("Gemini API failed, attempting automatic failover to OpenRouter...", geminiErr);
+                    const openRouterKey = getApiKeyFromEnv('OpenRouter') || (userProfile && userProfile.openRouterApiKey);
+                    if (openRouterKey) {
+                        const fallbackModel: ModelConfig = {
+                            id: 'openrouter-qwen-2-5-coder',
+                            name: 'Qwen 2.5 Coder 32B (OpenRouter)',
+                            provider: 'OpenRouter',
+                            apiIdentifier: 'qwen/qwen-2.5-coder-32b-instruct'
+                        };
+                        yield* streamOpenAICompatibleResponse(fullPrompt, history, fallbackModel, openRouterKey);
+                    } else {
+                        throw geminiErr;
+                    }
+                }
                 break;
 
             case 'Ollama':
@@ -444,6 +493,22 @@ export async function* streamChatResponse(
         }
     } catch (error) {
         console.error(`Error with ${modelConfig.provider} API:`, error);
+        const openRouterKey = getApiKeyFromEnv('OpenRouter');
+        if (openRouterKey && modelConfig.provider !== 'OpenRouter') {
+            try {
+                console.log("Attempting final recovery via OpenRouter Qwen 2.5 Coder...");
+                const fallbackModel: ModelConfig = {
+                    id: 'openrouter-qwen-2-5-coder',
+                    name: 'Qwen 2.5 Coder 32B (OpenRouter)',
+                    provider: 'OpenRouter',
+                    apiIdentifier: 'qwen/qwen-2.5-coder-32b-instruct'
+                };
+                yield* streamOpenAICompatibleResponse(fullPrompt, history, fallbackModel, openRouterKey);
+                return;
+            } catch (fallbackError) {
+                console.error("OpenRouter fallback also failed:", fallbackError);
+            }
+        }
         const errorMsg = error instanceof Error ? error.message : "An unknown error occurred.";
         const errJson = JSON.stringify({ conversation: `An error occurred with ${modelConfig.provider}: ${errorMsg}`, files: [] });
         yield { text: errJson };

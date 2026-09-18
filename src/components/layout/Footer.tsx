@@ -50,42 +50,8 @@ export const Footer: React.FC = () => {
           </ul>
         </div>
 
-        {/* Engineering & Bash Projects */}
-        <div>
-          <h4 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 dark:text-white mb-4">
-            Yash Projects
-          </h4>
-          <ul className="space-y-2.5 text-xs font-medium">
-            <li>
-              <a href="/iamyashramteke/case-study/agentbash/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-white transition-colors flex items-center gap-1">
-                AgentBash Engine <ExternalLink className="size-3 text-zinc-400" />
-              </a>
-            </li>
-            <li>
-              <a href="/iamyashramteke/case-study/void/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-white transition-colors flex items-center gap-1">
-                Void Cloud Terminal <ExternalLink className="size-3 text-zinc-400" />
-              </a>
-            </li>
-            <li>
-              <a href="/iamyashramteke/case-study/quantum-compute/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-white transition-colors flex items-center gap-1">
-                Quantum Compute <ExternalLink className="size-3 text-zinc-400" />
-              </a>
-            </li>
-            <li>
-              <a href="/iamyashramteke/case-study/gh-sync-desk/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-white transition-colors flex items-center gap-1">
-                GH-Sync-Desk <ExternalLink className="size-3 text-zinc-400" />
-              </a>
-            </li>
-            <li>
-              <a href="/iamyashramteke/" target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 dark:hover:text-white transition-colors font-bold text-blue-600 dark:text-blue-400">
-                Full Yash Portfolio →
-              </a>
-            </li>
-          </ul>
-        </div>
-
         {/* Contact & Legal */}
-        <div>
+        <div className="md:col-span-2">
           <h4 className="text-xs font-extrabold uppercase tracking-widest text-zinc-900 dark:text-white mb-4">
             Client Support
           </h4>

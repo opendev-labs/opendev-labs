@@ -23,12 +23,23 @@ export const DashboardLayout: React.FC = () => {
       return;
     }
 
-    if ((user?.role === 'client' || user?.role === 'user') && location.pathname.startsWith('/dashboard')) {
+    const allowedUserPaths = ['/client/profile', '/client/convert', '/client/security'];
+    if (user?.role === 'user' && !allowedUserPaths.includes(location.pathname)) {
+      navigate('/client/profile', { replace: true });
+    } else if (user?.role === 'client' && (location.pathname === '/client' || location.pathname === '/client/' || location.pathname.startsWith('/dashboard'))) {
       navigate('/client/portal', { replace: true });
     } else if (user?.role === 'developer' && location.pathname.startsWith('/client')) {
       navigate('/dashboard', { replace: true });
     }
   }, [user, isAuthenticated, location.pathname, navigate]);
+
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 768) {
+      setMobileSidebarOpen(prev => !prev);
+    } else {
+      setCollapsed(prev => !prev);
+    }
+  };
 
   return (
     <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-black dark:selection:text-white transition-colors duration-200">
@@ -46,10 +57,10 @@ export const DashboardLayout: React.FC = () => {
         <Header
           onOpenCommand={() => setCommandOpen(true)}
           onOpenAddClient={() => setAddClientOpen(true)}
-          onToggleMobileSidebar={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          onToggleMobileSidebar={handleToggleSidebar}
         />
 
-        <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-2">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-2">
           <Outlet context={{ onOpenAddClient: () => setAddClientOpen(true) }} />
         </main>
       </div>

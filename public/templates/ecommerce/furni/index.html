@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Furni Modern Living — Curated by opendev-labs</title>
+  <link rel="canonical" href="https://www.opendev-labs.com/templates/ecommerce/furni/index.html">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            furniGreen: '#3b5d50',
+            furniYellow: '#f9bf29',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-zinc-50 text-zinc-900 font-sans selection:bg-furniGreen selection:text-white">
+
+  <!-- Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 bg-furniGreen text-white shadow-md">
+    <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="#" class="font-extrabold text-2xl tracking-tight text-white">
+        Furni<span class="text-furniYellow">.</span>
+      </a>
+
+      <nav class="hidden md:flex items-center space-x-8 text-xs font-bold uppercase tracking-wider text-zinc-200">
+        <a href="#hero" class="hover:text-furniYellow transition">Home</a>
+        <a href="#products" class="hover:text-furniYellow transition">Shop Products</a>
+        <a href="#why-us" class="hover:text-furniYellow transition">Why Choose Us</a>
+        <a href="#testimonials" class="hover:text-furniYellow transition">Reviews</a>
+      </nav>
+
+      <div class="flex items-center gap-4">
+        <button class="relative p-2 text-white hover:text-furniYellow transition">
+          <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+          <span class="absolute top-0 right-0 w-4 h-4 rounded-full bg-furniYellow text-black font-extrabold text-[10px] flex items-center justify-center">3</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section id="hero" class="bg-furniGreen pt-32 pb-20 px-6 text-white">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
+      <div class="lg:col-span-7 space-y-6">
+        <span class="px-4 py-1.5 rounded-full bg-white/10 text-furniYellow text-xs font-bold uppercase tracking-wider inline-block">
+          Modern Interior Furniture & Living
+        </span>
+        <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight">
+          Modern Interior <br>Design Studio & Furniture.
+        </h1>
+        <p class="text-zinc-200 text-base max-w-xl font-medium leading-relaxed">
+          Crafted with premium Nordic materials, minimalist geometry, and lifetime comfort guarantees. Elevate your living space today.
+        </p>
+        <div class="flex flex-wrap gap-4 pt-2">
+          <a href="#products" class="px-8 py-4 rounded-full bg-furniYellow hover:bg-yellow-400 text-black font-extrabold text-xs uppercase tracking-wider transition shadow-lg">
+            Shop Collection Now
+          </a>
+          <a href="#why-us" class="px-8 py-4 rounded-full border border-white/30 hover:bg-white/10 text-white font-extrabold text-xs uppercase tracking-wider transition">
+            Explore Studio
+          </a>
+        </div>
+      </div>
+
+      <div class="lg:col-span-5 relative">
+        <img src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop" alt="Green Sofa" class="w-full h-auto rounded-3xl shadow-2xl object-cover">
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products Section -->
+  <section id="products" class="py-24 px-6 max-w-7xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-16 gap-4">
+      <div>
+        <span class="text-xs uppercase font-bold tracking-widest text-furniGreen">Handcrafted Products</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-zinc-900 mt-1">Crafted with Excellent Material.</h2>
+      </div>
+      <a href="#" class="text-xs font-extrabold text-furniGreen hover:underline flex items-center gap-1">
+        Explore All Products →
+      </a>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        <div class="aspect-square rounded-2xl overflow-hidden mb-6 bg-zinc-100 relative">
+          <img src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?q=80&w=800&auto=format&fit=crop" alt="Nordic Chair" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        </div>
+        <h3 class="font-extrabold text-lg text-zinc-900">Nordic Ergonomic Chair</h3>
+        <p class="text-xs text-zinc-500 mt-1">Solid oak legs with memory foam cushion</p>
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
+          <span class="font-extrabold text-xl text-zinc-900">$149.00</span>
+          <button class="p-3 rounded-full bg-furniGreen hover:bg-zinc-800 text-white transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        <div class="aspect-square rounded-2xl overflow-hidden mb-6 bg-zinc-100 relative">
+          <img src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=800&auto=format&fit=crop" alt="Modern Lounge Chair" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        </div>
+        <h3 class="font-extrabold text-lg text-zinc-900">Kruzo Aero Lounge Chair</h3>
+        <p class="text-xs text-zinc-500 mt-1">Breathable fabric weave with steel frame</p>
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
+          <span class="font-extrabold text-xl text-zinc-900">$210.00</span>
+          <button class="p-3 rounded-full bg-furniGreen hover:bg-zinc-800 text-white transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-zinc-200 shadow-sm hover:shadow-xl transition-all duration-300 group">
+        <div class="aspect-square rounded-2xl overflow-hidden mb-6 bg-zinc-100 relative">
+          <img src="https://images.unsplash.com/photo-1538688525198-9b88f6f53126?q=80&w=800&auto=format&fit=crop" alt="Ergonomic Stool" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        </div>
+        <h3 class="font-extrabold text-lg text-zinc-900">Ergonomic Studio Stool</h3>
+        <p class="text-xs text-zinc-500 mt-1">Adjustable height with matte black finish</p>
+        <div class="flex items-center justify-between mt-4 pt-4 border-t border-zinc-100">
+          <span class="font-extrabold text-xl text-zinc-900">$95.00</span>
+          <button class="p-3 rounded-full bg-furniGreen hover:bg-zinc-800 text-white transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="py-12 bg-white border-t border-zinc-200 text-center text-xs text-zinc-500">
+    Crafted with open-source excellence by <a href="https://www.opendev-labs.com/templates" class="text-furniGreen font-bold hover:underline">opendev-labs</a> — Free &amp; Production Ready.
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

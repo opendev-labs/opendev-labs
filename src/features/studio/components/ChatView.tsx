@@ -26,7 +26,13 @@ export function ChatView({ messages, isThinking, onSendMessage, suggestions, sel
   return (
     <div className="flex flex-col h-full bg-background relative">
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 pt-2 pb-8 space-y-4 custom-scrollbar scroll-smooth">
-        {messages.map((msg) => <ChatMessage key={msg.id} message={msg} />)}
+        {(() => {
+          let assistantCount = 0;
+          return messages.map((msg) => {
+            const version = msg.role === 'open-studio' ? assistantCount++ : undefined;
+            return <ChatMessage key={msg.id} message={msg} versionIndex={version} />;
+          });
+        })()}
         {isThinking && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
            <div className="animate-pulse flex items-center gap-3 px-8 text-zinc-600">
              <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />

@@ -11,15 +11,21 @@ export const SUGGESTED_PROMPTS = [
 ];
 
 export const SUPPORTED_MODELS: ModelConfig[] = [
+    // OpenRouter Premier Models (Recommended)
+    { id: 'openrouter-qwen-2-5-coder', name: 'Qwen 2.5 Coder 32B (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'qwen/qwen-2.5-coder-32b-instruct' },
+    { id: 'openrouter-deepseek-v3', name: 'DeepSeek V3 (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'deepseek/deepseek-chat' },
+    { id: 'openrouter-deepseek-r1', name: 'DeepSeek R1 (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'deepseek/deepseek-r1' },
+    { id: 'openrouter-claude-3-5-sonnet', name: 'Claude 3.5 Sonnet (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'anthropic/claude-3.5-sonnet' },
+    { id: 'openrouter-gpt-4o', name: 'GPT-4o (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'openai/gpt-4o' },
+    { id: 'openrouter-llama-3-3-70b', name: 'Llama 3.3 70B (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'meta-llama/llama-3.3-70b-instruct' },
 
+    // Google Gemini Models
     { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'Google', apiIdentifier: 'gemini-2.0-flash' },
     { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', provider: 'Google', apiIdentifier: 'gemini-2.0-flash-lite' },
-    { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'Google', apiIdentifier: 'gemini-1.5-pro' },
     { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'Google', apiIdentifier: 'gemini-1.5-flash' },
 
     // Top Free Coding Models
     { id: 'deepseek-coder-v2', name: 'DeepSeek Coder V2', provider: 'DeepSeek', apiIdentifier: 'deepseek-coder' },
-    { id: 'openrouter-nous-hermes-2-mixtral', name: 'Nous Hermes 2 (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'nousresearch/nous-hermes-2-mixtral-8x7b-dpo' },
     { id: 'meta-codellama-70b', name: 'CodeLlama 70B', provider: 'Meta', apiIdentifier: 'codellama/CodeLlama-70b-hf' },
     { id: 'bigcode-starcoder', name: 'StarCoder', provider: 'BigCode', apiIdentifier: 'bigcode/starcoder' },
     { id: 'wizardlm-wizardcoder-python', name: 'WizardCoder', provider: 'WizardLM', apiIdentifier: 'WizardLM/WizardCoder-Python-34B-V1.0' },

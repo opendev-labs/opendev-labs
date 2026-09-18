@@ -31,12 +31,16 @@ export const AddClientModal: React.FC<AddClientModalProps> = ({ open, onOpenChan
   const [razorpayPaymentLink, setRazorpayPaymentLink] = useState('');
   const [notes, setNotes] = useState('');
 
+  const [clientCode, setClientCode] = useState('');
+  const [clientPassword, setClientPassword] = useState('client123');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email) return;
 
     const finalWebsiteUrl = websiteUrl.trim() || (domain ? `https://${domain.replace(/^https?:\/\//, '')}` : 'https://opendev-labs.com');
     const finalDomain = domain.trim() || finalWebsiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const generatedCode = clientCode.trim().toUpperCase() || `${name.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase()}2026`;
 
     addClient({
       name,
@@ -57,6 +61,8 @@ export const AddClientModal: React.FC<AddClientModalProps> = ({ open, onOpenChan
       status: 'paid',
       razorpayPaymentLink: razorpayPaymentLink || `https://rzp.io/l/opendev-${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
       notes: notes || `Website Status: ${websiteStatus}. Advance: ${advancePaidStatus === 'paid' ? 'Paid' : 'Pending'} (₹${advanceAmount}).`,
+      clientCode: generatedCode,
+      password: clientPassword || 'client123',
     });
 
     onOpenChange(false);

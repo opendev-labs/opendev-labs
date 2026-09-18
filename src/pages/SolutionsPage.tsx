@@ -65,8 +65,8 @@ export const SolutionsPage: React.FC = () => {
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center my-auto w-full">
           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 text-xs sm:text-sm font-semibold text-blue-600 dark:text-blue-400 mb-4 sm:mb-6 shadow-xs">
-              <Zap className="size-3.5" /> High-Performance Software Engineering & Automation
+            <span className="hero-pill-badge mb-4 sm:mb-6">
+              <Zap className="size-3.5 text-blue-500" /> High-Performance Software Engineering & Automation
             </span>
           </motion.div>
 
@@ -74,7 +74,7 @@ export const SolutionsPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl mx-auto leading-[1.06] text-zinc-900 dark:text-white min-h-[140px] sm:min-h-[180px] flex items-center justify-center"
+            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl mx-auto leading-[1.06] text-zinc-900 dark:text-white h-[210px] sm:h-[250px] lg:h-[270px] flex items-center justify-center text-center overflow-hidden"
           >
             <TypewriterHeading phrases={heroPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
           </motion.h1>
@@ -104,7 +104,7 @@ export const SolutionsPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Option A: One-Time Handover */}
-          <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 p-8 flex flex-col justify-between hover:border-blue-500/50 transition-all shadow-sm">
+          <div className="hero-glass-card rounded-3xl p-8 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700/80 transition-all shadow-sm">
             <div>
               <div className="size-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-6">
                 <Code2 className="size-6" />

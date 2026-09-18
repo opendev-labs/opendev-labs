@@ -1,249 +1,288 @@
 import React, { useState, useEffect } from 'react';
-import { UserIcon, BuildingIcon, CreditCardIcon, KeyIcon, ShieldIcon } from './icons/Icons';
+import { KeyIcon, UserIcon, ShieldIcon, CheckIcon } from './icons/Icons';
 import { useAuth } from '../../void/hooks/useAuth';
-import { getSystemIntegrity } from '../../../lib/lamaDB/config';
 import { toast } from 'sonner';
 
-// Reusable component for a setting card
-const SettingsCard: React.FC<{ icon: React.ReactNode; title: string; description: string; children: React.ReactNode }> = ({ icon, title, description, children }) => (
-    <div className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl overflow-hidden mb-6 shadow-sm">
-        <div className="p-8 border-b border-border/30">
-            <div className="flex items-start gap-4">
-                <div className="text-zinc-600 p-2 bg-zinc-900/50 rounded-lg border border-border">{icon}</div>
-                <div>
-                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-[0.2em] mb-1">{title}</h2>
-                    <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest opacity-80">{description}</p>
-                </div>
-            </div>
-        </div>
-        <div className="p-8 bg-transparent">
-            {children}
-        </div>
-    </div>
-);
-
-const SettingsRow: React.FC<{ label: string; children: React.ReactNode; }> = ({ label, children }) => (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between py-6 border-b border-border/30 last:border-b-0">
-        <label className="text-[10px] font-bold text-zinc-600 uppercase tracking-[0.3em] mb-4 sm:mb-0">{label}</label>
-        <div className="w-full sm:w-auto">{children}</div>
-    </div>
-);
-
 export function SettingsView() {
-    const { profile, updateProfile } = useAuth();
-    const integrity = getSystemIntegrity();
+    const { user, profile, updateProfile } = useAuth();
     
     const [apiKeys, setApiKeys] = useState({
-        geminiApiKey: profile?.geminiApiKey || '',
-        openRouterApiKey: profile?.openRouterApiKey || '',
-        openaiApiKey: profile?.openaiApiKey || '',
-        deepseekApiKey: profile?.deepseekApiKey || '',
+        openRouterApiKey: localStorage.getItem('opendev-openRouterApiKey') || profile?.openRouterApiKey || '',
+        geminiApiKey: localStorage.getItem('opendev-geminiApiKey') || profile?.geminiApiKey || '',
+        openaiApiKey: localStorage.getItem('opendev-openaiApiKey') || profile?.openaiApiKey || '',
+        deepseekApiKey: localStorage.getItem('opendev-deepseekApiKey') || profile?.deepseekApiKey || '',
     });
+    const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+    const [isSaving, setIsSaving] = useState(false);
+    const [savedNotice, setSavedNotice] = useState(false);
 
     useEffect(() => {
-        if (profile) {
-            setApiKeys({
-                geminiApiKey: profile.geminiApiKey || '',
-                openRouterApiKey: profile.openRouterApiKey || '',
-                openaiApiKey: profile.openaiApiKey || '',
-                deepseekApiKey: profile.deepseekApiKey || '',
-            });
-        }
+        const localOpenRouter = localStorage.getItem('opendev-openRouterApiKey');
+        const localGemini = localStorage.getItem('opendev-geminiApiKey');
+        const localOpenai = localStorage.getItem('opendev-openaiApiKey');
+        const localDeepseek = localStorage.getItem('opendev-deepseekApiKey');
+
+        setApiKeys({
+            openRouterApiKey: localOpenRouter || profile?.openRouterApiKey || '',
+            geminiApiKey: localGemini || profile?.geminiApiKey || '',
+            openaiApiKey: localOpenai || profile?.openaiApiKey || '',
+            deepseekApiKey: localDeepseek || profile?.deepseekApiKey || '',
+        });
     }, [profile]);
 
+    const toggleShowKey = (keyName: string) => {
+        setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }));
+    };
+
     const handleSaveKeys = async () => {
+        setIsSaving(true);
         try {
-            await updateProfile(apiKeys);
-            toast.success("Materialization Handshake Updated");
+            // Store directly in browser localStorage so guest & unauthenticated sessions work immediately
+            if (apiKeys.openRouterApiKey.trim()) {
+                localStorage.setItem('opendev-openRouterApiKey', apiKeys.openRouterApiKey.trim());
+            } else {
+                localStorage.removeItem('opendev-openRouterApiKey');
+            }
+
+            if (apiKeys.geminiApiKey.trim()) {
+                localStorage.setItem('opendev-geminiApiKey', apiKeys.geminiApiKey.trim());
+            } else {
+                localStorage.removeItem('opendev-geminiApiKey');
+            }
+
+            if (apiKeys.openaiApiKey.trim()) {
+                localStorage.setItem('opendev-openaiApiKey', apiKeys.openaiApiKey.trim());
+            } else {
+                localStorage.removeItem('opendev-openaiApiKey');
+            }
+
+            if (apiKeys.deepseekApiKey.trim()) {
+                localStorage.setItem('opendev-deepseekApiKey', apiKeys.deepseekApiKey.trim());
+            } else {
+                localStorage.removeItem('opendev-deepseekApiKey');
+            }
+
+            // Sync with profile if user is logged in
+            if (user && updateProfile) {
+                try {
+                    await updateProfile(apiKeys);
+                } catch (e) {
+                    console.warn("Profile sync error (keys still preserved locally):", e);
+                }
+            }
+
+            setSavedNotice(true);
+            setTimeout(() => setSavedNotice(false), 4000);
+            toast.success("API Keys saved successfully!");
         } catch (error) {
-            toast.error("Failed to update handshake parameters");
+            console.error("Save API Keys error:", error);
+            toast.error("Failed to save API keys.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
     return (
-        <div className="h-full overflow-y-auto bg-background text-foreground selection:bg-primary/20 selection:text-foreground custom-scrollbar transition-all duration-500">
-            <div className="max-w-5xl mx-auto p-12 lg:p-20">
-                <header className="mb-20">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-zinc-900/50 border border-border text-[9px] font-bold text-zinc-600 mb-8 uppercase tracking-[0.3em] rounded-lg font-mono">
-                        <div className="w-1 h-1 rounded-full bg-zinc-700" />
-                        System // Core Parameters
+        <div className="h-full overflow-y-auto bg-[#050505] text-zinc-100 p-6 md:p-12 custom-scrollbar selection:bg-[#f02050]/30 selection:text-white">
+            <div className="max-w-3xl mx-auto space-y-8">
+                {/* HEADER */}
+                <header className="border-b border-zinc-800/80 pb-6">
+                    <div className="flex items-center gap-3 mb-2">
+                        <img
+                            src="/logo-icon.webp"
+                            alt="OpenDev Labs"
+                            className="h-8 w-8 object-contain"
+                            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                        />
+                        <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                            Open<span className="text-[#f02050]">Studio</span> Settings
+                        </h1>
                     </div>
-                    <h1 className="text-6xl md:text-7xl font-bold tracking-tight text-foreground mb-4">
-                        Handshake.<br /><span className="text-zinc-800">Uplink Configuration.</span>
-                    </h1>
+                    <p className="text-xs text-zinc-400 font-normal">
+                        Configure your AI model keys and workspace preferences for OpenStudio.
+                    </p>
                 </header>
 
-                <div className="space-y-6">
-                    <SettingsCard
-                        icon={<UserIcon className="w-4 h-4" />}
-                        title="Neural Profile"
-                        description="Identity parameters and handshake preferences."
-                    >
-                        <div className="space-y-2">
-                            <SettingsRow label="Full Name">
-                                <input type="text" disabled value="Sovereign User" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
-                            </SettingsRow>
-                            <SettingsRow label="Uplink ID">
-                                <input type="email" disabled value="uplink@opendev-labs.io" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
-                            </SettingsRow>
-                            <SettingsRow label="System Theme">
-                                <div className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 opacity-50">
-                                   Titan // Black (Standard)
-                                </div>
-                            </SettingsRow>
-                        </div>
-                    </SettingsCard>
-
-                    <SettingsCard
-                        icon={<BuildingIcon className="w-4 h-4" />}
-                        title="Consortium"
-                        description="Cluster management and role distribution."
-                    >
-                        <div className="space-y-2">
-                            <SettingsRow label="Consortium Name">
-                                <input type="text" disabled value="OpenDev Labs" className="bg-zinc-900/30 border border-border/30 rounded-xl px-4 py-2.5 text-[11px] font-mono w-full sm:w-80 text-zinc-600 cursor-not-allowed focus:outline-none" />
-                            </SettingsRow>
-                            <SettingsRow label="Active Nodes">
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">Invite Architects</button>
-                            </SettingsRow>
-                        </div>
-                    </SettingsCard>
-
-                    <SettingsCard
-                        icon={<CreditCardIcon className="w-4 h-4" />}
-                        title="Compute Credits"
-                        description="Resource allocation and usage history."
-                    >
-                        <SettingsRow label="Resource Plan">
-                            <div className="flex flex-col sm:flex-row items-center gap-4">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-500/80 border border-emerald-500/20 px-4 py-2 bg-emerald-500/5 rounded-full">Unlimited Compute // Active</span>
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">Manage Allocation</button>
+                {/* API KEYS CARD */}
+                <section className="bg-zinc-900/60 border border-zinc-800/90 rounded-2xl p-6 backdrop-blur-xl shadow-xl space-y-6">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-[#f02050]">
+                                <KeyIcon className="w-4 h-4" />
                             </div>
-                        </SettingsRow>
-                    </SettingsCard>
-
-                    <SettingsCard
-                        icon={<KeyIcon className="w-4 h-4" />}
-                        title="Materialization Handshake"
-                        description="Custom model authentication for decentralized materialization."
-                    >
-                        <div className="space-y-4">
-                            <div className="p-4 bg-zinc-900/30 border border-border/30 rounded-xl mb-6">
-                               <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-[0.2em] leading-relaxed">
-                                   Uplink Priority: Local materialization keys will override system mesh protocols. Ensure integrity before application.
-                               </p>
+                            <div>
+                                <h2 className="text-sm font-bold text-white">API Model Handshake</h2>
+                                <p className="text-xs text-zinc-400">Your keys are encrypted and stored locally in your browser context.</p>
                             </div>
-                            
-                            <SettingsRow label="Gemini API Key">
-                                <div className="space-y-3 w-full sm:w-80">
-                                    <input 
-                                        type="password" 
-                                        placeholder="Enter your Google Gemini key..."
-                                        value={apiKeys.geminiApiKey}
-                                        onChange={(e) => setApiKeys({...apiKeys, geminiApiKey: e.target.value})}
-                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
-                                    />
-                                    <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Get your key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">Google AI Studio</a>.
-                                    </p>
-                                </div>
-                            </SettingsRow>
-                            
-                            <SettingsRow label="OpenRouter Key">
-                                <div className="space-y-3 w-full sm:w-80">
-                                    <input 
-                                        type="password" 
-                                        placeholder="Enter your OpenRouter key..."
-                                        value={apiKeys.openRouterApiKey}
-                                        onChange={(e) => setApiKeys({...apiKeys, openRouterApiKey: e.target.value})}
-                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
-                                    />
-                                    <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Optional. Connect to any model via <a href="https://openrouter.ai/keys" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">OpenRouter</a>.
-                                    </p>
-                                </div>
-                            </SettingsRow>
-                            
-                            <SettingsRow label="OpenAI Key">
-                                <div className="space-y-3 w-full sm:w-80">
-                                    <input 
-                                        type="password" 
-                                        placeholder="Enter your OpenAI key..."
-                                        value={apiKeys.openaiApiKey}
-                                        onChange={(e) => setApiKeys({...apiKeys, openaiApiKey: e.target.value})}
-                                        className="bg-background border border-border focus:border-zinc-700 rounded-xl px-4 py-3 text-[11px] font-mono w-full text-foreground transition-all focus:outline-none" 
-                                    />
-                                    <p className="text-[9px] text-zinc-600 font-medium tracking-wide">
-                                        Optional. Get your key from the <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground underline decoration-zinc-800 underline-offset-4">OpenAI Dashboard</a>.
-                                    </p>
-                                </div>
-                            </SettingsRow>
+                        </div>
 
-                            <div className="pt-8 flex justify-end">
-                                <button 
-                                    onClick={handleSaveKeys}
-                                    className="px-10 py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white text-black hover:bg-zinc-200 transition-all duration-300 rounded-xl shadow-lg"
+                        {savedNotice && (
+                            <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-bold animate-fade-in">
+                                <CheckIcon className="w-3.5 h-3.5" /> Saved & Active
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-5">
+                        {/* OPENROUTER KEY */}
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-zinc-300">
+                                    OpenRouter API Key <span className="text-emerald-400 text-[10px] font-semibold">(Recommended)</span>
+                                </label>
+                                {apiKeys.openRouterApiKey && (
+                                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
+                                    </span>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type={showKeys['openRouter'] ? "text" : "password"}
+                                    placeholder="sk-or-v1-..."
+                                    value={apiKeys.openRouterApiKey}
+                                    onChange={(e) => setApiKeys({ ...apiKeys, openRouterApiKey: e.target.value })}
+                                    className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#f02050] transition-colors font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => toggleShowKey('openRouter')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
                                 >
-                                    Apply Handshake
+                                    {showKeys['openRouter'] ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 mt-1">
+                                Unlocks all models (Qwen 2.5 Coder, DeepSeek R1, Claude 3.5 Sonnet, Llama 3) via <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-[#f02050] hover:underline">openrouter.ai/keys</a>.
+                            </p>
+                        </div>
+
+                        {/* GEMINI KEY */}
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-zinc-300">
+                                    Google Gemini API Key
+                                </label>
+                                {apiKeys.geminiApiKey && (
+                                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
+                                    </span>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type={showKeys['gemini'] ? "text" : "password"}
+                                    placeholder="AIzaSy..."
+                                    value={apiKeys.geminiApiKey}
+                                    onChange={(e) => setApiKeys({ ...apiKeys, geminiApiKey: e.target.value })}
+                                    className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#f02050] transition-colors font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => toggleShowKey('gemini')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
+                                >
+                                    {showKeys['gemini'] ? "Hide" : "Show"}
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-zinc-500 mt-1">
+                                Get a free key from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-[#f02050] hover:underline">Google AI Studio</a>.
+                            </p>
+                        </div>
+
+                        {/* OPENAI KEY */}
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-zinc-300">
+                                    OpenAI API Key
+                                </label>
+                                {apiKeys.openaiApiKey && (
+                                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
+                                    </span>
+                                )}
+                            </div>
+                            <div className="relative">
+                                <input
+                                    type={showKeys['openai'] ? "text" : "password"}
+                                    placeholder="sk-..."
+                                    value={apiKeys.openaiApiKey}
+                                    onChange={(e) => setApiKeys({ ...apiKeys, openaiApiKey: e.target.value })}
+                                    className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#f02050] transition-colors font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => toggleShowKey('openai')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
+                                >
+                                    {showKeys['openai'] ? "Hide" : "Show"}
                                 </button>
                             </div>
                         </div>
-                    </SettingsCard>
 
-                    <SettingsCard
-                        icon={<ShieldIcon className="w-4 h-4" />}
-                        title="System Integrity"
-                        description="Core mesh diagnostics and connectivity reporting."
-                    >
-                        <div className="space-y-6">
-                            <div className="p-6 bg-background border border-border rounded-2xl">
-                                <div className="flex items-center justify-between mb-6">
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Database Cluster Status</span>
-                                    <div className="flex items-center gap-2">
-                                       <div className={`w-1.5 h-1.5 rounded-full ${integrity.mode === 'PRODUCTION' ? 'bg-emerald-500' : 'bg-red-500 animate-pulse'}`} />
-                                       <span className={`text-[10px] font-bold uppercase tracking-widest ${integrity.mode === 'PRODUCTION' ? 'text-emerald-500' : 'text-red-500'}`}>
-                                           {integrity.mode} Mode
-                                       </span>
-                                    </div>
-                                </div>
-                                
-                                <div className="space-y-3">
-                                    {integrity.missingVariables.length > 0 ? (
-                                        <>
-                                            <p className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest mb-2">// Missing Environment Parameters:</p>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                {integrity.missingVariables.map(v => (
-                                                    <div key={v} className="flex items-center gap-3 px-3 py-2 bg-zinc-900/30 border border-border/30 rounded-lg text-[10px] font-mono text-muted-foreground">
-                                                        <span className="text-red-900 text-[8px]">×</span> {v}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                            <p className="mt-6 text-[9px] text-zinc-700 uppercase leading-relaxed font-bold tracking-widest italic opacity-60">
-                                                Uplink notice: Materialize these parameters in your host controller to enable specialized mesh features.
-                                            </p>
-                                            <div className="mt-4 p-4 bg-blue-500/5 border border-blue-500/10 rounded-xl text-[9px] font-mono text-blue-400/80">
-                                                <span className="text-blue-500 font-bold uppercase tracking-widest">Auth Protocol Tip:</span> Ensure 'opendev-labs.vercel.app' is added to your Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains.
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <div className="flex items-center gap-3 p-4 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-[10px] font-mono text-emerald-600/80">
-                                            <span className="text-emerald-900 font-bold">✓</span> All core parameters materialized. Mesh integrity at 100%.
-                                        </div>
-                                    )}
-                                </div>
+                        {/* DEEPSEEK KEY */}
+                        <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                                <label className="block text-xs font-bold text-zinc-300">
+                                    DeepSeek API Key
+                                </label>
+                                {apiKeys.deepseekApiKey && (
+                                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
+                                    </span>
+                                )}
                             </div>
-                            
-                            <SettingsRow label="Uplink Logs">
-                                <button disabled className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest bg-zinc-900/50 text-zinc-700 cursor-not-allowed border border-border rounded-xl">View Transaction Manifest</button>
-                            </SettingsRow>
+                            <div className="relative">
+                                <input
+                                    type={showKeys['deepseek'] ? "text" : "password"}
+                                    placeholder="sk-..."
+                                    value={apiKeys.deepseekApiKey}
+                                    onChange={(e) => setApiKeys({ ...apiKeys, deepseekApiKey: e.target.value })}
+                                    className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#f02050] transition-colors font-mono"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => toggleShowKey('deepseek')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
+                                >
+                                    {showKeys['deepseek'] ? "Hide" : "Show"}
+                                </button>
+                            </div>
                         </div>
-                    </SettingsCard>
-                </div>
 
-                <div className="mt-20 pt-10 border-t border-border flex flex-col items-center">
-                    <p className="text-[9px] font-bold text-zinc-800 uppercase tracking-[0.5em]">End of Core Manifest</p>
-                </div>
+                        {/* SAVE BUTTON */}
+                        <div className="pt-2 flex justify-end">
+                            <button
+                                onClick={handleSaveKeys}
+                                disabled={isSaving}
+                                className="px-6 py-2.5 bg-[#f02050] hover:bg-[#d01840] text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(240,32,80,0.4)] transition-all cursor-pointer flex items-center gap-2"
+                            >
+                                <CheckIcon className="w-4 h-4" />
+                                <span>{isSaving ? 'Saving...' : 'Save API Keys'}</span>
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                {/* ACCOUNT CONTEXT CARD */}
+                <section className="bg-zinc-900/60 border border-zinc-800/90 rounded-2xl p-6 backdrop-blur-xl shadow-xl flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-white font-bold text-sm">
+                            {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <div>
+                            <p className="text-xs font-bold text-white">{user?.email || 'Guest User'}</p>
+                            <p className="text-[10px] text-zinc-400">OpenDev Labs Workspace Member</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">LamaDB Active</span>
+                    </div>
+                </section>
             </div>
         </div>
     );
 }
+

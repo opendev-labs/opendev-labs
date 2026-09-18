@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { ChatSession, View } from '../types';
-import { NewChatIcon, SearchIcon, TrashIcon } from './icons/Icons';
+import { PlusIcon, SearchIcon, TrashIcon, CodeIcon } from './icons/Icons';
 
-// Helper function to format time since a timestamp
 function timeAgo(timestamp: number): string {
     const now = Date.now();
     const seconds = Math.floor((now - timestamp) / 1000);
@@ -37,74 +36,105 @@ export function AllChatsView({ sessions, onSelectChat, onDeleteSession, onNaviga
     }, [sessions, searchTerm]);
 
     return (
-        <div className="h-full overflow-y-auto bg-black text-foreground selection:bg-white selection:text-black">
-            <div className="max-w-4xl mx-auto p-12">
-                <header className="flex items-center justify-between mb-16">
+        <div className="h-full overflow-y-auto bg-[#050505] text-zinc-100 p-6 md:p-12 custom-scrollbar selection:bg-[#f02050]/30 selection:text-white">
+            <div className="max-w-4xl mx-auto space-y-8">
+                {/* HEADER */}
+                <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-border text-[9px] font-bold text-muted-foreground mb-6 uppercase tracking-[0.3em]">
-                            Archives // Neural Repository
+                        <div className="flex items-center gap-3 mb-2">
+                            <img
+                                src="/logo-icon.webp"
+                                alt="OpenDev Labs"
+                                className="h-8 w-8 object-contain"
+                                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                            />
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                                Project <span className="text-[#f02050]">History</span>
+                            </h1>
                         </div>
-                        <h1 className="text-6xl font-bold tracking-tighter lowercase leading-none">
-                            node<br /><span className="text-zinc-600">archives.</span>
-                        </h1>
+                        <p className="text-xs text-zinc-400 font-normal">
+                            Manage and revisit all your generated web applications and builds.
+                        </p>
                     </div>
+
                     <button
                         onClick={() => onNavigate('new-chat')}
-                        className="flex items-center gap-3 px-6 py-3 text-[10px] font-bold uppercase tracking-widest bg-white text-black hover:bg-red-500 hover:text-foreground transition-all duration-300 rounded-none shadow-2xl"
+                        className="flex items-center justify-center gap-2 px-5 py-2.5 bg-[#f02050] hover:bg-[#d01840] text-white font-bold text-xs rounded-xl shadow-[0_0_15px_rgba(240,32,80,0.4)] transition-all cursor-pointer shrink-0"
                     >
-                        <NewChatIcon className="h-4 w-4" />
-                        Materialize Node
+                        <PlusIcon className="h-4 w-4 text-white" />
+                        <span>New Project</span>
                     </button>
                 </header>
 
-                <div className="relative mb-12">
-                    <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-600" />
+                {/* SEARCH BAR */}
+                <div className="relative">
+                    <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                     <input
                         type="text"
-                        placeholder="Search archives by project name or purpose..."
+                        placeholder="Search projects by title..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-zinc-950 border border-border rounded-none pl-14 pr-6 py-4 text-[11px] font-mono text-zinc-300 placeholder-zinc-800 focus:outline-none focus:border-zinc-700 transition-colors"
+                        className="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl pl-11 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#f02050] transition-colors"
                     />
                 </div>
 
-                <div className="space-y-4">
+                {/* PROJECT LIST GRID */}
+                <div className="space-y-3">
                     {filteredSessions.length > 0 ? (
                         filteredSessions.map(session => (
-                            <div key={session.id} className="group relative">
-                                <button
-                                    onClick={() => onSelectChat(session.id)}
-                                    className="w-full text-left p-8 bg-zinc-950/50 border border-border rounded-none hover:border-zinc-700 transition-all duration-300 flex items-center justify-between"
-                                >
-                                    <div>
-                                        <div className="flex items-center gap-4 mb-2">
-                                            <div className="w-1.5 h-1.5 rounded-none bg-zinc-800 group-hover:bg-red-500 transition-colors" />
-                                            <h2 className="text-[12px] font-bold text-foreground uppercase tracking-widest truncate">{session.title}</h2>
-                                        </div>
-                                        <p className="text-[9px] font-bold text-zinc-600 uppercase tracking-[0.2em] mt-1 ml-5">
-                                            Handshake: {timeAgo(session.lastUpdated)}
-                                        </p>
+                            <div
+                                key={session.id}
+                                className="group relative bg-zinc-900/50 hover:bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700/80 rounded-2xl p-5 transition-all duration-300 flex items-center justify-between shadow-md"
+                            >
+                                <div className="flex items-center gap-4 truncate mr-4">
+                                    <div className="w-10 h-10 rounded-xl bg-[#f02050]/10 border border-[#f02050]/20 flex items-center justify-center text-[#f02050] shrink-0">
+                                        <CodeIcon className="w-5 h-5" />
                                     </div>
-                                </button>
-                                <button
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        if (window.confirm(`Are you sure you want to delete "${session.title}"?`)) {
-                                            onDeleteSession(session.id);
-                                        }
-                                    }}
-                                    className="absolute right-8 top-1/2 -translate-y-1/2 p-3 rounded-none text-zinc-700 opacity-0 group-hover:opacity-100 hover:bg-zinc-900 hover:text-red-500 transition-all border border-border"
-                                    aria-label={`Delete chat ${session.title}`}
-                                >
-                                    <TrashIcon className="h-4 w-4" />
-                                </button>
+                                    <div className="truncate">
+                                        <h2 className="text-sm font-bold text-white truncate group-hover:text-[#f02050] transition-colors">
+                                            {session.title || 'Untitled Session'}
+                                        </h2>
+                                        <div className="flex items-center gap-3 mt-1">
+                                            <span className="text-[10px] text-zinc-400 font-medium">
+                                                Updated {timeAgo(session.lastUpdated)}
+                                            </span>
+                                            {session.fileTree && session.fileTree.length > 0 && (
+                                                <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                                                    {session.fileTree.length} files
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0">
+                                    <button
+                                        onClick={() => onSelectChat(session.id)}
+                                        className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs rounded-xl border border-zinc-700/60 transition-all cursor-pointer"
+                                    >
+                                        Open
+                                    </button>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (window.confirm(`Are you sure you want to delete "${session.title}"?`)) {
+                                                onDeleteSession(session.id);
+                                            }
+                                        }}
+                                        className="p-2 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 transition-all rounded-xl border border-transparent hover:border-red-500/20 cursor-pointer"
+                                        title="Delete project"
+                                    >
+                                        <TrashIcon className="h-4 w-4" />
+                                    </button>
+                                </div>
                             </div>
                         ))
                     ) : (
-                        <div className="text-center py-24 px-8 border border-dashed border-border rounded-none">
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-muted-foreground">Node records void</h3>
-                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-700 mt-4 leading-relaxed max-w-xs mx-auto">
-                                {searchTerm ? 'The requested identifier does not exist in the current neural history.' : 'Initialize your first node to populate the system archives.'}
+                        <div className="text-center py-16 px-6 bg-zinc-900/30 border border-dashed border-zinc-800 rounded-2xl">
+                            <CodeIcon className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
+                            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">No Projects Found</h3>
+                            <p className="text-xs text-zinc-500 mt-1 max-w-sm mx-auto">
+                                {searchTerm ? 'No projects match your search query.' : 'Click "+ New Project" to create your first web application build.'}
                             </p>
                         </div>
                     )}

@@ -8,6 +8,13 @@ export interface RegisteredUser {
   joinedAt: string;
   role: UserRole;
   clientId?: string;
+  online?: boolean;
+  team?: string;
+  authMethod?: 'google' | 'password';
+  ipAddress?: string;
+  location?: string;
+  lastActive?: string;
+  sessionDuration?: string;
 }
 
 export type BillingType = 'monthly_retainer' | 'one_time_build';
@@ -52,6 +59,7 @@ export interface Client {
   razorpayPaymentLink?: string;
   notes?: string;
   password?: string;
+  clientCode?: string;
 }
 
 export interface Invoice {
@@ -126,3 +134,40 @@ export interface PaymentNotification {
   date: string;
   status: 'pending_verification' | 'confirmed' | 'rejected';
 }
+
+export interface CustomAgent {
+  id: string;
+  name: string;
+  model: string;
+  projectKey: string;
+  targetDomain: string;
+  status: 'active' | 'deploying' | 'idle' | 'error';
+  requests24h: number;
+  latencyMs: number;
+  accuracyRate: string;
+  description: string;
+  lastTrained: string;
+}
+
+export interface LiveAnalyticsPoint {
+  timestamp: string;
+  requestsPerSec: number;
+  activeSessions: number;
+  cpuUsage: number;
+  memUsage: number;
+  latencyMs: number;
+}
+
+export interface ProjectTelemetry {
+  id: string;
+  title: string;
+  domain: string;
+  category: string;
+  status: 'live' | 'scaling' | 'maintenance' | 'beta';
+  uptime: string;
+  mrr: string;
+  activeUsersCount: number;
+  reqPerMin: number;
+  health: 'healthy' | 'warning' | 'degraded';
+}
+

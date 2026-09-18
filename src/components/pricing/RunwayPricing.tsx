@@ -259,10 +259,10 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
           return (
             <div
               key={plan.id}
-              className={`rounded-2xl border flex flex-col justify-between bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 transition-all duration-300 relative overflow-hidden h-full ${
+              className={`hero-glass-card rounded-3xl flex flex-col justify-between text-zinc-900 dark:text-zinc-100 transition-all duration-300 relative overflow-hidden h-full ${
                 plan.highlightBorder
                   ? 'border-2 border-blue-600 dark:border-blue-500 shadow-xl ring-4 ring-blue-500/10'
-                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700 shadow-sm'
+                  : 'hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
               }`}
             >
               {/* Fixed Top Badge Bar for Equal Alignment */}
