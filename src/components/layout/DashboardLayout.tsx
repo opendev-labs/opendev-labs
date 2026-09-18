@@ -7,7 +7,7 @@ import { AddClientModal } from '../modals/AddClientModal';
 import { useAuth } from '../../context/AuthContext';
 
 export const DashboardLayout: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [commandOpen, setCommandOpen] = useState(false);
   const [addClientOpen, setAddClientOpen] = useState(false);
