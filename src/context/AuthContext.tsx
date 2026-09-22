@@ -40,7 +40,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const DEV_USER: AuthUser = {
   id: 'dev-1',
   name: 'Yash Shirish Ramteke',
-  email: 'opendev.office@gmail.com',
+  email: 'opendev-labs.office@gmail.com',
   role: 'developer',
   authMethod: 'password',
 };
@@ -271,7 +271,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Failed to parse saved user', e);
       }
     }
-    return DEV_USER;
+    return null;
   });
 
   const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>(() => {
@@ -336,7 +336,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastActiveStr = diffMins < 60 ? `${diffMins}m ago` : diffMins < 1440 ? `${Math.round(diffMins / 60)}h ago` : `${Math.round(diffMins / 1440)}d ago`;
         }
 
-        const isDev = (data.email || '').toLowerCase().trim() === 'opendev.office@gmail.com' || data.role === 'developer';
+        const cleanEmail = (data.email || '').toLowerCase().trim();
+        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com' || data.role === 'developer';
 
         return {
           id: d.id,
@@ -380,7 +381,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const cleanEmail = (firebaseUser.email || '').toLowerCase().trim();
-        const isDev = cleanEmail === 'opendev.office@gmail.com';
+        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
         const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
@@ -445,7 +446,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     googleAvatar = 'https://lh3.googleusercontent.com/a/default-user'
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
-    const isDev = cleanEmail === 'opendev.office@gmail.com';
+    const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
     const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
     const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 

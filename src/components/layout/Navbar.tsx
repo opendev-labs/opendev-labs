@@ -12,10 +12,12 @@ import {
   Code2,
   Layers,
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Bot
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useAISupport } from '../../context/AISupportContext';
 import { Button } from '../ui/Button';
 
 export const Navbar: React.FC = () => {
@@ -24,6 +26,7 @@ export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { user, isAuthenticated, logout } = useAuth();
+  const { openSupport } = useAISupport();
 
   const navItems = [
     { label: 'Templates', path: '/templates' },
@@ -197,6 +200,16 @@ export const Navbar: React.FC = () => {
                 {item.label}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                openSupport();
+              }}
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-purple-600 dark:text-purple-400 hover:text-purple-500 py-4 border-b border-zinc-200 dark:border-zinc-800/80 transition-colors text-left flex items-center justify-between"
+            >
+              <span>24/7 AI Support</span>
+              <Bot className="size-8 text-cyan-400" />
+            </button>
           </div>
 
           {/* Bottom Stack Action Buttons */}

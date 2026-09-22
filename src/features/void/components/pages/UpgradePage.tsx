@@ -1,5 +1,6 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon, CpuChipIcon, UserGroupIcon, RocketLaunchIcon, ChartBarIcon } from '../common/Icons';
+import { openRazorpayCheckout } from '../../../../lib/payment/razorpay';
 
 const FeatureRow: React.FC<{ feature: string; hobby: React.ReactNode; pro: React.ReactNode; icon: React.ReactNode }> = ({ feature, hobby, pro, icon }) => (
     <tr className="border-b border-zinc-900 last:border-b-0 group">
@@ -51,7 +52,16 @@ export const UpgradePage: React.FC = () => {
                     <h3 className="text-2xl font-bold text-white tracking-tight mb-3">Ready to escalation protocol?</h3>
                     <p className="text-zinc-500 text-sm font-medium mb-10">Join thousands of developers building sovereign systems on opendev-labs.</p>
 
-                    <button className="h-14 px-12 bg-white text-black text-xs font-bold tracking-[0.2em] uppercase hover:bg-zinc-200 transition-all shadow-lg shadow-white/5">
+                    <button
+                        onClick={() => {
+                            openRazorpayCheckout({
+                                amount: 20,
+                                currency: 'USD',
+                                description: 'Node Pro Tier Escalation Plan ($20/mo)',
+                            });
+                        }}
+                        className="h-14 px-12 bg-white text-black text-xs font-bold tracking-[0.2em] uppercase hover:bg-zinc-200 transition-all shadow-lg shadow-white/5 cursor-pointer active:scale-98"
+                    >
                         Upgrade to Node Pro &mdash; $20/mo
                     </button>
                 </div>

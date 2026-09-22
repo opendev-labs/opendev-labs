@@ -38,10 +38,21 @@ export default async function handler(req: Request) {
   });
 
   try {
+    let bodyData: any = {};
+    try {
+      bodyData = await req.json();
+    } catch {
+      bodyData = {};
+    }
+
+    const orderAmount = bodyData.amount ? Math.round(Number(bodyData.amount) * 100) : 900;
+    const orderCurrency = bodyData.currency || 'INR';
+
     const options = {
-      amount: 900, // $9.00 in cents, Razorpay handles currency, assuming USD here
-      currency: "USD",
-      receipt: "receipt_order_" + Math.random().toString(36).substring(2, 10),
+      amount: orderAmount,
+      currency: orderCurrency,
+      receipt: 'receipt_order_' + Math.random().toString(36).substring(2, 10),
+      notes: bodyData.notes || { project: 'OpenDev-Labs' },
     };
 
     const order = await instance.orders.create(options);

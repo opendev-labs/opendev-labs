@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -56,19 +57,22 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 }) => {
   const location = useLocation();
   const { user, registeredUsers, logout } = useAuth();
-  const { clients } = useClients();
+  const { clients, projectRequests } = useClients();
   const { theme, toggleTheme } = useTheme();
 
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const overdueCount = clients.filter(c => c.status === 'overdue').length;
+  const pendingRequestsCount = projectRequests.filter(r => r.status === 'pending_review').length;
   const isDev = user?.role === 'developer';
 
   const devNavItems: NavItem[] = [
     { title: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { title: 'Client Requests & Code', path: '/dashboard/requests', icon: Key, badge: pendingRequestsCount > 0 ? `${pendingRequestsCount}` : undefined, badgeVariant: 'destructive' },
     { title: 'Clients CRM', path: '/dashboard/clients', icon: Building },
     { title: 'Registered Users', path: '/dashboard/clients?tab=users', icon: Users, badge: registeredUsers.length },
+    { title: 'Notification History', path: '/dashboard/notifications', icon: BellRing },
     { title: 'Payment Reminders', path: '/dashboard/reminders', icon: BellRing, badge: overdueCount > 0 ? `${overdueCount}` : undefined, badgeVariant: 'destructive' },
     { title: 'Invoices & Ledger', path: '/dashboard/invoices', icon: ReceiptText },
     { title: 'Settings', path: '/dashboard/settings', icon: Settings },
@@ -77,17 +81,20 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   const userNavItems: NavItem[] = [
     { title: 'Profile', path: '/client/profile', icon: Users },
     { title: 'Client Portal', path: '/client/convert', icon: Key },
-    { title: 'Security & Info', path: '/client/security', icon: Settings },
+    { title: 'Notification History', path: '/client/notifications', icon: BellRing },
+    { title: 'Settings & Security', path: '/client/security', icon: Settings },
   ];
 
   const clientNavItems: NavItem[] = [
     { title: 'Dashboard & Specs', path: '/client/portal', icon: LayoutDashboard },
+    { title: 'Notification History', path: '/client/notifications', icon: BellRing },
     { title: 'Payments & Retainer', path: '/client/payments', icon: CreditCard },
     { title: 'Invoices & Receipts', path: '/client/invoices', icon: ReceiptText },
     { title: 'Support & Tickets', path: '/client/support', icon: HelpCircle },
     { title: 'Milestones & Roadmap', path: '/client/milestones', icon: Zap },
     { title: 'Vault Credentials', path: '/client/credentials', icon: Key },
     { title: 'User Profile', path: '/client/profile', icon: Users },
+    { title: 'Settings & Security', path: '/client/security', icon: Settings },
   ];
 
   const navItems = isDev ? devNavItems : user?.role === 'user' ? userNavItems : clientNavItems;
@@ -104,9 +111,9 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
 
       <aside
         className={cn(
-          'flex flex-col h-screen border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-[width] duration-300 ease-in-out z-30 select-none shrink-0 overflow-x-hidden',
-          'fixed inset-y-0 left-0 md:relative',
-          mobileOpen ? 'translate-x-0 w-64 shadow-2xl' : '-translate-x-full md:transform-none',
+          'flex flex-col h-screen border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-[width,transform] duration-300 ease-in-out select-none shrink-0 overflow-x-hidden',
+          'fixed inset-0 z-50 md:inset-y-0 md:left-0 md:relative',
+          mobileOpen ? 'translate-x-0 w-full md:w-60 shadow-2xl' : '-translate-x-full md:transform-none md:z-30',
           collapsed ? 'md:w-16' : 'md:w-60'
         )}
       >
@@ -161,13 +168,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                 <ChevronLeft className="size-4" />
               </button>
 
-              {/* Mobile Close Button */}
+              {/* Mobile Close Button (Full Screen Close) */}
               {mobileOpen && (
                 <button
                   onClick={onCloseMobile}
-                  className="md:hidden p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
+                  className="md:hidden p-2 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-100 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors shrink-0 flex items-center gap-1 font-bold text-xs"
                 >
                   <ChevronLeft className="size-5" />
+                  <span>Close Menu</span>
                 </button>
               )}
             </>
@@ -269,41 +277,44 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
       )}>
         
         {/* Drop-Up Popover / Flyout Menu */}
-        {popoverOpen && (
-          <>
+        {popoverOpen && createPortal(
+          <div className="fixed inset-0 z-[9999] pointer-events-auto font-sans">
             {/* Backdrop overlay to close menu on outside click */}
             <div
-              className="fixed inset-0 z-40"
+              className="fixed inset-0 bg-transparent"
               onClick={() => setPopoverOpen(false)}
             />
-            <div className={cn(
-              "p-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-50 animate-in fade-in space-y-1 min-w-[210px]",
-              collapsed && !mobileOpen
-                ? "fixed left-16 bottom-3 ml-3 slide-in-from-left-2"
-                : "absolute left-3 right-3 bottom-full mb-2 slide-in-from-bottom-2"
-            )}>
-              
+
+            {/* Flyout Popover Menu */}
+            <div
+              className={cn(
+                "p-1.5 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl z-[9999] animate-in fade-in space-y-1 text-zinc-900 dark:text-zinc-100 min-w-[220px]",
+                collapsed && !mobileOpen
+                  ? "fixed left-16 bottom-3 ml-3 slide-in-from-left-2"
+                  : "fixed left-3 bottom-16 slide-in-from-bottom-2 w-[220px]"
+              )}
+            >
               {/* User Profile Header in Drop-Up */}
               <div className="px-2.5 py-2 border-b border-zinc-100 dark:border-zinc-800 flex items-center gap-2.5">
                 {user?.avatar ? (
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
-                    className="size-8 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700"
+                    className="size-8 rounded-full object-cover shrink-0 border border-zinc-200 dark:border-zinc-700 shadow-sm"
                     onError={(e) => {
                       (e.target as HTMLElement).style.display = 'none';
                     }}
                   />
                 ) : (
-                  <div className="size-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center shrink-0">
+                  <div className="size-8 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
                     {user?.name ? user.name.charAt(0) : 'U'}
                   </div>
                 )}
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
+                  <span className="text-xs font-extrabold text-zinc-900 dark:text-white truncate">
                     {user?.name || 'User Account'}
                   </span>
-                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate font-medium">
                     {user?.email || 'Registered User'}
                   </span>
                 </div>
@@ -315,7 +326,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   setPopoverOpen(false);
                   setSettingsOpen(true);
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-left"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-left cursor-pointer"
               >
                 <Settings className="size-4 text-zinc-500" />
                 <span>Settings</span>
@@ -327,13 +338,14 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   setPopoverOpen(false);
                   logout();
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors text-left"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 transition-colors text-left cursor-pointer"
               >
                 <LogOut className="size-4 text-red-500" />
                 <span>Log out</span>
               </button>
             </div>
-          </>
+          </div>,
+          document.body
         )}
 
         {/* User Card Content */}

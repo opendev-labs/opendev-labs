@@ -46,8 +46,13 @@ export interface Client {
   websiteUrl: string;
   domain?: string;
   websiteStatus: WebsiteStatus;
+  workStatus?: 'waiting_for_approval' | 'work_started' | 'in_progress' | 'testing_preview' | 'completed';
+  progressPercentage?: number; // 0 to 100
   advancePaid: boolean;
   advanceAmount?: number;
+  totalBill?: number;
+  livePreviewUrl?: string; // e.g. https://elite-tradinghub.com
+  devPreviewUrl?: string; // e.g. https://project.vercel.app
   previewUrl?: string;
   billingType: BillingType;
   monthlyFee: number; // in INR or USD
@@ -55,11 +60,14 @@ export interface Client {
   billingCycleDay: number; // 1 to 31
   nextPaymentDue: string;
   status: PaymentStatus;
+  maintenanceStatus?: 'paid' | 'need_to_pay' | 'no_retainer';
+  domainStatus?: 'active' | 'pending_dns' | 'expired' | 'registered';
   joinedDate: string;
   razorpayPaymentLink?: string;
   notes?: string;
   password?: string;
   clientCode?: string;
+  sudoPassword?: string;
 }
 
 export interface Invoice {
@@ -94,11 +102,13 @@ export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  type: 'reminder' | 'payment' | 'ticket' | 'system';
+  type: 'reminder' | 'payment' | 'ticket' | 'system' | 'request' | 'security';
   date: string;
   read: boolean;
   clientId?: string;
   clientName?: string;
+  targetType?: 'all' | 'client' | 'user';
+  targetEmail?: string;
 }
 
 export interface ProjectRequest {
@@ -109,7 +119,10 @@ export interface ProjectRequest {
   requestedDomain: string;
   extraRequirements: string;
   createdAt: string;
-  status: 'pending_review' | 'accepted' | 'client_converted';
+  status: 'pending_review' | 'accepted' | 'rejected' | 'client_converted';
+  assignedCode?: string;
+  assignedDomain?: string;
+  assignedPassword?: string;
 }
 
 export interface ChangelogItem {
@@ -128,7 +141,7 @@ export interface PaymentNotification {
   clientName: string;
   clientEmail: string;
   amount: number;
-  paymentMethod: 'GPay' | 'PhonePe' | 'Cash' | 'Bank Transfer / NEFT' | 'Razorpay' | 'Other';
+  paymentMethod: 'GPay' | 'PhonePe' | 'Cash' | 'Bank Transfer / NEFT' | 'Razorpay' | 'Kotak Direct UPI' | 'Other';
   transactionRef?: string;
   notes?: string;
   date: string;

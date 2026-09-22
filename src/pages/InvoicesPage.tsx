@@ -45,53 +45,50 @@ export const InvoicesPage: React.FC = () => {
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto text-zinc-900 dark:text-zinc-100 font-sans">
       
-      {/* Executive Hero Banner Card (Black Rectangle Welcome Card Style) */}
+      {/* Google/Microsoft Level Minimal Header Bar */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-black text-white relative overflow-hidden shadow-xl"
+        transition={{ duration: 0.3 }}
+        className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
       >
-        <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 z-0" particleCount={30} />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-md">
-                Official Billing Ledger
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              Invoices & Financial Receipts
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed">
-              Automated monthly invoices and official payment receipts for client hosting & development retainers.
-            </p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold tracking-wide uppercase">
+              Official Billing Ledger
+            </span>
           </div>
-
-          {clients.length > 0 && (
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <select
-                value={selectedClientId}
-                onChange={e => setSelectedClientId(e.target.value)}
-                className="h-10 bg-zinc-800 border border-zinc-700 text-white text-xs font-bold rounded-full px-4 focus:outline-none"
-              >
-                {clients.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} ({c.company})
-                  </option>
-                ))}
-              </select>
-
-              <Button
-                onClick={handleGenerateForSelected}
-                className="bg-white text-black hover:bg-zinc-100 font-extrabold text-xs gap-1.5 h-10 rounded-full px-5 shadow-lg shrink-0"
-              >
-                <Plus className="size-4" /> Generate Invoice
-              </Button>
-            </div>
-          )}
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <ReceiptText className="size-6 text-zinc-700 dark:text-zinc-300 shrink-0" /> Invoices & Financial Receipts
+          </h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Automated monthly invoices and official payment receipts for client hosting & development retainers.
+          </p>
         </div>
+
+        {clients.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <select
+              value={selectedClientId}
+              onChange={e => setSelectedClientId(e.target.value)}
+              className="h-8 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-medium rounded-lg px-3 focus:outline-none"
+            >
+              {clients.map(c => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.company})
+                </option>
+              ))}
+            </select>
+
+            <Button
+              size="sm"
+              onClick={handleGenerateForSelected}
+              className="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-xs gap-1.5 h-8 rounded-lg px-3.5 shadow-xs shrink-0"
+            >
+              <Plus className="size-3.5" /> Generate Invoice
+            </Button>
+          </div>
+        )}
       </motion.div>
 
       {/* Invoices List Table */}

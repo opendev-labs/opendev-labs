@@ -24,10 +24,39 @@ interface ClientContextType {
   updateTicketStatus: (ticketId: string, status: 'open' | 'in_progress' | 'resolved') => void;
   generateInvoice: (clientId: string) => void;
   markNotificationRead: (id: string) => void;
+  sendNotification: (payload: {
+    title: string;
+    message: string;
+    type?: 'reminder' | 'payment' | 'ticket' | 'system' | 'request' | 'security';
+    targetType?: 'all' | 'client' | 'user';
+    targetId?: string;
+    targetName?: string;
+  }) => void;
   getWhatsAppReminderUrl: (client: Client) => string;
   getRazorpayLink: (client: Client) => string;
   addProjectRequest: (req: Omit<ProjectRequest, 'id' | 'createdAt' | 'status'>) => void;
   updateProjectRequestStatus: (id: string, status: ProjectRequest['status']) => void;
+  approveProjectRequest: (id: string, code: string, domain: string, password?: string) => void;
+  rejectProjectRequest: (id: string) => void;
+  deleteProjectRequest: (id: string) => void;
+  generateClientCredentials: (data: {
+    name: string;
+    email: string;
+    domain: string;
+    clientCode: string;
+    password?: string;
+    monthlyFee?: number;
+    company?: string;
+    workStatus?: 'waiting_for_approval' | 'work_started' | 'in_progress' | 'testing_preview' | 'completed';
+    progressPercentage?: number;
+    advancePaid?: boolean;
+    advanceAmount?: number;
+    totalBill?: number;
+    livePreviewUrl?: string;
+    devPreviewUrl?: string;
+    maintenanceStatus?: 'paid' | 'need_to_pay' | 'no_retainer';
+    domainStatus?: 'active' | 'pending_dns' | 'expired' | 'registered';
+  }) => void;
   addChangelog: (item: Omit<ChangelogItem, 'id' | 'date'>) => void;
   deleteChangelog: (id: string) => void;
   notifyPayment: (data: Omit<PaymentNotification, 'id' | 'date' | 'status'>) => void;
@@ -35,80 +64,7 @@ interface ClientContextType {
   rejectPaymentNotification: (id: string) => void;
 }
 
-const INITIAL_CLIENTS: Client[] = [
-  {
-    id: 'client-1',
-    name: 'Elite Trading Hub',
-    company: 'Elite Trading Systems Ltd',
-    email: 'rahul.sharma@elite-trading.com',
-    phone: '+91 98765 43210',
-    websiteUrl: 'https://elite-tradinghub.com',
-    domain: 'elite-tradinghub.com',
-    websiteStatus: 'completed',
-    advancePaid: true,
-    advanceAmount: 25000,
-    previewUrl: 'https://elite-tradinghub.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 45000,
-    currency: 'INR',
-    billingCycleDay: 5,
-    nextPaymentDue: '2026-10-05',
-    status: 'paid',
-    joinedDate: '2026-08-10',
-    razorpayPaymentLink: 'https://rzp.io/l/elitetradinghub',
-    notes: 'High-frequency algorithmic trading web application with real-time WebSocket charts.',
-    clientCode: 'ELITE2026',
-    password: 'client123',
-  },
-  {
-    id: 'client-2',
-    name: 'Vishwa Leader Corp',
-    company: 'Vishwa Leader Global Enterprises',
-    email: 'priya.patel@techfirm.io',
-    phone: '+91 98123 45678',
-    websiteUrl: 'https://vishwaleadr.com',
-    domain: 'vishwaleadr.com',
-    websiteStatus: 'completed',
-    advancePaid: true,
-    advanceAmount: 35000,
-    previewUrl: 'https://vishwaleadr.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 65000,
-    currency: 'INR',
-    billingCycleDay: 10,
-    nextPaymentDue: '2026-10-10',
-    status: 'paid',
-    joinedDate: '2026-08-15',
-    razorpayPaymentLink: 'https://rzp.io/l/vishwaleadr',
-    notes: 'Global leadership news, analytics & community portal built with Next.js & Firebase.',
-    clientCode: 'VISHWA2026',
-    password: 'client123',
-  },
-  {
-    id: 'client-3',
-    name: 'OpenDev-Labs Architecture',
-    company: 'OpenDev-Labs Sovereign Agency',
-    email: 'opendev.office@gmail.com',
-    phone: '+91 91234 56789',
-    websiteUrl: 'https://opendev-labs.com',
-    domain: 'opendev-labs.com',
-    websiteStatus: 'completed',
-    advancePaid: true,
-    advanceAmount: 50000,
-    previewUrl: 'https://opendev-labs.com',
-    billingType: 'monthly_retainer',
-    monthlyFee: 120000,
-    currency: 'INR',
-    billingCycleDay: 1,
-    nextPaymentDue: '2026-10-01',
-    status: 'paid',
-    joinedDate: '2026-08-01',
-    razorpayPaymentLink: 'https://rzp.io/l/opendevlabs',
-    notes: 'Primary agency infrastructure, Void IDE terminal, and custom AI agent execution suite.',
-    clientCode: 'OPENDEV2026',
-    password: 'client123',
-  }
-];
+const INITIAL_CLIENTS: Client[] = [];
 
 const INITIAL_CUSTOM_AGENTS: CustomAgent[] = [
   {
@@ -155,8 +111,61 @@ const INITIAL_CUSTOM_AGENTS: CustomAgent[] = [
 const INITIAL_PAYMENTS: PaymentRecord[] = [];
 const INITIAL_INVOICES: Invoice[] = [];
 const INITIAL_TICKETS: MaintenanceTicket[] = [];
-const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
-const INITIAL_PROJECT_REQUESTS: ProjectRequest[] = [];
+const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: 'welcome-notification-1',
+    title: '👋 Welcome to OpenDev-Labs Sovereign Portal!',
+    message: 'Welcome to your OpenDev-Labs Client Gateway! Access live project tracking, payments, security settings, and direct AI support.',
+    date: '2026-09-20',
+    read: false,
+    type: 'system',
+    targetType: 'all',
+  },
+  {
+    id: 'admin-broadcast-example-2',
+    title: '📢 Admin Announcement Example: 24/7 Monitoring Active',
+    message: 'Admin Notice Example: All client web applications, database snapshots, and retainer services are active with 99.9% uptime monitoring.',
+    date: '2026-09-20',
+    read: false,
+    type: 'system',
+    targetType: 'all',
+  }
+];
+const INITIAL_PROJECT_REQUESTS: ProjectRequest[] = [
+  {
+    id: 'req-1',
+    userEmail: 'afwank768@gmail.com',
+    userName: 'Afwan Khan',
+    projectType: 'Custom Client Portal Request',
+    requestedDomain: 'afwan-tech.com',
+    extraRequirements: 'Needs website status monitoring, retainer invoice receipts & priority support.',
+    createdAt: '2026-09-18',
+    status: 'pending_review',
+  },
+  {
+    id: 'req-2',
+    userEmail: 'vtxcy22@gmail.com',
+    userName: 'VTXCY Member',
+    projectType: 'E-Commerce Access Code Request',
+    requestedDomain: 'vtxcy-store.com',
+    extraRequirements: 'Client access code request for retail dashboard & webhook alerts.',
+    createdAt: '2026-09-17',
+    status: 'pending_review',
+  },
+  {
+    id: 'req-3',
+    userEmail: 'faizanhd5@gmail.com',
+    userName: 'Faizan HD',
+    projectType: 'Web Portal Gateway Request',
+    requestedDomain: 'faizan-media.io',
+    extraRequirements: 'Access code for high-traffic media agency retainer portal.',
+    createdAt: '2026-09-15',
+    status: 'accepted',
+    assignedCode: 'FAIZAN2026',
+    assignedDomain: 'faizan-media.io',
+    assignedPassword: 'client123',
+  }
+];
 const INITIAL_CHANGELOGS: ChangelogItem[] = [];
 const INITIAL_PAYMENT_NOTIFICATIONS: PaymentNotification[] = [];
 
@@ -164,8 +173,9 @@ const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [clients, setClients] = useState<Client[]>(() => {
-    const saved = localStorage.getItem('opendev_clients_v6');
-    return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
+    // Wipe all legacy client local storage caches completely
+    ['opendev_clients_v1', 'opendev_clients_v2', 'opendev_clients_v3', 'opendev_clients_v4', 'opendev_clients_v5', 'opendev_clients_v6', 'opendev_clients_v7', 'opendev_clients_v8', 'opendev_clients_v9'].forEach(k => localStorage.removeItem(k));
+    return [];
   });
 
   const [customAgents] = useState<CustomAgent[]>(INITIAL_CUSTOM_AGENTS);
@@ -186,7 +196,7 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
-    const saved = localStorage.getItem('opendev_notifications_v5');
+    const saved = localStorage.getItem('opendev_notifications_v6');
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
 
@@ -205,20 +215,13 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     return saved ? JSON.parse(saved) : INITIAL_PAYMENT_NOTIFICATIONS;
   });
 
-  // 1. Real-time Firestore Clients Listener & Auto-Seeding
+  // 1. Real-time Firestore Clients Listener
   useEffect(() => {
     if (!db) return;
 
     const unsubClients = onSnapshot(collection(db, "clients"), async (snapshot) => {
       if (snapshot.empty) {
-        // Automatically seed INITIAL_CLIENTS into Firestore
-        try {
-          for (const c of INITIAL_CLIENTS) {
-            await setDoc(doc(db, "clients", c.id), c);
-          }
-        } catch (seedErr) {
-          console.warn("Error seeding clients into Firestore:", seedErr);
-        }
+        setClients([]);
         return;
       }
 
@@ -244,15 +247,37 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       console.warn("Payments onSnapshot error:", err);
     });
 
+    const unsubNotifs = onSnapshot(collection(db, "notifications"), (snapshot) => {
+      if (!snapshot.empty) {
+        const firestoreNotifs: NotificationItem[] = snapshot.docs.map(d => ({
+          id: d.id,
+          ...(d.data() as Omit<NotificationItem, 'id'>)
+        }));
+        firestoreNotifs.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        setNotifications(prev => {
+          const combined = [...firestoreNotifs, ...prev];
+          const seen = new Set<string>();
+          return combined.filter(n => {
+            if (!n || !n.id || seen.has(n.id)) return false;
+            seen.add(n.id);
+            return true;
+          });
+        });
+      }
+    }, (err) => {
+      console.warn("Notifications onSnapshot error:", err);
+    });
+
     return () => {
       unsubClients();
       unsubPayments();
+      unsubNotifs();
     };
   }, []);
 
   // Local Storage Backups
   useEffect(() => {
-    localStorage.setItem('opendev_clients_v6', JSON.stringify(clients));
+    localStorage.setItem('opendev_clients_v9', JSON.stringify(clients));
   }, [clients]);
 
   useEffect(() => {
@@ -480,6 +505,171 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setProjectRequests(prev => prev.map(r => (r.id === id ? { ...r, status } : r)));
   };
 
+  const approveProjectRequest = (id: string, code: string, domain: string, password?: string) => {
+    const req = projectRequests.find(r => r.id === id);
+    const cleanCode = code.trim().toUpperCase();
+    const cleanDomain = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const cleanPass = (password || 'client123').trim();
+
+    setProjectRequests(prev =>
+      prev.map(r => {
+        if (r.id === id) {
+          return {
+            ...r,
+            status: 'accepted',
+            assignedCode: cleanCode,
+            assignedDomain: cleanDomain,
+            assignedPassword: cleanPass,
+          };
+        }
+        return r;
+      })
+    );
+
+    const existingClient = clients.find(c =>
+      (req && c.email.toLowerCase() === req.userEmail.toLowerCase()) ||
+      (c.domain && c.domain.toLowerCase() === cleanDomain)
+    );
+
+    if (existingClient) {
+      updateClient({
+        ...existingClient,
+        clientCode: cleanCode,
+        domain: cleanDomain,
+        password: cleanPass,
+        websiteUrl: `https://${cleanDomain}`,
+        websiteStatus: 'completed',
+      });
+    } else {
+      addClient({
+        name: req?.userName || 'Client Partner',
+        company: req?.userName ? `${req.userName}'s Company` : 'Client Organization',
+        email: req?.userEmail || 'client@opendev-labs.com',
+        phone: '+91 81695 68582',
+        websiteUrl: `https://${cleanDomain}`,
+        domain: cleanDomain,
+        websiteStatus: 'completed',
+        advancePaid: true,
+        advanceAmount: 5000,
+        previewUrl: `https://${cleanDomain}`,
+        billingType: 'monthly_retainer',
+        monthlyFee: 4000,
+        currency: 'INR',
+        billingCycleDay: 5,
+        nextPaymentDue: '2026-10-05',
+        status: 'paid',
+        razorpayPaymentLink: `https://rzp.io/l/opendev-${(req?.userName || 'client').toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+        notes: `Approved client request for domain ${cleanDomain}. Assigned Code: ${cleanCode}`,
+        clientCode: cleanCode,
+        password: cleanPass,
+      });
+    }
+
+    const notif: NotificationItem = {
+      id: `notif-${Date.now()}`,
+      title: `Client Request Approved: ${req?.userName || 'Client'}`,
+      message: `Assigned Code: ${cleanCode} | Domain: ${cleanDomain} | Password: ${cleanPass}`,
+      date: new Date().toISOString().split('T')[0],
+      type: 'system',
+      read: false,
+      clientName: req?.userName,
+    };
+    setNotifications(prev => [notif, ...prev]);
+  };
+
+  const rejectProjectRequest = (id: string) => {
+    setProjectRequests(prev => prev.map(r => (r.id === id ? { ...r, status: 'rejected' } : r)));
+  };
+
+  const deleteProjectRequest = (id: string) => {
+    setProjectRequests(prev => prev.filter(r => r.id !== id));
+  };
+
+  const generateClientCredentials = (data: {
+    name: string;
+    email: string;
+    domain: string;
+    clientCode: string;
+    password?: string;
+    monthlyFee?: number;
+    company?: string;
+    workStatus?: 'waiting_for_approval' | 'work_started' | 'in_progress' | 'testing_preview' | 'completed';
+    progressPercentage?: number;
+    advancePaid?: boolean;
+    advanceAmount?: number;
+    totalBill?: number;
+    livePreviewUrl?: string;
+    devPreviewUrl?: string;
+    maintenanceStatus?: 'paid' | 'need_to_pay' | 'no_retainer';
+    domainStatus?: 'active' | 'pending_dns' | 'expired' | 'registered';
+  }) => {
+    const cleanCode = data.clientCode.trim().toUpperCase();
+    const cleanDomain = data.domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const cleanPass = (data.password || 'client123').trim();
+
+    const existingClient = clients.find(c =>
+      c.email.toLowerCase() === data.email.toLowerCase() ||
+      (c.domain && c.domain.toLowerCase() === cleanDomain)
+    );
+
+    const workStat = data.workStatus || 'work_started';
+    const progressPerc = data.progressPercentage !== undefined ? data.progressPercentage : (workStat === 'completed' ? 100 : workStat === 'testing_preview' ? 85 : workStat === 'work_started' ? 50 : 25);
+    const liveUrl = data.livePreviewUrl || `https://${cleanDomain}`;
+    const devUrl = data.devPreviewUrl || `https://${cleanDomain.split('.')[0]}-dev.vercel.app`;
+
+    if (existingClient) {
+      updateClient({
+        ...existingClient,
+        name: data.name || existingClient.name,
+        company: data.company || existingClient.company,
+        clientCode: cleanCode,
+        domain: cleanDomain,
+        password: cleanPass,
+        websiteUrl: liveUrl,
+        monthlyFee: data.monthlyFee || existingClient.monthlyFee || 4000,
+        workStatus: workStat,
+        progressPercentage: progressPerc,
+        advancePaid: data.advancePaid !== undefined ? data.advancePaid : true,
+        advanceAmount: data.advanceAmount !== undefined ? data.advanceAmount : 25000,
+        totalBill: data.totalBill !== undefined ? data.totalBill : 70000,
+        livePreviewUrl: liveUrl,
+        devPreviewUrl: devUrl,
+        maintenanceStatus: data.maintenanceStatus || 'paid',
+        domainStatus: data.domainStatus || 'active',
+      });
+    } else {
+      addClient({
+        name: data.name,
+        company: data.company || `${data.name}'s Company`,
+        email: data.email,
+        phone: '+91 81695 68582',
+        websiteUrl: liveUrl,
+        domain: cleanDomain,
+        websiteStatus: workStat === 'completed' ? 'completed' : 'under-development',
+        workStatus: workStat,
+        progressPercentage: progressPerc,
+        advancePaid: data.advancePaid !== undefined ? data.advancePaid : true,
+        advanceAmount: data.advanceAmount !== undefined ? data.advanceAmount : 25000,
+        totalBill: data.totalBill !== undefined ? data.totalBill : 70000,
+        livePreviewUrl: liveUrl,
+        devPreviewUrl: devUrl,
+        maintenanceStatus: data.maintenanceStatus || 'paid',
+        domainStatus: data.domainStatus || 'active',
+        previewUrl: liveUrl,
+        billingType: 'monthly_retainer',
+        monthlyFee: data.monthlyFee || 4000,
+        currency: 'INR',
+        billingCycleDay: 5,
+        nextPaymentDue: '2026-10-05',
+        status: 'paid',
+        razorpayPaymentLink: `https://rzp.io/l/opendev-${data.name.toLowerCase().replace(/[^a-z0-9]/g, '')}`,
+        notes: `Generated access code ${cleanCode} for ${cleanDomain}`,
+        clientCode: cleanCode,
+        password: cleanPass,
+      });
+    }
+  };
+
   const addChangelog = (itemData: Omit<ChangelogItem, 'id' | 'date'>) => {
     const newLog: ChangelogItem = {
       ...itemData,
@@ -535,6 +725,38 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
 
+  const sendNotification = (payload: {
+    title: string;
+    message: string;
+    type?: 'reminder' | 'payment' | 'ticket' | 'system' | 'request' | 'security';
+    targetType?: 'all' | 'client' | 'user';
+    targetId?: string;
+    targetName?: string;
+  }) => {
+    const newNotif: NotificationItem = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: payload.title,
+      message: payload.message,
+      type: payload.type || 'system',
+      date: new Date().toISOString().split('T')[0],
+      read: false,
+      targetType: payload.targetType || 'all',
+      targetEmail: payload.targetType === 'user' ? payload.targetId : undefined,
+      clientId: payload.targetType === 'client' ? payload.targetId : undefined,
+      clientName: payload.targetName,
+    };
+
+    setNotifications(prev => [newNotif, ...prev]);
+
+    if (db) {
+      try {
+        setDoc(doc(db, "notifications", newNotif.id), newNotif, { merge: true });
+      } catch (e) {
+        console.warn("sendNotification Firestore error:", e);
+      }
+    }
+  };
+
   const getWhatsAppReminderUrl = (client: Client) => {
     const message = `Hello ${client.name} 👋, this is Yash Shirish Ramteke from OpenDev-Labs (www.opendev-labs.com).\n\nA friendly reminder for your monthly webapp retainer of ${client.currency === 'INR' ? '₹' : '$'}${client.monthlyFee.toLocaleString()} due on ${client.nextPaymentDue}.\n\nPay online via Razorpay: ${client.razorpayPaymentLink || 'https://opendev-labs.com/client/portal'}\n\nWork Mail: opendev.office@gmail.com | Phone: +91 81695 68582`;
     const cleanPhone = client.phone.replace(/[^0-9]/g, '') || '918169568582';
@@ -568,10 +790,15 @@ export const ClientProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         updateTicketStatus,
         generateInvoice,
         markNotificationRead,
+        sendNotification,
         getWhatsAppReminderUrl,
         getRazorpayLink,
         addProjectRequest,
         updateProjectRequestStatus,
+        approveProjectRequest,
+        rejectProjectRequest,
+        deleteProjectRequest,
+        generateClientCredentials,
         addChangelog,
         deleteChangelog,
         notifyPayment,

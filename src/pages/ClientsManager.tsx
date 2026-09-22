@@ -56,15 +56,15 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({ onOpenAddClient 
   const { registeredUsers, deleteRegisteredUser } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const currentTab = searchParams.get('tab') === 'users' ? 'users' : 'clients';
+  const currentTab = searchParams.get('tab') === 'clients' ? 'clients' : 'users';
   const [activeTab, setActiveTab] = useState<'clients' | 'users'>(currentTab);
 
   useEffect(() => {
     const tabParam = searchParams.get('tab');
-    if (tabParam === 'users') {
-      setActiveTab('users');
-    } else if (tabParam === 'clients' || !tabParam) {
+    if (tabParam === 'clients') {
       setActiveTab('clients');
+    } else {
+      setActiveTab('users');
     }
   }, [searchParams]);
 
@@ -162,52 +162,54 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({ onOpenAddClient 
 
   return (
     <div className="p-4 md:p-8 space-y-6 max-w-7xl mx-auto text-zinc-900 dark:text-zinc-100 font-sans">
-      {/* Executive Hero Banner Card (Black Rectangle Welcome Card Header) */}
+      {/* Google/Microsoft Level Minimal Header Bar */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-black text-white relative overflow-hidden shadow-xl"
+        transition={{ duration: 0.3 }}
+        className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
       >
-        <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 z-0" particleCount={30} />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-extrabold tracking-wider uppercase backdrop-blur-md">
-                CRM & User Directory
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              <Users className="size-7 text-white shrink-0" /> Client CRM & User Management
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed">
-              Manage registered Google users, client profiles, domain names, advance payments, and live website statuses.
-            </p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold tracking-wide uppercase">
+              CRM & Directory
+            </span>
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 flex items-center gap-2">
+            <Users className="size-6 text-zinc-700 dark:text-zinc-300 shrink-0" /> Client CRM & User Directory
+          </h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Manage registered Google users, client profiles, domain names, advance payments, and live website statuses.
+          </p>
+        </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {clients.length > 0 && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to clear all demo clients for a blank dashboard start? You can add clients manually anytime.')) {
-                    clearAllClients();
-                  }
-                }}
-                className="text-xs font-bold gap-1.5 h-9 rounded-full px-4 bg-white/10 hover:bg-red-500/20 border-white/20 text-white hover:text-red-300 backdrop-blur-md transition-colors"
-              >
-                <RotateCcw className="size-3.5" /> Clear Demo Clients
-              </Button>
-            )}
-
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {clients.length > 0 && (
             <Button
-              onClick={onOpenAddClient}
-              className="bg-white text-black hover:bg-zinc-200 font-extrabold text-xs gap-1.5 h-9 rounded-full px-5 shadow-md"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                if (window.confirm('Clear all client records for a fresh AI workspace start?')) {
+                  clearAllClients();
+                }
+              }}
+              className="text-xs font-semibold gap-1.5 h-8 rounded-lg text-zinc-600 dark:text-zinc-400 hover:text-red-600 dark:hover:text-red-400 border-zinc-200 dark:border-zinc-800"
             >
-              <Plus className="size-4" /> Add Manual Client
+              <RotateCcw className="size-3.5" /> Clear Client List
             </Button>
-          </div>
+          )}
+
+          <Button
+            size="sm"
+            onClick={() => {
+              const agentBtn = document.querySelector('[title="Open Super Agent AI Chat Panel"]') as HTMLButtonElement;
+              if (agentBtn) agentBtn.click();
+            }}
+            className="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-xs gap-1.5 h-8 rounded-lg px-3.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <img src="/logo-icon.webp" alt="OpenDev" className="h-9 sm:h-10 w-auto object-contain" />
+            <span>⚡ Onboard via Super Agent</span>
+          </Button>
         </div>
       </motion.div>
 
@@ -273,8 +275,8 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({ onOpenAddClient 
       </div>
 
       {/* Primary Section Switcher Tabs */}
-      <div className="flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-1">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-200 dark:border-zinc-800 pb-2 gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => handleTabChange('clients')}
             className={`px-4 py-2 text-xs font-extrabold rounded-full transition-all flex items-center gap-2 ${
@@ -296,6 +298,13 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({ onOpenAddClient 
           >
             <Users className="size-4" /> Registered Users ({registeredUsers.length})
           </button>
+
+          <a
+            href="/dashboard/requests"
+            className="px-4 py-2 text-xs font-extrabold rounded-full bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 flex items-center gap-2 transition-colors"
+          >
+            <Key className="size-4 text-blue-500" /> Client Requests & Code Generator ⚡
+          </a>
         </div>
 
         {activeTab === 'users' && (
@@ -562,16 +571,19 @@ export const ClientsManager: React.FC<ClientsManagerProps> = ({ onOpenAddClient 
             </div>
           ) : (
             <div className="p-12 text-center space-y-4">
-              <Building className="size-10 mx-auto text-zinc-400" />
-              <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">Admin Dashboard Clean Start</h3>
+              <Sparkles className="size-10 mx-auto text-purple-500 animate-pulse" />
+              <h3 className="font-extrabold text-base text-zinc-900 dark:text-white">Admin Dashboard Clean Start (0 Clients)</h3>
               <p className="text-xs text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
-                No active clients in database. You can manually add clients or convert registered Google users into client partners.
+                All demo clients cleared. Onboard new clients automatically by pasting WhatsApp messages or raw notes into the Super Agent AI.
               </p>
               <Button
-                onClick={onOpenAddClient}
-                className="bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-extrabold text-xs rounded-full px-6 py-2 shadow-sm"
+                onClick={() => {
+                  const agentBtn = document.querySelector('[title="Open Super Agent AI Chat Panel"]') as HTMLButtonElement;
+                  if (agentBtn) agentBtn.click();
+                }}
+                className="bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white font-extrabold text-xs rounded-full px-6 py-2 shadow-md hover:from-purple-500 hover:to-cyan-500 transition-all cursor-pointer"
               >
-                + Add First Client Manually
+                ⚡ Open Super Agent AI Copilot
               </Button>
             </div>
           )}

@@ -3,6 +3,7 @@ import type { LogEntry, AiChatMessage } from '../types';
 import { LogLevel, DeploymentStatus } from '../types';
 import { getAIAssistance } from '../services/geminiService';
 import { SparklesIcon, SendIcon } from './common/Icons';
+import { ThreeLoadingAnimation } from '../../../components/ui/ThreeLoadingAnimation';
 
 interface AIAssistantProps {
   logs: LogEntry[];
@@ -84,15 +85,11 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ logs, deploymentStatus
             </div>
           </div>
         ))}
-        {isLoading && messages[messages.length - 1]?.sender !== 'user' && (
-          <div className="flex justify-start">
-            <div className="bg-black border border-zinc-900 px-4 py-4">
-              <div className="flex gap-1.5">
-                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-pulse"></div>
-                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-pulse [animation-delay:200ms]"></div>
-                <div className="w-1.5 h-1.5 bg-zinc-600 rounded-full animate-pulse [animation-delay:400ms]"></div>
-              </div>
-            </div>
+
+        {isLoading && (
+          <div className="flex items-center gap-3 justify-start py-2">
+            <img src="/logo-icon.webp" alt="OpenDev Agent" className="h-8 w-auto object-contain shrink-0" />
+            <ThreeLoadingAnimation size={54} className="text-white shrink-0" />
           </div>
         )}
       </div>

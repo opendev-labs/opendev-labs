@@ -28,6 +28,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
+import { AirplaneAnimation } from '../components/ui/AirplaneAnimation';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export const AuthPage: React.FC = () => {
     setTimeout(() => {
       if (isAdminMode) {
         // Validate Admin credentials (username/email & password)
-        const validAdminEmails = ['opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
+        const validAdminEmails = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
         if (validAdminEmails.includes(email.trim().toLowerCase()) && password.length >= 4) {
           loginAsDeveloper();
           navigate('/dashboard');
@@ -104,7 +105,7 @@ export const AuthPage: React.FC = () => {
         // Persist real user into Firestore users collection
         if (db && googleUser) {
           try {
-            const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
+            const isLeadDev = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
             await setDoc(doc(db, "users", googleUser.uid), {
               id: googleUser.uid,
               name: googleUser.displayName || (googleUser.email ? googleUser.email.split('@')[0] : 'Google User'),
@@ -131,8 +132,9 @@ export const AuthPage: React.FC = () => {
 
         // Check if existing user is already a converted client
         const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
-        if (matchedClient || loggedUserEmail === 'opendev.office@gmail.com') {
-          navigate(loggedUserEmail === 'opendev.office@gmail.com' ? '/dashboard' : '/client/portal');
+        const isAdminUser = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
+        if (matchedClient || isAdminUser) {
+          navigate(isAdminUser ? '/dashboard' : '/client/portal');
         } else {
           navigate('/client/profile');
         }
@@ -171,8 +173,9 @@ export const AuthPage: React.FC = () => {
       );
 
       const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
-      if (matchedClient || loggedUserEmail === 'opendev.office@gmail.com') {
-        navigate(loggedUserEmail === 'opendev.office@gmail.com' ? '/dashboard' : '/client/portal');
+      const isAdminUser = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
+      if (matchedClient || isAdminUser) {
+        navigate(isAdminUser ? '/dashboard' : '/client/portal');
       } else {
         navigate('/client/profile');
       }
@@ -214,15 +217,17 @@ export const AuthPage: React.FC = () => {
         )}
       </button>
 
-      {/* TOP / UPPER PORTION (Exact 50% Height on Mobile, Full Height on Desktop with Background Image) */}
+      {/* TOP / UPPER PORTION (Exact 50% Height on Mobile, Full Height on Desktop with 3D Airplane Animation) */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full h-[50vh] lg:h-full lg:flex-1 relative bg-[url('/digital-nomads.webp')] bg-cover bg-center p-4 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0"
+        className="w-full h-[50vh] lg:h-full lg:flex-1 relative p-4 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0 overflow-hidden bg-zinc-950"
       >
+        <AirplaneAnimation />
+
         {/* Company Logo at Bottom Left of Image Area */}
-        <div className="z-10 flex items-center pt-4 lg:pt-0">
+        <div className="z-10 flex items-center pt-4 lg:pt-0 relative">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
             <img
               src="/logo-icon.webp"
@@ -263,7 +268,7 @@ export const AuthPage: React.FC = () => {
               type="button"
               onClick={() => {
                 setIsAdminMode(true);
-                setEmail('opendev.office@gmail.com');
+                setEmail('opendev-labs.office@gmail.com');
               }}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                 isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
@@ -327,7 +332,7 @@ export const AuthPage: React.FC = () => {
               <div className="space-y-1">
                 <Input
                   type="email"
-                  placeholder="Admin Email (opendev.office@gmail.com)"
+                  placeholder="Admin Email (opendev-labs.office@gmail.com)"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
@@ -408,7 +413,7 @@ export const AuthPage: React.FC = () => {
                 <button
                   onClick={() => {
                     setIsAdminMode(true);
-                    setEmail('opendev.office@gmail.com');
+                    setEmail('opendev-labs.office@gmail.com');
                   }}
                   className="font-bold text-black dark:text-white hover:underline transition-colors"
                 >

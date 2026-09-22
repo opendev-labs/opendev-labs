@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Users, Bell, ReceiptText, LayoutDashboard, Settings, Globe, Plus, X } from 'lucide-react';
+import { Search, Users, Bell, ReceiptText, LayoutDashboard, Settings, Globe, Plus, X, Sparkles } from 'lucide-react';
 import { useClients } from '../../context/ClientContext';
 import { Dialog, DialogContent } from '../ui/dialog';
 
@@ -73,12 +73,13 @@ export const CommandPaletteModal: React.FC<CommandPaletteModalProps> = ({
             <button
               onClick={() => {
                 onOpenChange(false);
-                onOpenAddClient();
+                const agentBtn = document.querySelector('[title="Open Super Agent AI Chat Panel"]') as HTMLButtonElement;
+                if (agentBtn) agentBtn.click();
               }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-md hover:bg-accent text-foreground text-left transition-colors"
             >
-              <Plus className="size-4 text-primary" />
-              <span className="font-semibold">Add New Client</span>
+              <img src="/logo-icon.webp" alt="OpenDev" className="h-5 w-auto object-contain" />
+              <span className="font-semibold">Onboard Client via Super Agent AI</span>
             </button>
           </div>
 

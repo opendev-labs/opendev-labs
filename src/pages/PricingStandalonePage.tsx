@@ -10,10 +10,10 @@ import { Footer } from '../components/layout/Footer';
 import { TypewriterHeading } from '../components/ui/TypewriterHeading';
 
 const pricingPhrases = [
-  "Choose the Perfect Plan for Your Business",
-  "Transparent Development Engagement Models",
-  "One-Time Codebase Handover with Full Source Code",
-  "Monthly Retainer Models Starting at ₹3,000–₹4,000/mo",
+  "Choose the Perfect Maintenance Plan",
+  "Transparent Monthly & Annual Retainer Models",
+  "Maintenance Plans Starting at $50 / month",
+  "Save Up to $150 on Annual Billing",
   "Daily Automated Database Backups & Uptime Monitoring",
   "No Hidden Fees or Surprise Operational Costs"
 ];
@@ -41,7 +41,7 @@ export const PricingStandalonePage: React.FC = () => {
           </h1>
 
           <p className="mt-6 sm:mt-8 text-base sm:text-xl lg:text-2xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto font-medium leading-relaxed">
-            From one-time custom handovers to continuous monthly retainers starting at ₹3,000–₹4,000/mo. Zero hidden setup fees.
+            Continuous monthly & annual maintenance retainers starting at $50/mo. Save up to $150 with annual billing. Zero hidden fees.
           </p>
         </div>
       </section>
@@ -57,7 +57,7 @@ export const PricingStandalonePage: React.FC = () => {
               Flagship Model
             </span>
             <h3 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white">
-              Why 85% of Clients Choose the ₹3,000–₹4,000/mo Retainer
+              Why 85% of Clients Choose Annual Maintenance Retainers
             </h3>
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-300 leading-relaxed">
               Never worry about server crashes, missing database backups, or outdated security dependencies again. Our retainers include automated daily backups, 24/7 uptime monitoring, and priority developer availability for continuous maintenance.

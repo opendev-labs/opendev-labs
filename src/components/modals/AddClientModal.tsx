@@ -38,21 +38,29 @@ export const AddClientModal: React.FC<AddClientModalProps> = ({ open, onOpenChan
     e.preventDefault();
     if (!name || !email) return;
 
-    const finalWebsiteUrl = websiteUrl.trim() || (domain ? `https://${domain.replace(/^https?:\/\//, '')}` : 'https://opendev-labs.com');
-    const finalDomain = domain.trim() || finalWebsiteUrl.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const finalDomain = domain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '') || (name ? `${name.toLowerCase().replace(/[^a-z0-9]/g, '')}.com` : 'clientdomain.com');
     const generatedCode = clientCode.trim().toUpperCase() || `${name.replace(/[^a-zA-Z]/g, '').substring(0, 4).toUpperCase()}2026`;
+    const liveUrl = websiteUrl.trim() || `https://${finalDomain}`;
+    const devUrl = `https://${finalDomain.split('.')[0]}-dev.vercel.app`;
 
     addClient({
       name,
       company: company || name,
       email,
       phone: phone || '+91 81695 68582',
-      websiteUrl: finalWebsiteUrl,
+      websiteUrl: liveUrl,
       domain: finalDomain,
       websiteStatus,
+      workStatus: websiteStatus === 'completed' ? 'completed' : 'work_started',
+      progressPercentage: websiteStatus === 'completed' ? 100 : 50,
       advancePaid: advancePaidStatus === 'paid',
-      advanceAmount: Number(advanceAmount) || 0,
-      previewUrl: finalWebsiteUrl,
+      advanceAmount: Number(advanceAmount) || 25000,
+      totalBill: 70000,
+      livePreviewUrl: liveUrl,
+      devPreviewUrl: devUrl,
+      maintenanceStatus: 'paid',
+      domainStatus: 'active',
+      previewUrl: liveUrl,
       billingType,
       monthlyFee: billingType === 'monthly_retainer' ? Number(monthlyFee) : 0,
       currency,

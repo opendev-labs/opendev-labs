@@ -76,8 +76,8 @@ export const ClientCredentialsPage: React.FC = () => {
               <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 space-y-1">
                 <span className="text-[10px] font-bold text-zinc-400 uppercase">Razorpay Automated Payment Key</span>
                 <div className="p-2.5 rounded-lg bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white flex items-center justify-between">
-                  <span className="truncate">rzp_live_opendev_vltmpl_****9481</span>
-                  <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-extrabold">VLTMPL Linked</span>
+                  <span className="truncate">rzp_live_opendev_vtlm_****9481</span>
+                  <span className="text-[10px] bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-extrabold">VTLM Linked</span>
                 </div>
               </div>
 

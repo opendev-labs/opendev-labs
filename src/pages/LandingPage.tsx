@@ -293,34 +293,36 @@ export const LandingPage: React.FC = () => {
             Work directly with Yash Shirish Ramteke & OpenDev-Labs.
           </p>
 
-          <div className="grid sm:grid-cols-3 gap-4 text-xs font-mono">
+          <div className="grid sm:grid-cols-3 gap-4 text-xs font-sans">
             <a
               href="mailto:opendev.office@gmail.com"
-              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-blue-600 transition-colors shadow-xs"
+              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-blue-600 transition-colors shadow-xs group"
             >
-              <Mail className="size-6 text-zinc-900 dark:text-white" />
-              <span className="font-bold text-zinc-900 dark:text-white">Work Mail</span>
-              <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">opendev.office@gmail.com</span>
+              <Mail className="size-6 text-zinc-900 dark:text-white group-hover:text-blue-600 transition-colors" />
+              <span className="font-extrabold text-zinc-900 dark:text-white text-sm">Work Mail</span>
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium text-xs">opendev.office@gmail.com</span>
             </a>
 
             <a
-              href="tel:8169568582"
-              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-blue-600 transition-colors shadow-xs"
+              href="https://wa.me/918169568582"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-emerald-600 transition-colors shadow-xs group"
             >
-              <Phone className="size-6 text-zinc-900 dark:text-white" />
-              <span className="font-bold text-zinc-900 dark:text-white">Phone / WhatsApp</span>
-              <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">+91 81695 68582</span>
+              <Phone className="size-6 text-zinc-900 dark:text-white group-hover:text-emerald-600 transition-colors" />
+              <span className="font-extrabold text-zinc-900 dark:text-white text-sm">Phone / WhatsApp</span>
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium text-xs">+91 81695 68582</span>
             </a>
 
             <a
               href="https://github.com/opendev-labs"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-blue-600 transition-colors shadow-xs"
+              className="p-5 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col items-center justify-center gap-2 hover:border-purple-600 transition-colors shadow-xs group"
             >
-              <Github className="size-6 text-zinc-900 dark:text-white" />
-              <span className="font-bold text-zinc-900 dark:text-white">GitHub Org</span>
-              <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">github.com/opendev-labs</span>
+              <Github className="size-6 text-zinc-900 dark:text-white group-hover:text-purple-600 transition-colors" />
+              <span className="font-extrabold text-zinc-900 dark:text-white text-sm">GitHub Org</span>
+              <span className="text-zinc-600 dark:text-zinc-400 font-medium text-xs">github.com/opendev-labs</span>
             </a>
           </div>
         </div>

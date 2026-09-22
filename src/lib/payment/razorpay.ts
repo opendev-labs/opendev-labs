@@ -1,7 +1,11 @@
 /**
- * RAZORPAY PAYMENT PROTOCOL
- * Handles subscription materialization and marketplace transactions.
+ * RAZORPAY & UPI PAYMENT GATEWAY CONTROLLER
+ * Handles live subscription materialization, international checkout, and preferred India UPI payments.
  */
+
+export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TeHfR3oT5qWEH8';
+export const PREFERRED_UPI_ID = import.meta.env.VITE_PREFERRED_UPI_ID || '8169568582@kotakbank';
+export const PREFERRED_UPI_NAME = import.meta.env.VITE_PREFERRED_UPI_NAME || 'Yash Ramteke (Kotak Mahindra Bank)';
 
 export const SUBSCRIPTION_TIERS = {
   FREE: {
@@ -41,43 +45,93 @@ export const SUBSCRIPTION_TIERS = {
 };
 
 /**
- * Initiates the Razorpay subscription handshake.
+ * Dynamically loads official Razorpay Checkout SDK script
+ */
+export function loadRazorpaySDK(): Promise<boolean> {
+  return new Promise((resolve) => {
+    if (typeof window !== 'undefined' && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+export interface RazorpayModalOptions {
+  amount: number; // in INR or USD
+  currency?: string; // 'INR' | 'USD'
+  name?: string;
+  email?: string;
+  description?: string;
+  orderId?: string;
+  onSuccess?: (response: { razorpay_payment_id: string; razorpay_order_id?: string; razorpay_signature?: string }) => void;
+  onDismiss?: () => void;
+}
+
+/**
+ * Opens official Razorpay Checkout modal with Live Key ID
+ */
+export async function openRazorpayCheckout(options: RazorpayModalOptions): Promise<void> {
+  const isLoaded = await loadRazorpaySDK();
+  if (!isLoaded) {
+    alert('Could not load Razorpay SDK. Please check your internet connection.');
+    return;
+  }
+
+  const razorpayOptions: any = {
+    key: RAZORPAY_KEY_ID,
+    name: 'opendev-labs',
+    amount: Math.round(options.amount * 100), // amount in smallest currency unit (paise / cents)
+    currency: options.currency || 'INR',
+    ...(options.description && { description: options.description }),
+    prefill: {
+      name: options.name || 'Client Partner',
+      email: options.email || 'opendev.office@gmail.com',
+      contact: '+918169568582',
+    },
+    notes: {
+      merchant: 'opendev-labs',
+      upi_vpa: PREFERRED_UPI_ID,
+    },
+    handler: function (response: any) {
+      console.log('✅ Razorpay Live Payment Successful:', response);
+      if (options.onSuccess) {
+        options.onSuccess(response);
+      }
+    },
+    modal: {
+      ondismiss: function () {
+        console.log('⚠️ Razorpay Modal Dismissed by User');
+        if (options.onDismiss) {
+          options.onDismiss();
+        }
+      },
+    },
+  };
+
+  razorpayOptions.name = 'opendev-labs';
+
+  const rzp = new (window as any).Razorpay(razorpayOptions);
+  rzp.open();
+}
+
+/**
+ * Helper function for backward compatibility
  */
 export async function createSubscription(tier: keyof typeof SUBSCRIPTION_TIERS): Promise<any> {
-    console.log(`💳 PAY_BRIDGE: Initiating handshake for ${tier} tier...`);
-    
-    // Placeholder for actual API call to Vercel/Razorpay
-    // In production, this would call /api/payment/create-order
-    const mockOrder = {
-        orderId: 'order_mesh_' + Math.random().toString(36).substring(7),
-        keyId: 'rzp_test_placeholder',
-        amount: SUBSCRIPTION_TIERS[tier].price * 100
-    };
-
-    return new Promise((resolve, reject) => {
-        const options = {
-            key: mockOrder.keyId,
-            amount: mockOrder.amount,
-            currency: 'INR',
-            name: 'OpenDev-Labs',
-            description: `${tier} Subscription`,
-            order_id: mockOrder.orderId,
-            handler: (response: any) => {
-                console.log("✅ PAY_BRIDGE: Verification Received", response);
-                resolve({ success: true, ...response });
-            },
-            modal: {
-                ondismiss: () => {
-                    console.warn("⚠️ PAY_BRIDGE: Handshake Aborted by User");
-                    reject(new Error('Payment cancelled'));
-                }
-            },
-            theme: {
-                color: "#000000"
-            }
-        };
-
-        const rzp = new (window as any).Razorpay(options);
-        rzp.open();
+  const tierData = SUBSCRIPTION_TIERS[tier];
+  return new Promise((resolve, reject) => {
+    openRazorpayCheckout({
+      amount: tierData.price,
+      currency: 'INR',
+      description: `${tierData.name} Subscription Plan`,
+      onSuccess: (res) => resolve({ success: true, ...res }),
+      onDismiss: () => reject(new Error('Payment cancelled')),
     });
+  });
 }

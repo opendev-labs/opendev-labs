@@ -142,50 +142,49 @@ export const DeveloperDashboard: React.FC<DeveloperDashboardProps> = ({ onOpenAd
       className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto text-zinc-900 dark:text-zinc-100 font-sans"
     >
       
-      {/* 1. Executive Hero Header */}
+      {/* Google/Microsoft Level Minimal Executive Header */}
       <motion.div
         variants={itemVariants}
-        className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-zinc-900 via-zinc-800 to-black text-white relative overflow-hidden shadow-xl"
+        className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
       >
-        <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 z-0" particleCount={30} />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md">
-                Studio Admin Portal
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px]">
-                ● System Operational
-              </span>
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-              Good day, Yash Ramteke 👋
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-300 font-medium leading-relaxed">
-              Your software solutions & revenue dashboard is live, tracking active client retainers, domain health, and automated payment reminders.
-            </p>
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[11px] font-bold tracking-wide uppercase">
+              Studio Admin Portal
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-[10px] font-semibold">
+              ● System Operational
+            </span>
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+            Good day, Yash Ramteke 👋
+          </h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Your software solutions & revenue dashboard is live, tracking active client retainers, domain health, and automated payment reminders.
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowChangelogModal(true)}
-              className="px-5 py-2.5 rounded-full border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-white font-extrabold text-xs inline-flex items-center gap-2 shadow-md transition-colors"
-            >
-              <Code className="size-4 text-emerald-400" /> Post Developer Changelog
-            </motion.button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowChangelogModal(true)}
+            className="text-xs font-semibold gap-1.5 h-8 rounded-lg text-zinc-700 dark:text-zinc-300 border-zinc-200 dark:border-zinc-800"
+          >
+            <Code className="size-3.5 text-emerald-500" /> Post Changelog
+          </Button>
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onOpenAddClient}
-              className="px-5 py-2.5 rounded-full bg-white dark:bg-zinc-800 text-black dark:text-white font-extrabold text-xs inline-flex items-center gap-2 shadow-md transition-colors"
-            >
-              <Plus className="size-4" /> Add New Client Partner
-            </motion.button>
-          </div>
+          <Button
+            size="sm"
+            onClick={() => {
+              const agentBtn = document.querySelector('[title="Open Super Agent AI Chat Panel"]') as HTMLButtonElement;
+              if (agentBtn) agentBtn.click();
+            }}
+            className="bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white text-white dark:text-zinc-900 font-semibold text-xs gap-1.5 h-8 rounded-lg px-3.5 transition-colors cursor-pointer shadow-xs"
+          >
+            <img src="/logo-icon.webp" alt="OpenDev" className="h-9 sm:h-10 w-auto object-contain" />
+            <span>⚡ Onboard via Super Agent</span>
+          </Button>
         </div>
       </motion.div>
 
@@ -382,115 +381,7 @@ export const DeveloperDashboard: React.FC<DeveloperDashboardProps> = ({ onOpenAd
           </div>
         </div>
 
-        {/* Connected Professional & Experimental Projects Grid */}
-        <div className="space-y-3 pt-2">
-          <div className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 flex items-center justify-between">
-            <span>Connected Enterprise & Experimental Platforms</span>
-            <span className="text-[10px] text-zinc-500 font-normal">Auto-synced with Cloud Architecture</span>
-          </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Project 1: Vishwa Leader Corp */}
-            <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-all space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="font-extrabold text-sm text-white">Vishwa Leader Corp</span>
-                </div>
-                <a
-                  href="https://vishwaleadr.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1 font-mono"
-                >
-                  vishwaleadr.com <ExternalLink className="size-3" />
-                </a>
-              </div>
-              <p className="text-[11px] text-zinc-400 line-clamp-1">
-                Global news, leadership media portal & community analytics suite.
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-800 font-mono">
-                <span>MRR: <strong className="text-white">₹65,000</strong></span>
-                <span>Active Users: <strong className="text-emerald-400">1,420 online</strong></span>
-              </div>
-            </div>
-
-            {/* Project 2: Elite Trading Hub */}
-            <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-all space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="font-extrabold text-sm text-white">Elite Trading Hub</span>
-                </div>
-                <a
-                  href="https://elite-tradinghub.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1 font-mono"
-                >
-                  elite-tradinghub.com <ExternalLink className="size-3" />
-                </a>
-              </div>
-              <p className="text-[11px] text-zinc-400 line-clamp-1">
-                Algorithmic trading suite, real-time WebSocket orderbook & QBET bot.
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-800 font-mono">
-                <span>MRR: <strong className="text-white">₹45,000</strong></span>
-                <span>Sub-second Latency: <strong className="text-purple-400">32ms</strong></span>
-              </div>
-            </div>
-
-            {/* Project 3: OpenDev-Labs Sovereign Hub */}
-            <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-all space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-blue-500 animate-pulse" />
-                  <span className="font-extrabold text-sm text-white">OpenDev-Labs Core</span>
-                </div>
-                <a
-                  href="https://opendev-labs.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1 font-mono"
-                >
-                  opendev-labs.com <ExternalLink className="size-3" />
-                </a>
-              </div>
-              <p className="text-[11px] text-zinc-400 line-clamp-1">
-                Main software agency platform, client portal & Void IDE web studio.
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-800 font-mono">
-                <span>Retainer Pool: <strong className="text-white">₹1,20,000</strong></span>
-                <span>Global SLA: <strong className="text-emerald-400">99.99%</strong></span>
-              </div>
-            </div>
-
-            {/* Project 4: OpenDev-Labs GitHub Pages */}
-            <div className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 transition-all space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className="size-2 rounded-full bg-purple-500 animate-pulse" />
-                  <span className="font-extrabold text-sm text-white">OpenDev GitHub Pages</span>
-                </div>
-                <a
-                  href="https://opendev-labs.github.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs text-zinc-400 hover:text-white inline-flex items-center gap-1 font-mono"
-                >
-                  opendev-labs.github.io <ExternalLink className="size-3" />
-                </a>
-              </div>
-              <p className="text-[11px] text-zinc-400 line-clamp-1">
-                Documentation, developer tools showcase & GitHub Actions auto-deploy pipeline.
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-zinc-400 pt-1 border-t border-zinc-800 font-mono">
-                <span>Deployment: <strong className="text-white">GitHub Actions</strong></span>
-                <span>Status: <strong className="text-emerald-400">Synced</strong></span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Live Google Analytics & Firebase Auth Synchronization Deck */}
         <div className="p-5 rounded-2xl bg-zinc-900/90 border border-zinc-800/90 space-y-4">
@@ -588,24 +479,24 @@ export const DeveloperDashboard: React.FC<DeveloperDashboardProps> = ({ onOpenAd
       {/* 3. Main CRM Table & Alert Column */}
       <div className="grid lg:grid-cols-3 gap-6">
         
-        {/* Left 2 Cols: Client Retainer CRM */}
+        {/* Left 2 Cols: Registered Users Roster */}
         <motion.div variants={itemVariants} className="lg:col-span-2 space-y-4">
           <div className="p-6 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-base font-extrabold text-zinc-900 dark:text-white tracking-tight">
-                  Active Client Retainers & Quotations
+                  Registered Users & Account Telemetry
                 </h2>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 font-medium">
-                  Includes Khawar (Elite-Trading Hub) & Vishwa Leader Institute.
+                  {registeredUsers.length} total members synced with Google OAuth & Firebase.
                 </p>
               </div>
 
               <button
-                onClick={() => navigate('/dashboard/clients')}
+                onClick={() => navigate('/dashboard/clients?tab=users')}
                 className="text-xs font-bold text-black dark:text-white hover:underline flex items-center gap-1"
               >
-                Manage Full CRM <ArrowUpRight className="size-3.5" />
+                View All Users <ArrowUpRight className="size-3.5" />
               </button>
             </div>
 
@@ -613,89 +504,73 @@ export const DeveloperDashboard: React.FC<DeveloperDashboardProps> = ({ onOpenAd
               <table className="w-full text-left text-xs">
                 <thead className="bg-zinc-50 dark:bg-zinc-800/60 border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400 font-bold uppercase text-[10px]">
                   <tr>
-                    <th className="p-3">Client & Company</th>
-                    <th className="p-3">Billing Type</th>
-                    <th className="p-3">Monthly Fee</th>
-                    <th className="p-3">Status</th>
+                    <th className="p-3">User & Email</th>
+                    <th className="p-3">Role & Auth</th>
+                    <th className="p-3">Joined Date</th>
+                    <th className="p-3">Online Status</th>
                     <th className="p-3 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 bg-white dark:bg-zinc-900">
-                  {clients.map(client => (
-                    <tr key={client.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
+                  {registeredUsers.slice(0, 8).map(user => (
+                    <tr key={user.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/40 transition-colors">
                       <td className="p-3">
-                        <div className="flex flex-col">
-                          <span className="font-extrabold text-zinc-900 dark:text-white flex items-center gap-1.5">
-                            {client.name}
-                            <a href={client.websiteUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-black dark:hover:text-white">
-                              <ExternalLink className="size-3" />
-                            </a>
-                          </span>
-                          <span className="text-[10px] text-zinc-500 dark:text-zinc-400 font-medium">{client.company}</span>
+                        <div className="flex items-center gap-2.5">
+                          {user.avatar ? (
+                            <img src={user.avatar} alt={user.name} className="size-7 rounded-full object-cover border border-zinc-200 dark:border-zinc-700" />
+                          ) : (
+                            <div className="size-7 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold text-[10px] flex items-center justify-center">
+                              {user.name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-extrabold text-zinc-900 dark:text-white truncate">
+                              {user.name}
+                            </span>
+                            <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">{user.email}</span>
+                          </div>
                         </div>
                       </td>
 
                       <td className="p-3">
-                        {client.billingType === 'monthly_retainer' ? (
-                          <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-800 dark:text-zinc-200 text-[10px] font-extrabold border border-zinc-200 dark:border-zinc-700">
-                            Monthly Retainer
+                        {user.role === 'developer' ? (
+                          <span className="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 text-[10px] font-extrabold border border-purple-200 dark:border-purple-800">
+                            Admin
+                          </span>
+                        ) : user.role === 'client' ? (
+                          <span className="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 text-[10px] font-extrabold border border-blue-200 dark:border-blue-800">
+                            Client Partner
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 text-[10px]">
-                            Handover Build
+                          <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold">
+                            User
                           </span>
                         )}
                       </td>
 
-                      <td className="p-3 font-mono font-bold text-zinc-900 dark:text-white">
-                        {client.billingType === 'monthly_retainer' ? (
-                          <span>₹{client.monthlyFee.toLocaleString()}/mo</span>
-                        ) : (
-                          <span className="text-zinc-400 dark:text-zinc-500 font-normal">N/A</span>
-                        )}
+                      <td className="p-3 font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
+                        {user.joinedAt || '2026-09-01'}
                       </td>
 
                       <td className="p-3">
-                        {client.status === 'paid' && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold">
-                            PAID
+                        {user.online ? (
+                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 text-[10px] font-extrabold flex items-center gap-1 w-fit">
+                            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" /> ONLINE
                           </span>
-                        )}
-                        {client.status === 'pending' && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-[10px] font-extrabold">
-                            PENDING
-                          </span>
-                        )}
-                        {client.status === 'overdue' && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-[10px] font-extrabold">
-                            OVERDUE
-                          </span>
-                        )}
-                        {client.status === 'offboarded' && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-[10px]">
-                            HANDOVER
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 text-[10px]">
+                            OFFLINE
                           </span>
                         )}
                       </td>
 
                       <td className="p-3 text-right">
-                        {client.status === 'overdue' || client.status === 'pending' ? (
-                          <a
-                            href={getWhatsAppReminderUrl(client)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[10px] inline-flex items-center gap-1 transition-colors shadow-xs"
-                          >
-                            <Send className="size-3" /> WhatsApp Remind
-                          </a>
-                        ) : (
-                          <button
-                            onClick={() => markPaymentStatus(client.id, 'September 2026', 'paid')}
-                            className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                          >
-                            Mark Paid
-                          </button>
-                        )}
+                        <button
+                          onClick={() => navigate('/dashboard/clients?tab=users')}
+                          className="text-[10px] font-bold text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          Manage User
+                        </button>
                       </td>
                     </tr>
                   ))}

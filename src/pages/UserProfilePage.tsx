@@ -21,9 +21,11 @@ import {
   Check,
   Upload,
   Link2,
-  RotateCcw
+  RotateCcw,
+  Bot
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useClients } from '../context/ClientContext';
 import { useTheme } from '../context/ThemeContext';
 
 export interface WallpaperOption {
@@ -155,9 +157,12 @@ const WALLPAPER_OPTIONS: WallpaperOption[] = [
 export const UserProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { projectRequests } = useClients();
   const { theme, toggleTheme } = useTheme();
+
+  const userRequest = (projectRequests || []).find(r => (r?.userEmail || '').toLowerCase() === (user?.email || '').toLowerCase());
   
-  const [activeTab, setActiveTab] = useState<'timeline' | 'about' | 'friends' | 'photos' | 'settings'>('about');
+  const [activeTab, setActiveTab] = useState<'timeline' | 'about' | 'friends' | 'photos'>('about');
   
   // Cover Photo State (Defaults to black hole astronaut space wallpaper)
   const [coverImage, setCoverImage] = useState<string>(() => {
@@ -308,18 +313,6 @@ export const UserProfilePage: React.FC = () => {
             >
               Photos
             </button>
-
-            {/* Settings & Security Tab */}
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`py-3.5 border-b-2 transition-colors ${
-                activeTab === 'settings'
-                  ? 'border-blue-600 text-blue-600 font-bold'
-                  : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-              }`}
-            >
-              Settings & Security
-            </button>
           </div>
 
           <div className="flex items-center gap-2 pl-4">
@@ -368,17 +361,33 @@ export const UserProfilePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Item 2: Upgrade / Convert to Client */}
+              {/* Item 2: Upgrade / Convert to Client Access */}
               <Link to="/client/convert" className="flex items-start gap-4 group">
-                <div className="size-11 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 group-hover:bg-amber-100 group-hover:text-amber-600 transition-colors flex items-center justify-center shrink-0 border border-zinc-200 dark:border-zinc-700">
-                  <Plus className="size-5" />
+                <div className={`size-11 rounded-full flex items-center justify-center shrink-0 border transition-colors ${
+                  userRequest?.status === 'accepted' || userRequest?.status === 'client_converted'
+                    ? 'bg-emerald-100 text-emerald-600 border-emerald-300 dark:bg-emerald-950 dark:border-emerald-800'
+                    : userRequest?.status === 'pending_review'
+                    ? 'bg-amber-100 text-amber-600 border-amber-300 dark:bg-amber-950 dark:border-amber-800'
+                    : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 group-hover:bg-amber-100 group-hover:text-amber-600 border-zinc-200 dark:border-zinc-700'
+                }`}>
+                  <Key className="size-5" />
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block group-hover:text-amber-600 transition-colors">
-                    Client Portal 🔑
+                    Client Portal & Dashboard Activation 🔑
                   </span>
-                  <span className="text-xs text-amber-600 dark:text-amber-400 font-bold block">
-                    Upgrade account for dedicated retainers & milestones
+                  <span className={`text-xs font-bold block ${
+                    userRequest?.status === 'accepted' || userRequest?.status === 'client_converted'
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : userRequest?.status === 'pending_review'
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-amber-600 dark:text-amber-400'
+                  }`}>
+                    {userRequest?.status === 'pending_review'
+                      ? `⌛ Request Pending for ${userRequest.requestedDomain} (Enter Code)`
+                      : userRequest?.status === 'accepted' || userRequest?.status === 'client_converted'
+                      ? `🎉 Approved! Code: ${userRequest.assignedCode || 'CLIENT2026'} (Click to activate)`
+                      : 'Request client access code & enter domain + password to unlock'}
                   </span>
                 </div>
               </Link>
@@ -459,78 +468,7 @@ export const UserProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* 3. Settings & Security Tab Content */}
-      {activeTab === 'settings' && (
-        <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6">
-          <h2 className="text-lg font-bold text-zinc-900 dark:text-white border-b border-zinc-100 dark:border-zinc-800 pb-4">
-            Settings & Security Actions
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* Dark Mode Toggle */}
-            <div className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                  <Moon className="size-4" />
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 block">Dark Mode</span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400">Toggle dark / light appearance</span>
-                </div>
-              </div>
-              <button
-                onClick={toggleTheme}
-                className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-                  theme === 'dark' ? 'bg-zinc-900 dark:bg-white justify-end' : 'bg-zinc-200 justify-start'
-                }`}
-              >
-                <motion.div
-                  layout
-                  className={`size-4 rounded-full ${theme === 'dark' ? 'bg-white dark:bg-black' : 'bg-white'} shadow-sm`}
-                />
-              </button>
-            </div>
-
-            {/* Account Permissions */}
-            <Link
-              to="/client/security"
-              className="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/40 border border-zinc-200 dark:border-zinc-800 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300">
-                  <ShieldCheck className="size-4 text-emerald-500" />
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 block">Security Overview</span>
-                  <span className="text-[11px] text-zinc-500 dark:text-zinc-400">OAuth permissions & session logs</span>
-                </div>
-              </div>
-              <Settings className="size-4 text-zinc-400 group-hover:rotate-45 transition-transform" />
-            </Link>
-
-            {/* Log Out Button */}
-            <button
-              onClick={handleLogout}
-              className="md:col-span-2 flex items-center justify-between p-4 bg-red-50/60 dark:bg-red-950/20 border border-red-200 dark:border-red-900/50 rounded-xl hover:bg-red-100/60 dark:hover:bg-red-950/40 transition-colors text-left group text-red-600 dark:text-red-400"
-            >
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-400">
-                  <LogOut className="size-4" />
-                </div>
-                <div>
-                  <span className="text-sm font-bold block">Log out</span>
-                  <span className="text-[11px] text-red-500/80 dark:text-red-400/80">Sign out of current active session</span>
-                </div>
-              </div>
-              <LogOut className="size-4 text-red-400 group-hover:translate-x-1 transition-transform" />
-            </button>
-
-          </div>
-        </div>
-      )}
-
-      {/* 4. Timeline / Photos Placeholder for other tabs */}
+      {/* 3. Timeline / Photos Placeholder for other tabs */}
       {(activeTab === 'timeline' || activeTab === 'friends' || activeTab === 'photos') && (
         <div className="w-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-12 text-center shadow-xs space-y-3">
           <div className="size-12 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 flex items-center justify-center mx-auto">

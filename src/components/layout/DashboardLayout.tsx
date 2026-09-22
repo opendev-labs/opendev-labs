@@ -5,6 +5,7 @@ import { Header } from './Header';
 import { CommandPaletteModal } from '../modals/CommandPaletteModal';
 import { AddClientModal } from '../modals/AddClientModal';
 import { useAuth } from '../../context/AuthContext';
+import { useAISupport } from '../../context/AISupportContext';
 
 export const DashboardLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(true);
@@ -13,6 +14,7 @@ export const DashboardLayout: React.FC = () => {
   const [addClientOpen, setAddClientOpen] = useState(false);
 
   const { user, isAuthenticated } = useAuth();
+  const { toggleSupport, openSupport } = useAISupport();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -23,12 +25,12 @@ export const DashboardLayout: React.FC = () => {
       return;
     }
 
-    const allowedUserPaths = ['/client/profile', '/client/convert', '/client/security'];
+    const allowedUserPaths = ['/client/profile', '/client/convert', '/client/security', '/client/notifications'];
     if (user?.role === 'user' && !allowedUserPaths.includes(location.pathname)) {
       navigate('/client/profile', { replace: true });
     } else if (user?.role === 'client' && (location.pathname === '/client' || location.pathname === '/client/' || location.pathname.startsWith('/dashboard'))) {
       navigate('/client/portal', { replace: true });
-    } else if (user?.role === 'developer' && location.pathname.startsWith('/client')) {
+    } else if (user?.role === 'developer' && (location.pathname === '/client' || location.pathname === '/client/')) {
       navigate('/dashboard', { replace: true });
     }
   }, [user, isAuthenticated, location.pathname, navigate]);
@@ -42,7 +44,7 @@ export const DashboardLayout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-black dark:selection:text-white transition-colors duration-200">
+    <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans selection:bg-zinc-200 dark:selection:bg-zinc-800 selection:text-black dark:selection:text-white transition-colors duration-200 relative">
       {/* Sidebar */}
       <AppSidebar
         collapsed={collapsed}
@@ -58,11 +60,15 @@ export const DashboardLayout: React.FC = () => {
           onOpenCommand={() => setCommandOpen(true)}
           onOpenAddClient={() => setAddClientOpen(true)}
           onToggleMobileSidebar={handleToggleSidebar}
+          onToggleAgent={toggleSupport}
         />
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-2">
-          <Outlet context={{ onOpenAddClient: () => setAddClientOpen(true) }} />
-        </main>
+        {/* Body Workspace Below Header */}
+        <div className="flex-1 flex min-h-0 w-full overflow-hidden relative">
+          <main className="flex-1 overflow-y-auto overflow-x-hidden bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-2">
+            <Outlet context={{ onOpenAddClient: () => setAddClientOpen(true), onOpenAgent: openSupport }} />
+          </main>
+        </div>
       </div>
 
       {/* Modals */}
