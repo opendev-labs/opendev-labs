@@ -32,6 +32,7 @@ export interface WallpaperOption {
   id: string;
   name: string;
   url: string;
+  thumbUrl: string;
   category?: string;
 }
 
@@ -42,114 +43,133 @@ const WALLPAPER_OPTIONS: WallpaperOption[] = [
     id: 'black-hole-astronaut',
     name: 'Black Hole Astronaut Spiral Galaxy',
     url: '/wallpapers/black-hole-astronaut-spiral-galaxy-stars-space-exploration-3840x2400-2482.jpg',
+    thumbUrl: '/wallpapers/thumbs/black-hole-astronaut-spiral-galaxy-stars-space-exploration-3840x2400-2482.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'gargantua-endurance',
     name: 'Gargantua Endurance Space',
     url: '/wallpapers/gargantua-endurance-5120x3662-25445.jpg',
+    thumbUrl: '/wallpapers/thumbs/gargantua-endurance-5120x3662-25445.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'astronaut-space-suit',
     name: 'Astronaut Space Suit ISS Exploration',
     url: '/wallpapers/astronaut-space-suit-dark-exploration-iss-nasa-5200x3250-8229.jpg',
+    thumbUrl: '/wallpapers/thumbs/astronaut-space-suit-dark-exploration-iss-nasa-5200x3250-8229.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'wormhole-black-hole',
     name: 'Wormhole Black Hole Cosmos',
     url: '/wallpapers/wormhole-black-hole-astronaut-cosmos-planet-asteroids-5200x3250-7686.jpg',
+    thumbUrl: '/wallpapers/thumbs/wormhole-black-hole-astronaut-cosmos-planet-asteroids-5200x3250-7686.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'artemis-ii-nasa',
     name: 'Artemis II NASA Launch 5K',
     url: '/wallpapers/artemis-ii-nasa-5k-5200x3250-25357.jpg',
+    thumbUrl: '/wallpapers/thumbs/artemis-ii-nasa-5k-5200x3250-25357.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'nasa-laser',
     name: 'NASA Deep Space Laser',
     url: '/wallpapers/nasa-laser-5200x3250-20860.jpg',
+    thumbUrl: '/wallpapers/thumbs/nasa-laser-5200x3250-20860.jpg',
     category: 'Space & Cosmos'
   },
   {
     id: 'tron-ares-movie',
     name: 'Tron Ares Movie Sci-Fi',
     url: '/wallpapers/tron-ares-movie-6000x4000-23270.jpg',
+    thumbUrl: '/wallpapers/thumbs/tron-ares-movie-6000x4000-23270.jpg',
     category: 'Sci-Fi & Cyberpunk'
   },
   {
     id: 'tron-ares-red',
     name: 'Tron Ares Neon Red',
     url: '/wallpapers/tron-ares-red-3840x2702-22155.jpg',
+    thumbUrl: '/wallpapers/thumbs/tron-ares-red-3840x2702-22155.jpg',
     category: 'Sci-Fi & Cyberpunk'
   },
   {
     id: 'ghost-modern',
     name: 'Ghost Modern Abstract 8K',
     url: '/wallpapers/ghost-modern-7655x4320-10953.jpg',
+    thumbUrl: '/wallpapers/thumbs/ghost-modern-7655x4320-10953.jpg',
     category: 'Abstract & Dark'
   },
   {
     id: 'alienware-glowing',
     name: 'Alienware Glowing Neon',
     url: '/wallpapers/alienware-glowing-3840x2160-14352.jpeg',
+    thumbUrl: '/wallpapers/thumbs/alienware-glowing-3840x2160-14352.jpeg',
     category: 'Sci-Fi & Cyberpunk'
   },
   {
     id: 'muscle-car-retro',
     name: 'Muscle Car Retro Vintage Sunset',
     url: '/wallpapers/muscle-car-retro-vintage-car-sunset-neon-5k-4960x3507-1229.jpg',
+    thumbUrl: '/wallpapers/thumbs/muscle-car-retro-vintage-car-sunset-neon-5k-4960x3507-1229.jpg',
     category: 'Automotive & Sunset'
   },
   {
     id: 'porsche-911-gt3',
     name: 'Porsche 911 GT3 RS Dark',
     url: '/wallpapers/porsche-911-gt3-rs-3840x2160-20432.png',
+    thumbUrl: '/wallpapers/thumbs/porsche-911-gt3-rs-3840x2160-20432.png',
     category: 'Automotive & Sunset'
   },
   {
     id: 'guts-berserk',
     name: 'Guts Berserk Dark Knight',
     url: '/wallpapers/guts-berserk-dark-5120x2880-19127.jpg',
+    thumbUrl: '/wallpapers/thumbs/guts-berserk-dark-5120x2880-19127.jpg',
     category: 'Anime & Gaming'
   },
   {
     id: 'vegeta-super-saiyan',
     name: 'Vegeta Super Saiyan',
     url: '/wallpapers/vegeta-super-saiyan-5120x2880-17604.jpg',
+    thumbUrl: '/wallpapers/thumbs/vegeta-super-saiyan-5120x2880-17604.jpg',
     category: 'Anime & Gaming'
   },
   {
     id: 'goku-perfected',
     name: 'Goku Perfected Ultra Instinct',
     url: '/wallpapers/goku-perfected-5120x2880-25454.jpg',
+    thumbUrl: '/wallpapers/thumbs/goku-perfected-5120x2880-25454.jpg',
     category: 'Anime & Gaming'
   },
   {
     id: 'goku-limit',
     name: 'Son Goku Limit Breaker',
     url: '/wallpapers/son-goku-limit-5120x2880-12438.jpg',
+    thumbUrl: '/wallpapers/thumbs/son-goku-limit-5120x2880-12438.jpg',
     category: 'Anime & Gaming'
   },
   {
     id: 'windows-11-amoled',
     name: 'Windows 11 Red Abstract Amoled',
     url: '/wallpapers/windows-11-stock-red-abstract-black-background-amoled-3840x2400-9058.jpg',
+    thumbUrl: '/wallpapers/thumbs/windows-11-stock-red-abstract-black-background-amoled-3840x2400-9058.jpg',
     category: 'Abstract & Dark'
   },
   {
     id: 'ios-13-amoled',
     name: 'iOS Stock Red Amoled HD',
     url: '/wallpapers/ios-13-stock-ipados-red-black-background-amoled-hd-3208x3208-799.jpg',
+    thumbUrl: '/wallpapers/thumbs/ios-13-stock-ipados-red-black-background-amoled-hd-3208x3208-799.jpg',
     category: 'Abstract & Dark'
   },
   {
     id: 'sunrise-desert',
     name: 'Sunrise Desert Sand 5K',
     url: '/wallpapers/sunrise-desert-sand-5120x2880-21157.jpg',
+    thumbUrl: '/wallpapers/thumbs/sunrise-desert-sand-5120x2880-21157.jpg',
     category: 'Nature & Landscapes'
   }
 ];
@@ -550,9 +570,11 @@ export const UserProfilePage: React.FC = () => {
                           }`}
                         >
                           <img
-                            src={wp.url}
+                            src={wp.thumbUrl || wp.url}
                             alt={wp.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 bg-zinc-800"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                           
