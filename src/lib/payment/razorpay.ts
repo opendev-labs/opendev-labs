@@ -1,7 +1,4 @@
-/**
- * RAZORPAY & UPI PAYMENT GATEWAY CONTROLLER
- * Handles live subscription materialization, international checkout, and preferred India UPI payments.
- */
+import { SupportedCurrency, getRazorpaySubunitAmount } from './currencies';
 
 export const RAZORPAY_KEY_ID = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_TeHfR3oT5qWEH8';
 export const PREFERRED_UPI_ID = import.meta.env.VITE_PREFERRED_UPI_ID || '8169568582@kotakbank';
@@ -63,8 +60,8 @@ export function loadRazorpaySDK(): Promise<boolean> {
 }
 
 export interface RazorpayModalOptions {
-  amount: number; // in INR or USD
-  currency?: string; // 'INR' | 'USD'
+  amount: number; // in chosen currency unit
+  currency?: SupportedCurrency | string; // 'INR' | 'USD' | 'GBP' | 'EUR' | 'AED' | 'SGD' | 'JPY' | 'CAD' | 'AUD' | 'CHF'
   name?: string;
   email?: string;
   description?: string;
@@ -83,11 +80,14 @@ export async function openRazorpayCheckout(options: RazorpayModalOptions): Promi
     return;
   }
 
+  const activeCurrency = (options.currency || 'INR') as SupportedCurrency;
+  const subunitAmount = getRazorpaySubunitAmount(options.amount, activeCurrency);
+
   const razorpayOptions: any = {
     key: RAZORPAY_KEY_ID,
     name: 'opendev-labs',
-    amount: Math.round(options.amount * 100), // amount in smallest currency unit (paise / cents)
-    currency: options.currency || 'INR',
+    amount: subunitAmount, // amount in smallest currency unit (paise / cents / yen)
+    currency: activeCurrency,
     ...(options.description && { description: options.description }),
     prefill: {
       name: options.name || 'Client Partner',

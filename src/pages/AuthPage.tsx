@@ -102,26 +102,22 @@ export const AuthPage: React.FC = () => {
         const googleUser = result.user;
         loggedUserEmail = (googleUser.email || '').toLowerCase().trim();
 
-        // Persist real user into Firestore users collection
+        // Persist real user into Firestore users collection in background
         if (db && googleUser) {
-          try {
-            const isLeadDev = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
-            await setDoc(doc(db, "users", googleUser.uid), {
-              id: googleUser.uid,
-              name: googleUser.displayName || (googleUser.email ? googleUser.email.split('@')[0] : 'Google User'),
-              email: googleUser.email || '',
-              avatar: googleUser.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
-              role: isLeadDev ? 'developer' : 'user',
-              authMethod: 'google',
-              online: true,
-              lastSeen: serverTimestamp(),
-              joinedAt: serverTimestamp(),
-              team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
-              location: 'Mumbai, IN',
-            }, { merge: true });
-          } catch (fsErr) {
-            console.warn("Error saving user to Firestore:", fsErr);
-          }
+          const isLeadDev = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
+          setDoc(doc(db, "users", googleUser.uid), {
+            id: googleUser.uid,
+            name: googleUser.displayName || (googleUser.email ? googleUser.email.split('@')[0] : 'Google User'),
+            email: googleUser.email || '',
+            avatar: googleUser.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
+            role: isLeadDev ? 'developer' : 'user',
+            authMethod: 'google',
+            online: true,
+            lastSeen: serverTimestamp(),
+            joinedAt: serverTimestamp(),
+            team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
+            location: 'Mumbai, IN',
+          }, { merge: true }).catch(fsErr => console.warn("Error saving user to Firestore bg:", fsErr));
         }
 
         loginWithGoogle(
@@ -145,25 +141,21 @@ export const AuthPage: React.FC = () => {
       const googleProfile = await promptGoogleSignIn();
       loggedUserEmail = (googleProfile?.email || '').toLowerCase().trim();
       if (db && googleProfile) {
-        try {
-          const pseudoId = `gsi-${(googleProfile.email || '').replace(/[^a-zA-Z0-9]/g, '_')}`;
-          const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
-          await setDoc(doc(db, "users", pseudoId), {
-            id: pseudoId,
-            name: googleProfile.name || googleProfile.email.split('@')[0],
-            email: googleProfile.email,
-            avatar: googleProfile.picture || 'https://lh3.googleusercontent.com/a/default-user',
-            role: isLeadDev ? 'developer' : 'user',
-            authMethod: 'google',
-            online: true,
-            lastSeen: serverTimestamp(),
-            joinedAt: serverTimestamp(),
-            team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
-            location: 'Mumbai, IN',
-          }, { merge: true });
-        } catch (fsErr) {
-          console.warn("Error saving GSI user to Firestore:", fsErr);
-        }
+        const pseudoId = `gsi-${(googleProfile.email || '').replace(/[^a-zA-Z0-9]/g, '_')}`;
+        const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
+        setDoc(doc(db, "users", pseudoId), {
+          id: pseudoId,
+          name: googleProfile.name || googleProfile.email.split('@')[0],
+          email: googleProfile.email,
+          avatar: googleProfile.picture || 'https://lh3.googleusercontent.com/a/default-user',
+          role: isLeadDev ? 'developer' : 'user',
+          authMethod: 'google',
+          online: true,
+          lastSeen: serverTimestamp(),
+          joinedAt: serverTimestamp(),
+          team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
+          location: 'Mumbai, IN',
+        }, { merge: true }).catch(fsErr => console.warn("Error saving GSI user to Firestore bg:", fsErr));
       }
 
       loginWithGoogle(

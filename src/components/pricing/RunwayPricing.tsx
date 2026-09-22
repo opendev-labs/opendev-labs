@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X } from 'lucide-react';
+import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X, Globe, ChevronDown } from 'lucide-react';
 import { openRazorpayCheckout } from '../../lib/payment/razorpay';
+import { SupportedCurrency, SUPPORTED_CURRENCIES, convertFromUSD, formatCurrencyPrice } from '../../lib/payment/currencies';
 import { useClients } from '../../context/ClientContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,46 +16,25 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
   const navigate = useNavigate();
 
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annually'>('monthly');
-  const [currency, setCurrency] = useState<'INR' | 'USD'>('INR');
+  const [currency, setCurrency] = useState<SupportedCurrency>('USD');
   const [showQRModal, setShowQRModal] = useState(false);
   const [copiedUPI, setCopiedUPI] = useState(false);
 
-
-  // Maintenance & Retainer Plan Data
+  // Base Maintenance & Retainer Plans (Normalized to USD base)
   const maintenancePlans = [
     {
       id: 'essential_maintenance',
       name: 'Essential Maintenance',
+      shortName: 'Essential',
       subtitle: 'Basic Uptime & Maintenance',
       description: 'Daily database backups, 24/7 uptime monitoring, security patches & standard bug fixes.',
-      numINR_Monthly: 4000,
-      numINR_Annual: 40000,
-      numUSD_Monthly: 50,
-      numUSD_Annual: 500,
-      priceINR_Monthly: '₹4,000',
-      priceINR_Annual: '₹40,000',
-      priceUSD_Monthly: '$50',
-      priceUSD_Annual: '$500',
-      retainerINR_Monthly: 'Billed ₹4,000 / month',
-      retainerINR_Annual: 'Billed ₹40,000 / year • Save ₹8,000',
-      retainerUSD_Monthly: 'Billed $50 / month',
-      retainerUSD_Annual: 'Billed $500 / year • Save $100',
+      usdMonthly: 50,
+      usdAnnual: 500,
       credits: 'Daily Backups • 24/7 Monitoring',
-      buttonTextINR_Monthly: 'Select Essential (₹4,000/mo)',
-      buttonTextINR_Annual: 'Select Essential (₹40,000/yr)',
-      buttonTextUSD_Monthly: 'Select Essential ($50/mo)',
-      buttonTextUSD_Annual: 'Select Essential ($500/yr)',
       buttonVariant: 'outline',
       badge: 'Essential',
       highlightBorder: false,
-      featuresINR: [
-        'Daily automated database backups & snapshots',
-        '24/7 uptime monitoring & server response alerts',
-        'Security patch updates & SSL maintenance',
-        'Standard email & ticket support response',
-        'Annual billing discount: Save ₹8,000 / year',
-      ],
-      featuresUSD: [
+      features: [
         'Daily automated database backups & snapshots',
         '24/7 uptime monitoring & server response alerts',
         'Security patch updates & SSL maintenance',
@@ -65,36 +45,16 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
     {
       id: 'advanced_maintenance',
       name: 'Advanced Maintenance',
+      shortName: 'Advanced',
       subtitle: 'Full-Stack DB & Uptime Support',
       description: 'Firebase DB monitoring, Google Cloud Console auth updates, weekly backups & priority dev support.',
-      numINR_Monthly: 6000,
-      numINR_Annual: 64000,
-      numUSD_Monthly: 75,
-      numUSD_Annual: 800,
-      priceINR_Monthly: '₹6,000',
-      priceINR_Annual: '₹64,000',
-      priceUSD_Monthly: '$75',
-      priceUSD_Annual: '$800',
-      retainerINR_Monthly: 'Billed ₹6,000 / month',
-      retainerINR_Annual: 'Billed ₹64,000 / year • Save ₹8,000',
-      retainerUSD_Monthly: 'Billed $75 / month',
-      retainerUSD_Annual: 'Billed $800 / year • Save $100',
+      usdMonthly: 75,
+      usdAnnual: 800,
       credits: 'Firebase DB + Cloud Console Auth',
-      buttonTextINR_Monthly: 'Select Advanced (₹6,000/mo)',
-      buttonTextINR_Annual: 'Select Advanced (₹64,000/yr)',
-      buttonTextUSD_Monthly: 'Select Advanced ($75/mo)',
-      buttonTextUSD_Annual: 'Select Advanced ($800/yr)',
       buttonVariant: 'black',
       badge: 'Popular',
       highlightBorder: false,
-      featuresINR: [
-        'Everything in Essential + Priority Dev Availability',
-        'Firebase DB & Google Cloud Auth maintenance',
-        'Weekly code optimization & cache tuning',
-        'Priority support response within 2 hours',
-        'Annual billing discount: Save ₹8,000 / year',
-      ],
-      featuresUSD: [
+      features: [
         'Everything in Essential + Priority Dev Availability',
         'Firebase DB & Google Cloud Auth maintenance',
         'Weekly code optimization & cache tuning',
@@ -105,77 +65,37 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
     {
       id: 'pro_ai_maintenance',
       name: 'Pro AI Maintenance',
+      shortName: 'Pro AI',
       subtitle: 'GenAI Models & Autonomous Uptime',
-      description: '24/7 Gemini AI model tuning, agent workflow monitoring, sub-second latency checks & database scaling.',
-      numINR_Monthly: 8000,
-      numINR_Annual: 88000,
-      numUSD_Monthly: 100,
-      numUSD_Annual: 1100,
-      priceINR_Monthly: '₹8,000',
-      priceINR_Annual: '₹88,000',
-      priceUSD_Monthly: '$100',
-      priceUSD_Annual: '$1,100',
-      retainerINR_Monthly: 'Billed ₹8,000 / month',
-      retainerINR_Annual: 'Billed ₹88,000 / year • Save ₹8,000',
-      retainerUSD_Monthly: 'Billed $100 / month',
-      retainerUSD_Annual: 'Billed $1,100 / year • Save $100',
-      credits: 'Firebase + Gemini AI Agent Pipelines',
-      buttonTextINR_Monthly: 'Select Pro AI (₹8,000/mo)',
-      buttonTextINR_Annual: 'Select Pro AI (₹88,000/yr)',
-      buttonTextUSD_Monthly: 'Select Pro AI ($100/mo)',
-      buttonTextUSD_Annual: 'Select Pro AI ($1,100/yr)',
+      description: '24/7 Multi-AI model tuning (OpenRouter, Gemini, OpenAI, Claude), agent workflow monitoring & database scaling.',
+      usdMonthly: 100,
+      usdAnnual: 1100,
+      credits: 'OpenRouter, Gemini, OpenAI & Any LLM',
       buttonVariant: 'black',
       badge: 'Recommended',
       highlightBorder: true,
-      featuresINR: [
-        'Everything in Advanced + Gemini AI Agent Support',
+      features: [
+        'Everything in Advanced + Any AI Model Support',
+        'OpenRouter, Gemini, OpenAI, Claude & DeepSeek support',
         '24/7 AI model prompt tuning & vector store updates',
         'Sub-second latency checks & DB auto-scaling',
-        '1-on-1 direct developer support hotline',
-        'Annual billing discount: Save ₹8,000 / year',
-      ],
-      featuresUSD: [
-        'Everything in Advanced + Gemini AI Agent Support',
-        '24/7 AI model prompt tuning & vector store updates',
-        'Sub-second latency checks & DB auto-scaling',
-        '1-on-1 direct developer support hotline',
         'Annual billing discount: Save $100 / year',
       ],
     },
     {
       id: 'enterprise_maintenance',
       name: 'Enterprise Maintenance',
+      shortName: 'Enterprise',
       subtitle: 'Custom Architecture & SLA Retainer',
       description: 'Dedicated cloud infrastructure, custom API integrations, 99.99% SLA & immediate emergency response.',
-      numINR_Monthly: 10000,
-      numINR_Annual: 110000,
-      numUSD_Monthly: 125,
-      numUSD_Annual: 1350,
-      priceINR_Monthly: '₹10,000',
-      priceINR_Annual: '₹1,10,000',
-      priceUSD_Monthly: '$125',
-      priceUSD_Annual: '$1,350',
-      retainerINR_Monthly: 'Billed ₹10,000 / month',
-      retainerINR_Annual: 'Billed ₹1,10,000 / year • Save ₹10,000',
-      retainerUSD_Monthly: 'Billed $125 / month',
-      retainerUSD_Annual: 'Billed $1,350 / year • Save $150',
+      usdMonthly: 125,
+      usdAnnual: 1350,
       credits: 'Dedicated Architecture + 99.99% SLA',
-      buttonTextINR_Monthly: 'Select Enterprise (₹10,000/mo)',
-      buttonTextINR_Annual: 'Select Enterprise (₹1,10,000/yr)',
-      buttonTextUSD_Monthly: 'Select Enterprise ($125/mo)',
-      buttonTextUSD_Annual: 'Select Enterprise ($1,350/yr)',
       buttonVariant: 'blue',
       badge: 'Best value',
       pillTag: 'Enterprise Retainer',
       highlightBorder: true,
-      featuresINR: [
-        'Tailored full-stack SLA & dedicated cloud runner',
-        'Custom database schema & API webhook maintenance',
-        '99.99% Uptime Guarantee with SLA compliance',
-        'Dedicated Lead Architect (Yash Ramteke)',
-        'Annual billing discount: Save ₹10,000 / year',
-      ],
-      featuresUSD: [
+      features: [
         'Tailored full-stack SLA & dedicated cloud runner',
         'Custom database schema & API webhook maintenance',
         '99.99% Uptime Guarantee with SLA compliance',
@@ -191,18 +111,13 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
       return;
     }
 
-    const isINR = currency === 'INR';
     const isMonthly = billingCycle === 'monthly';
+    const baseUsd = isMonthly ? plan.usdMonthly : plan.usdAnnual;
+    const baseAmount = convertFromUSD(baseUsd, currency);
 
-    const baseAmount = isMonthly
-      ? (isINR ? plan.numINR_Monthly : plan.numUSD_Monthly)
-      : (isINR ? plan.numINR_Annual : plan.numUSD_Annual);
-
+    // 10% extra fee for Razorpay live gateway handling
     const amountWithFee = Math.round(baseAmount * 1.10);
-
-    const formattedFeeAmount = isINR
-      ? `₹${amountWithFee.toLocaleString('en-IN')}`
-      : `$${amountWithFee.toLocaleString('en-US')}`;
+    const formattedFeeAmount = formatCurrencyPrice(amountWithFee, currency);
 
     if (onSelectPlan) {
       onSelectPlan(plan.name);
@@ -213,7 +128,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
       currency: currency,
       name: user?.name || 'Client Partner',
       email: user?.email || 'opendev.office@gmail.com',
-      description: `OpenDev-Labs ${plan.name} (${billingCycle.toUpperCase()}) - ${formattedFeeAmount} (Includes 10% Gateway Fee)`,
+      description: `OpenDev-Labs ${plan.name} (${billingCycle.toUpperCase()}) - ${formattedFeeAmount} ${currency} (Includes 10% Gateway Fee)`,
       onSuccess: (response) => {
         notifyPayment({
           clientId: user?.id || 'client-temp',
@@ -227,10 +142,16 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
     });
   };
 
+  const getSavingsText = () => {
+    const maxSavingsUsd = 150;
+    const converted = convertFromUSD(maxSavingsUsd, currency);
+    return `Save up to ${formatCurrencyPrice(converted, currency)}/yr`;
+  };
+
   return (
     <div className="w-full bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans py-8 px-4 sm:px-6 lg:px-8 transition-colors">
       
-      {/* Top Billing Cycle & Currency Controls */}
+      {/* Top Billing Cycle & Multi-Currency Controls */}
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 mb-10 pb-6 border-b border-zinc-200 dark:border-zinc-800">
         
         {/* Monthly vs Annual Toggle Switcher */}
@@ -255,67 +176,93 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
           >
             <span>Annual Billing</span>
             <span className="px-2 py-0.5 rounded-full bg-emerald-500 text-white text-[10px] font-extrabold uppercase">
-              {currency === 'USD' ? 'Save up to $150/yr' : 'Save up to ₹10k/yr'}
+              {getSavingsText()}
             </span>
           </button>
         </div>
 
-        {/* Currency Selector */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs font-bold">
-            <button
-              onClick={() => setCurrency('USD')}
-              className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
-                currency === 'USD' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs' : 'text-zinc-500 hover:text-black dark:hover:text-white'
-              }`}
+        {/* 10-Currency International Selector */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-600 dark:text-zinc-400">
+            <Globe className="size-4 text-blue-600 dark:text-blue-400" />
+            <span className="hidden sm:inline">Currency:</span>
+          </div>
+
+          {/* Quick Pill Toggles for Common Currencies */}
+          <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold">
+            {(['USD', 'INR', 'EUR', 'GBP'] as SupportedCurrency[]).map((cCode) => (
+              <button
+                key={cCode}
+                onClick={() => setCurrency(cCode)}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  currency === cCode
+                    ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs'
+                    : 'text-zinc-500 hover:text-black dark:hover:text-white'
+                }`}
+              >
+                {cCode}
+              </button>
+            ))}
+          </div>
+
+          {/* Full Dropdown for all 10 Supported Currencies */}
+          <div className="relative">
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
+              aria-label="Select Payment Currency"
+              className="appearance-none bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white font-extrabold text-xs pl-3 pr-8 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
             >
-              USD ($)
-            </button>
-            <button
-              onClick={() => setCurrency('INR')}
-              className={`px-3 py-1 rounded-md transition-all cursor-pointer ${
-                currency === 'INR' ? 'bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs' : 'text-zinc-500 hover:text-black dark:hover:text-white'
-              }`}
-            >
-              INR (₹)
-            </button>
+              {SUPPORTED_CURRENCIES.map((c) => (
+                <option key={c.code} value={c.code} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium">
+                  {c.flag} {c.code} ({c.symbol.trim()}) - {c.name}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="size-3.5 text-zinc-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
+
       </div>
 
-      {/* Grid Layout - Cards & Buttons Aligned horizontally on exact same level */}
+      {/* Grid Layout - Cards & Buttons Aligned horizontally */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
         {maintenancePlans.map((plan) => {
-          const isINR = currency === 'INR';
           const isMonthly = billingCycle === 'monthly';
-
-          const priceDisplay = isMonthly
-            ? (isINR ? plan.priceINR_Monthly : plan.priceUSD_Monthly)
-            : (isINR ? plan.priceINR_Annual : plan.priceUSD_Annual);
+          const usdBase = isMonthly ? plan.usdMonthly : plan.usdAnnual;
+          const convertedPrice = convertFromUSD(usdBase, currency);
+          const priceDisplay = formatCurrencyPrice(convertedPrice, currency);
 
           const periodSuffix = isMonthly ? '/month' : '/year';
 
+          const usdSavings = (plan.usdMonthly * 12) - plan.usdAnnual;
+          const convertedSavings = convertFromUSD(usdSavings, currency);
+          const savingsDisplay = formatCurrencyPrice(convertedSavings, currency);
+
           const retainerDisplay = isMonthly
-            ? (isINR ? plan.retainerINR_Monthly : plan.retainerUSD_Monthly)
-            : (isINR ? plan.retainerINR_Annual : plan.retainerUSD_Annual);
+            ? `Billed ${priceDisplay} / month`
+            : `Billed ${priceDisplay} / year • Save ${savingsDisplay}`;
 
-          const buttonText = isMonthly
-            ? (isINR ? plan.buttonTextINR_Monthly : plan.buttonTextUSD_Monthly)
-            : (isINR ? plan.buttonTextINR_Annual : plan.buttonTextUSD_Annual);
+          const buttonText = `Select ${plan.shortName} (${priceDisplay}/${isMonthly ? 'mo' : 'yr'})`;
 
-          const activeFeatures = isINR ? plan.featuresINR : plan.featuresUSD;
+          const activeFeatures = plan.features.map((feature) => {
+            if (feature.includes('Save')) {
+              return `Annual billing discount: Save ${savingsDisplay} / year`;
+            }
+            return feature;
+          });
 
           return (
             <div
               key={plan.id}
-              className={`hero-glass-card rounded-2xl flex flex-col justify-between text-zinc-900 dark:text-zinc-100 transition-all duration-300 relative overflow-hidden h-full ${
+              className={`hero-glass-card rounded-2xl flex flex-col justify-between text-zinc-900 dark:text-zinc-100 transition-all duration-300 relative h-full hover:z-30 ${
                 plan.highlightBorder
                   ? 'border-2 border-blue-600 dark:border-blue-500 shadow-xl ring-4 ring-blue-500/10'
                   : 'hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm'
               }`}
             >
-              {/* Fixed Top Badge Bar for Equal Alignment */}
-              <div className="h-7 w-full shrink-0">
+              {/* Fixed Top Badge Bar */}
+              <div className="h-7 w-full shrink-0 overflow-hidden rounded-t-2xl">
                 {plan.badge === 'Popular' || plan.badge === 'Recommended' ? (
                   <div className="bg-black dark:bg-zinc-800 text-white text-[11px] font-extrabold uppercase tracking-wider h-full flex items-center justify-center">
                     {plan.badge}
@@ -336,7 +283,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
               {/* Card Body */}
               <div className="p-6 flex-1 flex flex-col justify-between">
                 <div>
-                  {/* Title Slot - Fixed Height */}
+                  {/* Title Slot */}
                   <div className="h-12 flex items-start justify-between gap-2 mb-1">
                     <h3 className="text-xl font-extrabold tracking-tight text-zinc-900 dark:text-white leading-tight">
                       {plan.name}
@@ -348,21 +295,21 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
                     )}
                   </div>
 
-                  {/* Subtitle Slot - Fixed Height */}
+                  {/* Subtitle Slot */}
                   <div className="h-6 flex items-center mb-2">
                     <p className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 truncate">
                       {plan.subtitle}
                     </p>
                   </div>
 
-                  {/* Description Slot - Fixed Height */}
+                  {/* Description Slot */}
                   <div className="h-12 flex items-start mb-5 overflow-hidden">
                     <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed line-clamp-2">
                       {plan.description}
                     </p>
                   </div>
 
-                  {/* Price Slot - Fixed Height */}
+                  {/* Price Slot */}
                   <div className="h-16 flex flex-col justify-center mb-4">
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
@@ -377,18 +324,18 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
                     </span>
                   </div>
 
-                  {/* Credits / Tech Info Slot - Fixed Height */}
-                  <div className="h-10 flex items-center gap-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-5 pb-3 border-b border-zinc-100 dark:border-zinc-800">
+                  {/* Credits / Tech Info Slot */}
+                  <div className="h-10 flex items-center gap-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-5 pb-3 border-b border-zinc-100 dark:border-zinc-800 relative z-20">
                     <span className="truncate">{plan.credits}</span>
-                    <div className="group relative inline-block cursor-pointer shrink-0">
+                    <div className="group relative inline-block cursor-pointer shrink-0 z-30">
                       <Info className="size-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors" />
-                      <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 hidden group-hover:block w-52 p-2 rounded-lg bg-zinc-900 text-white text-[10px] leading-tight shadow-xl z-50 pointer-events-none">
+                      <div className="absolute left-1/2 bottom-full mb-2 -translate-x-1/2 hidden group-hover:block w-60 p-2.5 rounded-xl bg-zinc-900 dark:bg-zinc-800 text-white text-[11px] font-normal leading-snug shadow-2xl z-50 pointer-events-none border border-zinc-700/80 text-center">
                         Active maintenance retainer includes automated backups, daily health checks & security updates.
                       </div>
                     </div>
                   </div>
 
-                  {/* Features List Slot - Min Height for Aligned Bullet Points */}
+                  {/* Features List Slot */}
                   <ul className="space-y-3 text-xs text-zinc-700 dark:text-zinc-300 font-medium mb-6 min-h-[160px]">
                     {activeFeatures.map((feature, idx) => (
                       <li key={idx} className="flex items-start gap-2.5">
@@ -401,7 +348,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
                   </ul>
                 </div>
 
-                {/* Equal Level Action Button at Bottom */}
+                {/* Action Button */}
                 <div className="pt-4 border-t border-zinc-100 dark:border-zinc-800/60 mt-auto">
                   <button
                     onClick={() => handleSelectCard(plan)}
@@ -422,7 +369,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
         })}
       </div>
 
-      {/* Single-Liner Zero-Fee UPI Payment Banner (Below Pricing Cards, Above Annual Savings / Tech Stack Cards) */}
+      {/* Single-Liner Zero-Fee UPI Payment Banner */}
       <div className="max-w-7xl mx-auto mt-8 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 dark:bg-amber-950/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm font-medium text-amber-900 dark:text-amber-200">
         <div className="flex items-center gap-2.5 text-center sm:text-left">
           <span className="text-base sm:text-lg">💡</span>
@@ -449,24 +396,28 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
         
         <div className="rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-6">
           <h4 className="text-sm font-extrabold text-zinc-900 dark:text-white flex items-center gap-2 mb-2">
-            <Layers className="size-4 text-blue-600 dark:text-blue-400" /> Annual Savings Benefit
+            <Layers className="size-4 text-blue-600 dark:text-blue-400" /> Annual Savings Benefit ({currency})
           </h4>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-            {currency === 'USD' ? (
-              <>
-                Essential ($50/mo): <span className="font-bold text-zinc-900 dark:text-white">$500/yr (Save $100)</span><br />
-                Advanced ($75/mo): <span className="font-bold text-zinc-900 dark:text-white">$800/yr (Save $100)</span><br />
-                Pro AI ($100/mo): <span className="font-bold text-zinc-900 dark:text-white">$1,100/yr (Save $100)</span><br />
-                Enterprise ($125/mo): <span className="font-bold text-zinc-900 dark:text-white">$1,350/yr (Save $150)</span>
-              </>
-            ) : (
-              <>
-                Essential (₹4k/mo): <span className="font-bold text-zinc-900 dark:text-white">₹40,000/yr (Save ₹8,000)</span><br />
-                Advanced (₹6k/mo): <span className="font-bold text-zinc-900 dark:text-white">₹64,000/yr (Save ₹8,000)</span><br />
-                Pro AI (₹8k/mo): <span className="font-bold text-zinc-900 dark:text-white">₹88,000/yr (Save ₹8,000)</span><br />
-                Enterprise (₹10k/mo): <span className="font-bold text-zinc-900 dark:text-white">₹1,10,000/yr (Save ₹10,000)</span>
-              </>
-            )}
+            Essential ({formatCurrencyPrice(convertFromUSD(50, currency), currency)}/mo):{' '}
+            <span className="font-bold text-zinc-900 dark:text-white">
+              {formatCurrencyPrice(convertFromUSD(500, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(100, currency), currency)})
+            </span>
+            <br />
+            Advanced ({formatCurrencyPrice(convertFromUSD(75, currency), currency)}/mo):{' '}
+            <span className="font-bold text-zinc-900 dark:text-white">
+              {formatCurrencyPrice(convertFromUSD(800, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(100, currency), currency)})
+            </span>
+            <br />
+            Pro AI ({formatCurrencyPrice(convertFromUSD(100, currency), currency)}/mo):{' '}
+            <span className="font-bold text-zinc-900 dark:text-white">
+              {formatCurrencyPrice(convertFromUSD(1100, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(100, currency), currency)})
+            </span>
+            <br />
+            Enterprise ({formatCurrencyPrice(convertFromUSD(125, currency), currency)}/mo):{' '}
+            <span className="font-bold text-zinc-900 dark:text-white">
+              {formatCurrencyPrice(convertFromUSD(1350, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(150, currency), currency)})
+            </span>
           </p>
         </div>
 
@@ -486,6 +437,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
             <Zap className="size-4 text-amber-500" /> Technology Stack
           </h4>
           <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
+            AI Models: <span className="font-bold text-zinc-900 dark:text-white">OpenRouter, Gemini, OpenAI, Claude & Any LLM</span><br />
             Database: <span className="font-bold text-zinc-900 dark:text-white">Firebase (Firestore/Realtime DB)</span><br />
             Auth: <span className="font-bold text-zinc-900 dark:text-white">Google Cloud Console / Firebase Auth</span><br />
             Hosting & Code: <span className="font-bold text-zinc-900 dark:text-white">Hostinger, Vercel, GitHub</span>
@@ -494,7 +446,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
 
       </div>
 
-      {/* UPI QR Code Modal Popup (Image itself is the right window, details on left) */}
+      {/* UPI QR Code Modal Popup */}
       {showQRModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
           <div className="bg-white dark:bg-zinc-900 rounded-3xl max-w-3xl w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 shadow-2xl relative my-auto flex flex-col md:flex-row items-stretch min-h-[480px]">
@@ -563,7 +515,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
               </div>
             </div>
 
-            {/* RIGHT SIDE: The QR Code Image itself as the Window */}
+            {/* RIGHT SIDE: The QR Code Image */}
             <div className="w-full md:w-1/2 bg-black flex items-center justify-center relative overflow-hidden p-2 sm:p-4">
               <img
                 src="/QR-code-for-Yash-Ramteke.png"

@@ -66,7 +66,11 @@ export function parsePrice(priceStr: string): number {
   return parseInt(clean, 10) || 0;
 }
 
-export function formatPrice(val: number): string {
+export function formatPrice(val: number, currency: 'USD' | 'INR' = 'USD'): string {
+  if (currency === 'USD') {
+    const usdVal = Math.round(val / 80);
+    return `$${usdVal.toLocaleString('en-US')}`;
+  }
   return `₹${val.toLocaleString('en-IN')}`;
 }
 
@@ -89,7 +93,8 @@ export function calculateTemplatePricing(
   oneTimePriceStr: string,
   monthlyRetainerStr: string,
   hasDomain: boolean,
-  hasDatabase: boolean
+  hasDatabase: boolean,
+  currency: 'USD' | 'INR' = 'USD'
 ): PricingCalculation {
   const baseOneTime = parsePrice(oneTimePriceStr);
   const baseRetainer = parsePrice(monthlyRetainerStr);
@@ -128,10 +133,10 @@ export function calculateTemplatePricing(
     baseRetainer,
     finalOneTime,
     finalRetainer,
-    finalOneTimeFormatted: formatPrice(finalOneTime),
-    finalRetainerFormatted: `${formatPrice(finalRetainer)}/mo`,
-    baseOneTimeFormatted: formatPrice(baseOneTime),
-    baseRetainerFormatted: `${formatPrice(baseRetainer)}/mo`,
+    finalOneTimeFormatted: formatPrice(finalOneTime, currency),
+    finalRetainerFormatted: `${formatPrice(finalRetainer, currency)}/mo`,
+    baseOneTimeFormatted: formatPrice(baseOneTime, currency),
+    baseRetainerFormatted: `${formatPrice(baseRetainer, currency)}/mo`,
     discountPercentage,
     retainerDiscountPercentage,
     isDiscounted: discountPercentage > 0 || retainerDiscountPercentage > 0,
@@ -148,7 +153,8 @@ export const TemplatesPage: React.FC = () => {
   const [bookingTemplate, setBookingTemplate] = useState<WebsiteTemplate | null>(null);
   const [projectCategory, setProjectCategory] = useState<'all' | 'production' | 'experimental'>('all');
 
-  // Configurator Toggles (Global Defaults)
+  // Configurator Toggles & Currency (Global Defaults)
+  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
   const [globalHasDomain, setGlobalHasDomain] = useState<boolean>(true);
   const [globalHasDatabase, setGlobalHasDatabase] = useState<boolean>(true);
 
@@ -340,6 +346,39 @@ export const TemplatesPage: React.FC = () => {
                 </button>
               </div>
             </div>
+
+            {/* Currency Switcher */}
+            <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto sm:ml-4 border-t sm:border-t-0 sm:border-l border-zinc-200 dark:border-zinc-800 pt-3 sm:pt-0 sm:pl-4">
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                Currency:
+              </span>
+              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold">
+                <button
+                  type="button"
+                  onClick={() => setCurrency('USD')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                    currency === 'USD'
+                      ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs"
+                      : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+                  )}
+                >
+                  USD ($)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCurrency('INR')}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
+                    currency === 'INR'
+                      ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs"
+                      : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+                  )}
+                >
+                  INR (₹)
+                </button>
+              </div>
+            </div>
           </div>
 
           {/* Configuration Discount Badge */}
@@ -418,7 +457,8 @@ export const TemplatesPage: React.FC = () => {
               template.oneTimePrice,
               template.monthlyRetainer,
               globalHasDomain,
-              globalHasDatabase
+              globalHasDatabase,
+              currency
             );
 
             return (
@@ -774,7 +814,8 @@ export const TemplatesPage: React.FC = () => {
             bookingTemplate.oneTimePrice,
             bookingTemplate.monthlyRetainer,
             modalHasDomain,
-            modalHasDatabase
+            modalHasDatabase,
+            currency
           );
 
           return (

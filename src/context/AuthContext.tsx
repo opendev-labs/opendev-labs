@@ -296,11 +296,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Seed default users to Firestore so the database is populated with real documents
         try {
           for (const u of DEFAULT_REGISTERED_USERS) {
-            await setDoc(doc(db, "users", u.id), {
+            const cleanDoc: Record<string, any> = {
               ...u,
               lastSeen: new Date().toISOString(),
               joinedAt: u.joinedAt || '2026-01-30',
-            }, { merge: true });
+            };
+            Object.keys(cleanDoc).forEach(key => cleanDoc[key] === undefined && delete cleanDoc[key]);
+            await setDoc(doc(db, "users", u.id), cleanDoc, { merge: true });
           }
         } catch (seedErr) {
           console.warn("Error seeding default users to Firestore:", seedErr);
@@ -378,7 +380,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         const cleanEmail = (firebaseUser.email || '').toLowerCase().trim();
         const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
@@ -395,16 +397,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           avatar: firebaseUser.photoURL || undefined,
         });
 
-        // Update presence in Firestore
+        // Non-blocking presence update in Firestore
         if (db) {
-          try {
-            await setDoc(doc(db, "users", firebaseUser.uid), {
-              online: true,
-              lastSeen: serverTimestamp(),
-            }, { merge: true });
-          } catch (e) {
-            console.warn("Presence update error:", e);
-          }
+          setDoc(doc(db, "users", firebaseUser.uid), {
+            online: true,
+            lastSeen: serverTimestamp(),
+          }, { merge: true }).catch(e => console.warn("Presence bg update error:", e));
         }
       }
     });
@@ -440,7 +438,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const loginWithGoogle = async (
+  const loginWithGoogle = (
     googleEmail = 'user@gmail.com',
     googleName = 'Google User',
     googleAvatar = 'https://lh3.googleusercontent.com/a/default-user'
@@ -453,31 +451,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;
     const nameToUse = googleName || (googleEmail.includes('@') ? googleEmail.split('@')[0] : 'Google User');
 
-    const updatedUserRecord: RegisteredUser = {
-      id: userId,
-      name: nameToUse,
-      email: googleEmail,
-      avatar: googleAvatar || 'https://lh3.googleusercontent.com/a/default-user',
-      joinedAt: existingRegistered?.joinedAt || new Date().toISOString().split('T')[0],
-      role: userRole,
-      clientId: existingRegistered?.clientId,
-      online: true,
-      authMethod: 'google',
-    };
-
-    // Update in Firestore
-    if (db) {
-      try {
-        await setDoc(doc(db, "users", userId), {
-          ...updatedUserRecord,
-          lastSeen: serverTimestamp(),
-          online: true,
-        }, { merge: true });
-      } catch (e) {
-        console.warn("loginWithGoogle Firestore update error:", e);
-      }
-    }
-
+    // Set state instantly for 0ms UI lag
     setUser({
       id: userId,
       name: nameToUse,
@@ -487,6 +461,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       authMethod: 'google',
       avatar: googleAvatar,
     });
+
+    const updatedUserRecord: RegisteredUser = {
+      id: userId,
+      name: nameToUse,
+      email: googleEmail,
+      avatar: googleAvatar || 'https://lh3.googleusercontent.com/a/default-user',
+      joinedAt: existingRegistered?.joinedAt || new Date().toISOString().split('T')[0],
+      role: userRole,
+      ...(existingRegistered?.clientId ? { clientId: existingRegistered.clientId } : {}),
+      online: true,
+      authMethod: 'google',
+    };
+
+    // Perform Firestore update asynchronously in background with clean fields (no undefined values)
+    if (db) {
+      const fsData: Record<string, any> = {
+        id: userId,
+        name: nameToUse,
+        email: googleEmail,
+        avatar: googleAvatar || 'https://lh3.googleusercontent.com/a/default-user',
+        joinedAt: existingRegistered?.joinedAt || new Date().toISOString().split('T')[0],
+        role: userRole,
+        online: true,
+        authMethod: 'google',
+        lastSeen: serverTimestamp(),
+      };
+      if (existingRegistered?.clientId) {
+        fsData.clientId = existingRegistered.clientId;
+      }
+
+      setDoc(doc(db, "users", userId), fsData, { merge: true }).catch(e => console.warn("loginWithGoogle bg update error:", e));
+    }
   };
 
   const convertRegisteredUserToClient = async (userId: string, clientId: string, clientName?: string) => {
