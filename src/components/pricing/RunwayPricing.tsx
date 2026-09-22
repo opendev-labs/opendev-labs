@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X, Globe, ChevronDown } from 'lucide-react';
+import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X, Globe, ChevronDown, Upload, MessageSquare, ExternalLink } from 'lucide-react';
 import { openRazorpayCheckout } from '../../lib/payment/razorpay';
 import { SupportedCurrency, SUPPORTED_CURRENCIES, convertFromUSD, formatCurrencyPrice } from '../../lib/payment/currencies';
 import { useClients } from '../../context/ClientContext';
@@ -19,6 +19,8 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
   const [currency, setCurrency] = useState<SupportedCurrency>('USD');
   const [showQRModal, setShowQRModal] = useState(false);
   const [copiedUPI, setCopiedUPI] = useState(false);
+  const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
+  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
 
   // Base Maintenance & Retainer Plans (Normalized to USD base)
   const maintenancePlans = [
@@ -504,14 +506,63 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
                 </div>
               </div>
 
-              {/* Account Holder Info Box */}
-              <div className="text-[11px] text-zinc-600 dark:text-zinc-400 leading-relaxed bg-zinc-50 dark:bg-zinc-950/80 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800/80">
-                <p className="font-extrabold text-zinc-900 dark:text-white text-xs mb-1">Account Holder Info:</p>
-                <p>Beneficiary: <span className="font-bold text-zinc-900 dark:text-white">Yash Shirish Ramteke</span></p>
-                <p>Bank: <span className="font-semibold text-zinc-800 dark:text-zinc-200">Kotak Mahindra Bank</span></p>
-                <p className="mt-2 pt-2 border-t border-zinc-200/60 dark:border-zinc-800/80 text-[10px] text-zinc-400">
-                  After payment, send screenshot/UTR to <span className="font-bold text-zinc-700 dark:text-zinc-300">opendev.office@gmail.com</span> or WhatsApp <span className="font-bold text-zinc-700 dark:text-zinc-300">+91 81695 68582</span>.
-                </p>
+              {/* Upload Screenshot to Verify & Direct WhatsApp Send */}
+              <div className="space-y-4 my-2">
+                <div>
+                  <label className="text-xs font-bold text-zinc-900 dark:text-white block mb-1.5 flex items-center justify-between">
+                    <span>Upload Screenshot to Verify:</span>
+                    <span className="text-[10px] text-zinc-400 font-normal">JPG, PNG or WebP</span>
+                  </label>
+                  <label className="relative flex items-center justify-center p-3 sm:p-4 border-2 border-dashed border-zinc-200 dark:border-zinc-700 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 cursor-pointer transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPaymentScreenshot(file);
+                          setScreenshotPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    {screenshotPreview ? (
+                      <div className="flex items-center gap-3 w-full">
+                        <img src={screenshotPreview} alt="Screenshot Preview" className="size-10 rounded-xl object-cover border border-emerald-500 shrink-0" />
+                        <div className="overflow-hidden flex-1 text-left">
+                          <span className="text-xs font-extrabold text-emerald-600 dark:text-emerald-400 block truncate flex items-center gap-1">
+                            <Check className="size-3.5" /> Screenshot Selected
+                          </span>
+                          <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate block">
+                            {paymentScreenshot?.name}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 underline shrink-0">Change</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-zinc-500 dark:text-zinc-400">
+                        <Upload className="size-4 text-emerald-500" />
+                        <span className="text-xs font-semibold">Click to select payment screenshot</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+                {/* Direct WhatsApp Send Button */}
+                <a
+                  href={`https://wa.me/918169568582?text=${encodeURIComponent(
+                    `Hello Yash (@opendev.labs)! 👋\n\nI have completed the direct zero-fee UPI payment of ${currency === 'INR' ? '₹' : '$'}${currency} to 8169568582@kotakbank.${
+                      paymentScreenshot ? `\n\nPayment Screenshot attached: ${paymentScreenshot.name}` : ''
+                    }\n\nPlease verify and activate my subscription.`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+                >
+                  <MessageSquare className="size-4" />
+                  <span>Send Direct to WhatsApp (@opendev.labs)</span>
+                  <ExternalLink className="size-3.5 opacity-80" />
+                </a>
               </div>
             </div>
 
