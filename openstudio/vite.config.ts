@@ -17,6 +17,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
     },
   },
+  // Vercel "Config" variables (without VITE_ prefix) are injected at build time.
+  // We map them here so import.meta.env.VITE_* still works in the browser code.
+  define: {
+    'import.meta.env.VITE_OPENROUTER_API_KEY': JSON.stringify(
+      process.env.VITE_OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY || ''
+    ),
+    'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(
+      process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''
+    ),
+  },
   build: {
     outDir: 'dist',
     sourcemap: false,
