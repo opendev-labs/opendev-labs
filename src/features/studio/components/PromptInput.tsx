@@ -25,12 +25,22 @@ export function PromptInput({ onSendMessage, disabled, selectedModelId, onModelC
     }
   }, [prompt]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (prompt.trim() && !disabled) {
-      onSendMessage(prompt);
-      setPrompt('');
-    }
+  const isSubmittingRef = useRef(false);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (isSubmittingRef.current || disabled) return;
+    const trimmed = prompt.trim();
+    if (!trimmed) return;
+
+    isSubmittingRef.current = true;
+    setPrompt('');
+    onSendMessage(trimmed);
+
+    // Keep locked for 600ms to guarantee no double-dispatch from Enter + form submit
+    setTimeout(() => {
+      isSubmittingRef.current = false;
+    }, 600);
   };
 
   const handleModelSelect = (modelId: string) => {
@@ -55,7 +65,8 @@ export function PromptInput({ onSendMessage, disabled, selectedModelId, onModelC
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                handleSubmit(e);
+                e.stopPropagation();
+                handleSubmit();
               }
             }}
             placeholder="Describe what you want to build..."
@@ -116,13 +127,6 @@ export function PromptInput({ onSendMessage, disabled, selectedModelId, onModelC
               <ArrowUpIcon className="h-3.5 w-3.5" />
             </button>
           </div>
-        </div>
-
-        {/* OPENSTUDIO BRANDING SUBTITLE */}
-        <div className="mt-1.5 flex justify-center">
-          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest text-center">
-            OpenStudio AI Engine · Build full stack apps instantly
-          </span>
         </div>
       </form>
     </div>

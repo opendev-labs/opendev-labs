@@ -105,9 +105,9 @@ export function ChatSessionView({
 
     function onMouseMove(mouseMoveEvent: MouseEvent) {
       if (!isResizingRef.current) return;
-      const newWidth = startWidth + mouseMoveEvent.clientX - startPosition;
+      const newWidth = startWidth - (mouseMoveEvent.clientX - startPosition);
       const minWidth = 300;
-      const maxWidth = 550;
+      const maxWidth = 700;
       if (newWidth >= minWidth && newWidth <= maxWidth) {
         setChatPanelWidth(newWidth);
       }
@@ -223,11 +223,48 @@ export function ChatSessionView({
       </header>
 
       {/* 🏗️ MAIN WORKSPACE AREA */}
-      <div className="flex-1 flex min-h-0 relative">
-        {/* CHAT PANEL */}
+      <div className="flex-1 flex min-h-0 relative overflow-hidden">
+        {/* CODE / PREVIEW PANEL (CENTER / MAIN) */}
+        <AnimatePresence>
+          {isCodeViewVisible && (
+            <motion.div
+              className="flex-1 h-full bg-[#09090b] relative overflow-hidden min-w-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="h-full">
+                <CodeView
+                  session={session}
+                  setActiveFile={setActiveFile}
+                  onFileContentChange={onFileContentChange}
+                  generationInfo={generationInfo}
+                  onAddFileOrFolder={onAddFileOrFolder}
+                  onDeleteFileOrFolder={onDeleteFileOrFolder}
+                  onRenameFileOrFolder={onRenameFileOrFolder}
+                  activeTab={activeTab}
+                  onFixError={(prompt: string) => onSendMessage(prompt)}
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* SUBTLE RESIZER */}
+        {isCodeViewVisible && (
+          <div
+            onMouseDown={startResizing}
+            className="relative w-[6px] h-full cursor-col-resize bg-zinc-900 hover:bg-[#f02050] transition-colors flex-shrink-0 z-30 select-none"
+          >
+            <div className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize z-10" />
+          </div>
+        )}
+
+        {/* CHAT PANEL (RIGHT SIDE) */}
         <motion.div
           ref={chatViewRef}
-          className="h-full bg-[#09090b] overflow-hidden relative border-r border-zinc-800/60"
+          className="h-full bg-[#09090b] overflow-hidden relative border-l border-zinc-800/60 shrink-0"
           initial={false}
           animate={{ width: isCodeViewVisible ? `${chatPanelWidth}px` : '100%' }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
@@ -243,42 +280,6 @@ export function ChatSessionView({
             />
           </div>
         </motion.div>
-
-        {/* CODE / PREVIEW PANEL */}
-        <AnimatePresence>
-          {isCodeViewVisible && (
-            <>
-              {/* SUBTLE RESIZER */}
-              <div
-                onMouseDown={startResizing}
-                className="relative w-[6px] h-full cursor-col-resize bg-zinc-900 hover:bg-[#f02050] transition-colors flex-shrink-0 z-30"
-              >
-                <div className="absolute inset-y-0 -left-1 -right-1 cursor-col-resize z-10" />
-              </div>
-
-              <motion.div
-                className="flex-1 h-full bg-[#09090b] relative overflow-hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="h-full">
-                  <CodeView
-                    session={session}
-                    setActiveFile={setActiveFile}
-                    onFileContentChange={onFileContentChange}
-                    generationInfo={generationInfo}
-                    onAddFileOrFolder={onAddFileOrFolder}
-                    onDeleteFileOrFolder={onDeleteFileOrFolder}
-                    onRenameFileOrFolder={onRenameFileOrFolder}
-                    activeTab={activeTab}
-                  />
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Deploy Dialog */}
