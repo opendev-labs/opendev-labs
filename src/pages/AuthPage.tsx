@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import {
+  GoogleAuthProvider,
+  GithubAuthProvider,
+  signInWithPopup,
+} from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
 import { promptGoogleSignIn } from '../services/googleAuth';
@@ -9,18 +13,11 @@ import {
   Eye,
   EyeOff,
   ShieldCheck,
-  UserCheck,
-  Building2,
   ArrowRight,
-  CheckSquare,
-  Square,
-  Lock,
   Mail,
-  Sparkles,
-  CheckCircle2,
-  X,
   Sun,
-  Moon
+  Moon,
+  Phone,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useClients } from '../context/ClientContext';
@@ -29,6 +26,9 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 import { AirplaneAnimation } from '../components/ui/AirplaneAnimation';
+
+// ── Social button types ─────────────────────────────────────────────────────
+type SocialMethod = 'google' | 'github' | 'email' | 'phone';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -39,48 +39,54 @@ export const AuthPage: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [activeMethod, setActiveMethod] = useState<SocialMethod | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const handlePostLogin = (email: string) => {
+    const clean = email.toLowerCase().trim();
+    const isAdmin =
+      clean === 'opendev-labs.office@gmail.com' ||
+      clean === 'opendev.office@gmail.com';
+    const matched = clients.find((c) => c.email.toLowerCase() === clean);
+    navigate(isAdmin ? '/dashboard' : matched ? '/client/portal' : '/client/profile');
+  };
+
+  // ── Email/Password admin submit ──────────────────────────────────────────
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthenticating(true);
     setErrorMessage('');
-
     setTimeout(() => {
       if (isAdminMode) {
-        // Validate Admin credentials (username/email & password)
-        const validAdminEmails = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
-        if (validAdminEmails.includes(email.trim().toLowerCase()) && password.length >= 4) {
+        const valid = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
+        if (valid.includes(email.trim().toLowerCase()) && password.length >= 4) {
           loginAsDeveloper();
           navigate('/dashboard');
         } else {
-          setErrorMessage('Invalid admin username or password. Use registered studio credentials.');
+          setErrorMessage('Invalid admin username or password.');
         }
       } else {
-        const cleanInput = email.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        
-        // Search client by domain name, email, or clientCode
-        const foundClient = clients.find(
-          c => (c.domain && c.domain.toLowerCase() === cleanInput) ||
-               (c.email.toLowerCase() === cleanInput) ||
-               (c.clientCode && c.clientCode.toLowerCase() === cleanInput)
+        const clean = email.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+        const found = clients.find(
+          (c) =>
+            (c.domain && c.domain.toLowerCase() === clean) ||
+            c.email.toLowerCase() === clean ||
+            (c.clientCode && c.clientCode.toLowerCase() === clean)
         );
-
-        if (foundClient) {
-          // Check password if provided
-          if (password && foundClient.password && foundClient.password !== password) {
-            setErrorMessage('Invalid password for this domain. Please check your credentials.');
+        if (found) {
+          if (password && found.password && found.password !== password) {
+            setErrorMessage('Invalid password for this domain.');
             setIsAuthenticating(false);
             return;
           }
-
-          loginAsClient(foundClient.id, foundClient.name, foundClient.email);
+          loginAsClient(found.id, found.name, found.email);
           navigate('/client/portal');
         } else {
-          loginWithGoogle(cleanInput, cleanInput.split('@')[0]);
+          loginWithGoogle(clean, clean.split('@')[0]);
           navigate('/client/profile');
         }
       }
@@ -88,114 +94,91 @@ export const AuthPage: React.FC = () => {
     }, 400);
   };
 
-  const triggerRealGoogleAuth = async () => {
+  // ── Google Sign-In ───────────────────────────────────────────────────────
+  const handleGoogleAuth = async () => {
     setIsAuthenticating(true);
     setErrorMessage('');
     try {
-      let loggedUserEmail = '';
-
-      // 1. Try Firebase Auth popup if Firebase auth is initialized
       if (auth) {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await signInWithPopup(auth, provider);
-        const googleUser = result.user;
-        loggedUserEmail = (googleUser.email || '').toLowerCase().trim();
-
-        // Persist real user into Firestore users collection in background
-        if (db && googleUser) {
-          const isLeadDev = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
-          setDoc(doc(db, "users", googleUser.uid), {
-            id: googleUser.uid,
-            name: googleUser.displayName || (googleUser.email ? googleUser.email.split('@')[0] : 'Google User'),
-            email: googleUser.email || '',
-            avatar: googleUser.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
+        const gu = result.user;
+        const email = (gu.email || '').toLowerCase().trim();
+        const isLeadDev = email === 'opendev-labs.office@gmail.com' || email === 'opendev.office@gmail.com';
+        if (db) {
+          setDoc(doc(db, 'users', gu.uid), {
+            id: gu.uid,
+            name: gu.displayName || email.split('@')[0],
+            email: gu.email || '',
+            avatar: gu.photoURL || '',
             role: isLeadDev ? 'developer' : 'user',
             authMethod: 'google',
             online: true,
             lastSeen: serverTimestamp(),
             joinedAt: serverTimestamp(),
-            team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
-            location: 'Mumbai, IN',
-          }, { merge: true }).catch(fsErr => console.warn("Error saving user to Firestore bg:", fsErr));
+          }, { merge: true }).catch(() => {});
         }
-
-        loginWithGoogle(
-          googleUser.email || undefined,
-          googleUser.displayName || undefined,
-          googleUser.photoURL || undefined
-        );
-
-        // Check if existing user is already a converted client
-        const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
-        const isAdminUser = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
-        if (matchedClient || isAdminUser) {
-          navigate(isAdminUser ? '/dashboard' : '/client/portal');
-        } else {
-          navigate('/client/profile');
-        }
+        loginWithGoogle(gu.email || undefined, gu.displayName || undefined, gu.photoURL || undefined);
+        handlePostLogin(email);
         return;
       }
-
-      // 2. Direct Google Identity Services (GSI) OAuth 2.0 popup
-      const googleProfile = await promptGoogleSignIn();
-      loggedUserEmail = (googleProfile?.email || '').toLowerCase().trim();
-      if (db && googleProfile) {
-        const pseudoId = `gsi-${(googleProfile.email || '').replace(/[^a-zA-Z0-9]/g, '_')}`;
-        const isLeadDev = loggedUserEmail === 'opendev.office@gmail.com';
-        setDoc(doc(db, "users", pseudoId), {
-          id: pseudoId,
-          name: googleProfile.name || googleProfile.email.split('@')[0],
-          email: googleProfile.email,
-          avatar: googleProfile.picture || 'https://lh3.googleusercontent.com/a/default-user',
-          role: isLeadDev ? 'developer' : 'user',
-          authMethod: 'google',
-          online: true,
-          lastSeen: serverTimestamp(),
-          joinedAt: serverTimestamp(),
-          team: isLeadDev ? 'OpenDev Studio Executive' : 'Google Auth Member',
-          location: 'Mumbai, IN',
-        }, { merge: true }).catch(fsErr => console.warn("Error saving GSI user to Firestore bg:", fsErr));
-      }
-
-      loginWithGoogle(
-        googleProfile.email,
-        googleProfile.name,
-        googleProfile.picture
-      );
-
-      const matchedClient = clients.find(c => c.email.toLowerCase() === loggedUserEmail);
-      const isAdminUser = loggedUserEmail === 'opendev-labs.office@gmail.com' || loggedUserEmail === 'opendev.office@gmail.com';
-      if (matchedClient || isAdminUser) {
-        navigate(isAdminUser ? '/dashboard' : '/client/portal');
-      } else {
-        navigate('/client/profile');
-      }
+      // fallback GSI
+      const gp = await promptGoogleSignIn();
+      loginWithGoogle(gp.email, gp.name, gp.picture);
+      handlePostLogin(gp.email);
     } catch (err: any) {
-      console.error('Google Auth Error:', err);
-      if (err?.message && !err.message.includes('closed_by_user')) {
-        setErrorMessage(err.message || 'Google Sign-In failed. Please try again.');
+      if (!err?.message?.includes('closed_by_user')) {
+        setErrorMessage(err?.message || 'Google Sign-In failed.');
       }
     } finally {
       setIsAuthenticating(false);
     }
   };
 
+  // ── GitHub Sign-In ───────────────────────────────────────────────────────
+  const handleGithubAuth = async () => {
+    setIsAuthenticating(true);
+    setErrorMessage('');
+    try {
+      if (!auth) throw new Error('Firebase not initialised');
+      const provider = new GithubAuthProvider();
+      provider.addScope('user:email');
+      const result = await signInWithPopup(auth, provider);
+      const gu = result.user;
+      const email = (gu.email || '').toLowerCase().trim();
+      if (db) {
+        setDoc(doc(db, 'users', gu.uid), {
+          id: gu.uid,
+          name: gu.displayName || email.split('@')[0],
+          email: gu.email || '',
+          avatar: gu.photoURL || '',
+          role: 'user',
+          authMethod: 'github',
+          online: true,
+          lastSeen: serverTimestamp(),
+          joinedAt: serverTimestamp(),
+        }, { merge: true }).catch(() => {});
+      }
+      loginWithGoogle(gu.email || undefined, gu.displayName || undefined, gu.photoURL || undefined);
+      handlePostLogin(email);
+    } catch (err: any) {
+      if (!err?.message?.includes('closed_by_user')) {
+        setErrorMessage(err?.message || 'GitHub Sign-In failed.');
+      }
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
-      
-      {/* 2D Live Canvas Background */}
+
+      {/* Canvas bg */}
       <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" particleCount={40} />
 
-      {/* TOP LEFT CORNER: Back to Home Button */}
-      <Link
-        to="/"
-        className="absolute top-3 left-3 sm:top-6 sm:left-6 z-30 inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-2 rounded-full bg-black/50 hover:bg-black/70 text-white text-[11px] sm:text-xs font-bold border border-white/20 backdrop-blur-md transition-all shadow-md hover:scale-105"
-      >
-        ← Back to Home
-      </Link>
-
-      {/* TOP RIGHT CORNER: Dark Mode Icon Switch */}
+      {/* Theme toggle — top right */}
       <button
         onClick={toggleTheme}
         className="absolute top-3 right-3 sm:top-6 sm:right-6 z-30 size-7 sm:size-9 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 flex items-center justify-center hover:bg-white dark:hover:bg-zinc-800 backdrop-blur-md transition-all shadow-md hover:scale-105"
@@ -209,207 +192,275 @@ export const AuthPage: React.FC = () => {
         )}
       </button>
 
-      {/* TOP / UPPER PORTION (Exact 50% Height on Mobile, Full Height on Desktop with 3D Airplane Animation) */}
+      {/* ── LEFT: Hero panel ─────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full h-[50vh] lg:h-full lg:flex-1 relative p-4 sm:p-6 lg:p-10 flex flex-col justify-end items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0 overflow-hidden bg-zinc-950"
+        className="w-full h-[50vh] lg:h-full lg:flex-1 relative p-4 sm:p-6 lg:p-10 flex flex-col justify-between items-start z-10 border-b lg:border-b-0 lg:border-r border-zinc-200 dark:border-zinc-800 shrink-0 overflow-hidden bg-zinc-950"
       >
         <AirplaneAnimation />
 
-        {/* Company Logo at Bottom Left of Image Area */}
-        <div className="z-10 flex items-center pt-4 lg:pt-0 relative">
-          <Link to="/" className="flex items-center gap-2 sm:gap-3 group">
-            <img
-              src="/logo-icon.webp"
-              alt="OpenDev-Labs Logo"
-              className="h-10 sm:h-16 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-            <span className="font-extrabold text-xl sm:text-4xl text-white tracking-tight drop-shadow-lg">
-              opendev<span className="text-blue-400">-labs</span>
-            </span>
-          </Link>
+        {/* ★ BRAND — top-left of hero, clicking = back to home */}
+        <Link
+          to="/"
+          className="relative z-10 flex items-center gap-2 sm:gap-3 group"
+          title="Back to opendev-labs.com"
+        >
+          <img
+            src="/logo-icon.webp"
+            alt="OpenDev-Labs Logo"
+            className="h-8 sm:h-11 w-auto object-contain drop-shadow-lg transition-transform group-hover:scale-105"
+            onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+          />
+          <span className="font-extrabold text-lg sm:text-2xl text-white tracking-tight drop-shadow-lg">
+            opendev<span className="text-blue-400">-labs</span>
+          </span>
+          <span className="text-zinc-500 text-xs hidden sm:inline ml-1 group-hover:text-zinc-300 transition-colors">← home</span>
+        </Link>
+
+        {/* bottom tagline on desktop */}
+        <div className="hidden lg:block relative z-10">
+          <p className="text-zinc-400 text-sm font-medium">
+            Enterprise software, client portals & AI products.
+          </p>
         </div>
-      </motion.div>      {/* BOTTOM / LOWER PORTION (Exact 50% Height on Mobile, Side Panel on Desktop) */}
+      </motion.div>
+
+      {/* ── RIGHT: Auth panel ─────────────────────────────────────────────── */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full h-[50vh] lg:h-full lg:w-[400px] xl:w-[440px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-10 flex flex-col justify-between items-center z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl overflow-y-auto lg:overflow-visible"
+        className="w-full h-[50vh] lg:h-full lg:w-[420px] xl:w-[460px] shrink-0 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 p-4 sm:p-6 lg:p-10 flex flex-col justify-between items-center z-10 relative border-l border-zinc-200 dark:border-zinc-800/80 shadow-2xl overflow-y-auto"
       >
-        {/* 1. Mode Switcher Pill - PINNED AT TOP (Fixed position, zero shift on toggle) */}
+        {/* Mode tab pill */}
         <div className="w-full max-w-sm flex justify-center shrink-0 pt-1 sm:pt-2 lg:pt-4">
           <div className="inline-flex p-0.5 sm:p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
             <button
               type="button"
-              onClick={() => {
-                setIsAdminMode(false);
-                setEmail('');
-              }}
+              onClick={() => { setIsAdminMode(false); setEmail(''); setActiveMethod(null); }}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                 !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
             >
-              Client Gateway
+              Sign In
             </button>
             <button
               type="button"
-              onClick={() => {
-                setIsAdminMode(true);
-                setEmail('opendev-labs.office@gmail.com');
-              }}
+              onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); setActiveMethod(null); }}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                 isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
             >
-              Admin Sign In
+              Admin
             </button>
           </div>
         </div>
-        
-        {/* 2. Main Form Content - VERTICALLY CENTERED IN THE MIDDLE OF RIGHT SIDE */}
-        <div className="w-full max-w-sm my-auto py-2 flex flex-col justify-center">
+
+        {/* ── MAIN CONTENT ─────────────────────────────────────────────── */}
+        <div className="w-full max-w-sm my-auto py-2 flex flex-col gap-3">
+
+          <div className="text-center mb-1">
+            <h1 className="text-lg font-extrabold text-zinc-900 dark:text-white tracking-tight">
+              {isAdminMode ? 'Admin Sign In' : 'Welcome back'}
+            </h1>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              {isAdminMode ? 'Studio admin access only' : 'Choose how you want to sign in'}
+            </p>
+          </div>
+
+          {/* Error */}
           {errorMessage && (
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-3 p-2 sm:p-3 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-[11px] sm:text-xs font-bold text-center"
+              className="p-2.5 rounded-xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-[11px] font-semibold text-center"
             >
               {errorMessage}
             </motion.div>
           )}
 
-          {/* CLIENT GOOGLE SIGN-IN MODE */}
+          {/* ── CLIENT MODE: Social sign-in grid ───────────────────────── */}
           {!isAdminMode ? (
-            <div className="space-y-2 sm:space-y-3 text-center">
+            <div className="space-y-2.5">
+
+              {/* Google */}
               <button
-                onClick={triggerRealGoogleAuth}
+                onClick={handleGoogleAuth}
                 disabled={isAuthenticating}
-                type="button"
-                className="gsi-material-button"
-              >
-                <div className="gsi-material-button-state"></div>
-                <div className="gsi-material-button-content-wrapper">
-                  {isAuthenticating ? (
-                    <div className="size-4 border-2 border-zinc-900 dark:border-white border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <div className="gsi-material-button-icon">
-                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" xmlnsXlink="http://www.w3.org/1999/xlink" style={{ display: 'block' }}>
-                          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"></path>
-                          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"></path>
-                          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"></path>
-                          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"></path>
-                          <path fill="none" d="M0 0h48v48H0z"></path>
-                        </svg>
-                      </div>
-                      <span className="gsi-material-button-contents">Sign in with Google</span>
-                      <span style={{ display: 'none' }}>Sign in with Google</span>
-                    </>
-                  )}
-                </div>
-              </button>
-
-              <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 leading-tight font-medium pt-0.5">
-                Sign in with your Google account to access your live webapp portal.
-              </p>
-            </div>
-          ) : (
-            /* ADMIN SIGN-IN FORM */
-            <form onSubmit={handleSubmit} className="space-y-2.5 text-xs">
-              <div className="space-y-1">
-                <Input
-                  type="email"
-                  placeholder="Admin Email (opendev-labs.office@gmail.com)"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white shadow-xs font-medium"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex items-center justify-between">
-                  <label className="font-bold text-zinc-700 dark:text-zinc-300 text-[11px] sm:text-xs">Password</label>
-                  <a href="mailto:opendev.office@gmail.com" className="text-[10px] sm:text-[11px] font-semibold text-zinc-500 hover:text-black dark:hover:text-white">
-                    Forgot Password?
-                  </a>
-                </div>
-                <div className="relative">
-                  <Input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••••••"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    className="h-9 sm:h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl focus:border-zinc-900 dark:focus:border-white pr-10 shadow-xs font-medium"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 sm:top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
-                  >
-                    {showPassword ? <EyeOff className="size-3.5 sm:size-4" /> : <Eye className="size-3.5 sm:size-4" />}
-                  </button>
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isAuthenticating}
-                className="w-full h-9 sm:h-11 text-xs font-extrabold rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 shadow-md transition-all mt-1 flex items-center justify-center gap-2"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60"
               >
                 {isAuthenticating ? (
-                  <div className="size-3.5 sm:size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-700 rounded-full animate-spin" />
                 ) : (
-                  <>
-                    <span>Sign In as Admin</span>
-                    <ArrowRight className="size-3.5 sm:size-4" />
-                  </>
+                  <svg className="w-5 h-5 shrink-0" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
                 )}
+                <span>Continue with Google</span>
+              </button>
+
+              {/* GitHub */}
+              <button
+                onClick={handleGithubAuth}
+                disabled={isAuthenticating}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60"
+              >
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                </svg>
+                <span>Continue with GitHub</span>
+              </button>
+
+              {/* Divider */}
+              <div className="flex items-center gap-3 py-1">
+                <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+                <span className="text-[10px] text-zinc-400 font-medium">or</span>
+                <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
+              </div>
+
+              {/* Email */}
+              {activeMethod === 'email' ? (
+                <motion.form
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onSubmit={handleSubmit}
+                  className="space-y-2"
+                >
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl"
+                    required autoFocus
+                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl pr-10"
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                      {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setActiveMethod(null)}
+                      className="flex-1 h-10 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                      Back
+                    </button>
+                    <Button type="submit" disabled={isAuthenticating}
+                      className="flex-1 h-10 text-xs font-extrabold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5">
+                      {isAuthenticating
+                        ? <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                        : <><span>Sign In</span><ArrowRight className="size-3.5" /></>}
+                    </Button>
+                  </div>
+                </motion.form>
+              ) : (
+                <button
+                  onClick={() => setActiveMethod('email')}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98]"
+                >
+                  <Mail className="w-5 h-5 shrink-0 text-zinc-500" />
+                  <span>Continue with Email</span>
+                </button>
+              )}
+
+              {/* Phone (placeholder — Firebase phone auth requires server-side setup) */}
+              {activeMethod === 'phone' ? (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center space-y-2">
+                  <p className="text-xs text-zinc-500">Enter your mobile number</p>
+                  <Input
+                    type="tel"
+                    placeholder="+91 98765 43210"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="h-10 text-xs rounded-xl bg-white dark:bg-zinc-900"
+                    autoFocus
+                  />
+                  <p className="text-[10px] text-zinc-400">OTP verification coming soon</p>
+                  <button onClick={() => setActiveMethod(null)}
+                    className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white underline">Cancel</button>
+                </motion.div>
+              ) : (
+                <button
+                  onClick={() => setActiveMethod('phone')}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98]"
+                >
+                  <Phone className="w-5 h-5 shrink-0 text-zinc-500" />
+                  <span>Continue with Phone</span>
+                </button>
+              )}
+            </div>
+
+          ) : (
+            /* ── ADMIN SIGN-IN FORM ───────────────────────────────────── */
+            <form onSubmit={handleSubmit} className="space-y-2.5 text-xs">
+              <Input
+                type="email"
+                placeholder="Admin Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl"
+                required
+              />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl pr-10"
+                  required
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                  {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                </button>
+              </div>
+              <Button type="submit" disabled={isAuthenticating}
+                className="w-full h-11 text-xs font-extrabold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-2">
+                {isAuthenticating
+                  ? <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                  : <><span>Sign In as Admin</span><ArrowRight className="size-4" /></>}
               </Button>
             </form>
           )}
         </div>
 
-        {/* 3. Bottom Footer Section (Positioned at bottom of right side panel) */}
-        <div className="w-full max-w-sm pt-2 sm:pt-4 space-y-1.5 sm:space-y-3 text-center shrink-0">
+        {/* Footer */}
+        <div className="w-full max-w-sm pt-2 space-y-2 text-center shrink-0">
           {!isAdminMode && (
-            <div className="flex items-center justify-center gap-1.5 text-[11px] sm:text-xs font-medium text-zinc-500 dark:text-zinc-400">
-              <ShieldCheck className="size-3.5 sm:size-4 text-emerald-500" />
-              <span>Secure Google OAuth 2.0 Access</span>
+            <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-zinc-400">
+              <ShieldCheck className="size-3.5 text-emerald-500" />
+              <span>Secure · No passwords stored</span>
             </div>
           )}
-
-          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] sm:text-xs text-zinc-500 font-medium">
+          <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-500">
             {isAdminMode ? (
               <span>
-                Looking for client project portal?{' '}
-                <button
-                  onClick={() => {
-                    setIsAdminMode(false);
-                    setEmail('');
-                  }}
-                  className="font-bold text-black dark:text-white hover:underline transition-colors"
-                >
-                  Sign In as Client Partner
+                Not admin?{' '}
+                <button onClick={() => { setIsAdminMode(false); setEmail(''); }}
+                  className="font-bold text-black dark:text-white hover:underline">
+                  Sign in as user
                 </button>
               </span>
             ) : (
               <span>
-                Are you an agency administrator?{' '}
-                <button
-                  onClick={() => {
-                    setIsAdminMode(true);
-                    setEmail('opendev-labs.office@gmail.com');
-                  }}
-                  className="font-bold text-black dark:text-white hover:underline transition-colors"
-                >
-                  Sign In to Studio Admin
+                Agency admin?{' '}
+                <button onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); }}
+                  className="font-bold text-black dark:text-white hover:underline">
+                  Admin sign in
                 </button>
               </span>
             )}
