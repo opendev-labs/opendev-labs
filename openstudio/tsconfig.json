@@ -11,16 +11,16 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "strict": true,
+    "strict": false,
     "baseUrl": ".",
     "paths": {
-      "@studio/*": ["../src/features/studio/*"],
-      "@lib/*": ["../src/lib/*"],
-      "@context/*": ["../src/context/*"],
-      "@components/*": ["../src/components/*"],
-      "@services/*": ["../src/services/*"],
-      "@/*": ["../src/*"]
+      "@studio/*": ["./studio/*"],
+      "@lib/*": ["./lib/*"],
+      "@context/*": ["./context/*"],
+      "@components/*": ["./components/*"],
+      "@services/*": ["./services/*"],
+      "@/*": ["./*"]
     }
   },
-  "include": ["src", "../src/features/studio", "../src/features/void", "../src/lib", "../src/context", "../src/services", "../src/components"]
+  "include": ["src", "studio", "void", "lib", "context", "services", "components"]
 }

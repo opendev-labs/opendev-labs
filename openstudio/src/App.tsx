@@ -1,19 +1,16 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-// Re-use the existing studio app and auth provider from the parent monorepo
-// These are path-aliased via vite.config.ts (@studio, @)
-import StudioApp from '@studio/App';
-import { AuthProvider as VoidAuthProvider } from '@/features/void/contexts/AuthContext';
-import { AuthProvider } from '@/context/AuthContext';
-import { ThemeProvider } from '@/context/ThemeContext';
+// All imports from self-contained local copies inside openstudio/
+import StudioApp from './studio/App';
+import { AuthProvider as VoidAuthProvider } from './void/contexts/AuthContext';
+import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 /**
  * Root App for openstudio.opendev-labs.com
- *
- * This is a STANDALONE deployment of the OpenStudio AI builder.
- * It mounts directly at the root `/` instead of `/open-studio`.
+ * Mounts the OpenStudio AI builder directly at / (root)
  */
 export default function App() {
   return (
@@ -22,7 +19,6 @@ export default function App() {
         <BrowserRouter>
           <VoidAuthProvider>
             <Routes>
-              {/* Studio app handles its own internal routing (hash-based) */}
               <Route
                 path="/*"
                 element={

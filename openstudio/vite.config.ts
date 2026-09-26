@@ -2,23 +2,24 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-// Separate Vite config for openstudio.opendev-labs.com
-// This project resolves shared code from the parent monorepo (../src)
+// Standalone Vite config for openstudio.opendev-labs.com
+// All shared code is self-contained inside openstudio/ (no ../src references)
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   resolve: {
     alias: {
-      // Allow this sub-project to import from the parent's src directory
-      '@studio': path.resolve(__dirname, '../src/features/studio'),
-      '@lib': path.resolve(__dirname, '../src/lib'),
-      '@context': path.resolve(__dirname, '../src/context'),
-      '@components': path.resolve(__dirname, '../src/components'),
-      '@services': path.resolve(__dirname, '../src/services'),
-      '@': path.resolve(__dirname, '../src'),
+      '@studio': path.resolve(__dirname, './studio'),
+      '@lib': path.resolve(__dirname, './lib'),
+      '@context': path.resolve(__dirname, './context'),
+      '@components': path.resolve(__dirname, './components'),
+      '@services': path.resolve(__dirname, './services'),
+      '@': path.resolve(__dirname, './'),
     },
   },
   build: {
     outDir: 'dist',
+    sourcemap: false,
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),

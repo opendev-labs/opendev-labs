@@ -3,13 +3,12 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    // Also scan parent monorepo source shared by this project
-    "../src/features/studio/**/*.{js,ts,jsx,tsx}",
-    "../src/features/void/**/*.{js,ts,jsx,tsx}",
-    "../src/lib/**/*.{js,ts,jsx,tsx}",
-    "../src/context/**/*.{js,ts,jsx,tsx}",
-    "../src/services/**/*.{js,ts,jsx,tsx}",
-    "../src/components/**/*.{js,ts,jsx,tsx}",
+    "./studio/**/*.{js,ts,jsx,tsx}",
+    "./void/**/*.{js,ts,jsx,tsx}",
+    "./lib/**/*.{js,ts,jsx,tsx}",
+    "./context/**/*.{js,ts,jsx,tsx}",
+    "./services/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}",
   ],
   darkMode: 'class',
   theme: {
