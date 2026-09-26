@@ -1126,7 +1126,7 @@ function App() {
               </div>
             )}
             {view === 'all-chats' && <div className="h-full"><AllChatsView sessions={sessions} onSelectChat={handleSelectChat} onDeleteSession={handleDeleteSession} onNavigate={handleNavigate} /></div>}
-            {view === 'settings' && <div className="h-full"><SettingsView /></div>}
+            {view === 'settings' && <div className="h-full"><SettingsView selectedModelId={selectedModelId} onModelChange={handleModelChange} /></div>}
           </div>
         </div>
       </main>

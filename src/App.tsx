@@ -21,6 +21,7 @@ import { ClientMilestonesPage } from './pages/ClientMilestonesPage';
 import { ClientCredentialsPage } from './pages/ClientCredentialsPage';
 import { ProfileSettings } from './pages/ProfileSettings';
 import { OpenStudioPage } from './pages/OpenStudioPage';
+import OpenStudioLandingPage from './pages/OpenStudioLandingPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { ClientConversionPage } from './pages/ClientConversionPage';
 import { UserSecurityPage } from './pages/UserSecurityPage';
@@ -51,6 +52,7 @@ export function App() {
                 {/* Public Pages */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/open-studio" element={<OpenStudioPage />} />
+                <Route path="/openstudio" element={<OpenStudioLandingPage />} />
                 <Route path="/studio" element={<OpenStudioPage />} />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route path="/solutions" element={<SolutionsPage />} />
