@@ -5,6 +5,12 @@ import {
   GoogleAuthProvider,
   GithubAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  ConfirmationResult,
+  getAdditionalUserInfo,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
@@ -18,6 +24,7 @@ import {
   Sun,
   Moon,
   Phone,
+  RotateCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useClients } from '../context/ClientContext';
@@ -40,6 +47,12 @@ export const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
   const [showPassword, setShowPassword] = useState(false);
   const [activeMethod, setActiveMethod] = useState<SocialMethod | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -55,43 +68,123 @@ export const AuthPage: React.FC = () => {
     navigate(isAdmin ? '/dashboard' : matched ? '/client/portal' : '/client/profile');
   };
 
-  // ── Email/Password admin submit ──────────────────────────────────────────
-  const handleSubmit = (e: React.FormEvent) => {
+  // ── Email/Password submit ──────────────────────────────────────────
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthenticating(true);
     setErrorMessage('');
-    setTimeout(() => {
-      if (isAdminMode) {
-        const valid = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
-        if (valid.includes(email.trim().toLowerCase()) && password.length >= 4) {
+
+    if (isAdminMode) {
+      const valid = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
+      if (valid.includes(email.trim().toLowerCase()) && password.length >= 4) {
+        loginAsDeveloper();
+        navigate('/dashboard');
+        setIsAuthenticating(false);
+        return;
+      }
+      if (auth) {
+        try {
+          await signInWithEmailAndPassword(auth, email.trim(), password);
           loginAsDeveloper();
           navigate('/dashboard');
-        } else {
-          setErrorMessage('Invalid admin username or password.');
-        }
-      } else {
-        const clean = email.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-        const found = clients.find(
-          (c) =>
-            (c.domain && c.domain.toLowerCase() === clean) ||
-            c.email.toLowerCase() === clean ||
-            (c.clientCode && c.clientCode.toLowerCase() === clean)
-        );
-        if (found) {
-          if (password && found.password && found.password !== password) {
-            setErrorMessage('Invalid password for this domain.');
-            setIsAuthenticating(false);
-            return;
-          }
-          loginAsClient(found.id, found.name, found.email);
-          navigate('/client/portal');
-        } else {
-          loginWithGoogle(clean, clean.split('@')[0]);
-          navigate('/client/profile');
+          setIsAuthenticating(false);
+          return;
+        } catch {
+          // fall through
         }
       }
+      setErrorMessage('Invalid admin username or password.');
       setIsAuthenticating(false);
-    }, 400);
+      return;
+    }
+
+    // Client custom domain / clientCode lookup
+    const clean = email.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+    const found = clients.find(
+      (c) =>
+        (c.domain && c.domain.toLowerCase() === clean) ||
+        c.email.toLowerCase() === clean ||
+        (c.clientCode && c.clientCode.toLowerCase() === clean)
+    );
+    if (found) {
+      if (password && found.password && found.password !== password) {
+        setErrorMessage('Invalid password for this domain.');
+        setIsAuthenticating(false);
+        return;
+      }
+      loginAsClient(found.id, found.name, found.email);
+      navigate('/client/portal');
+      setIsAuthenticating(false);
+      return;
+    }
+
+    // Direct Firebase Email/Password Sign-In
+    if (auth && email.includes('@') && password.length >= 6) {
+      try {
+        let fbUser;
+        try {
+          const res = await signInWithEmailAndPassword(auth, email.trim(), password);
+          fbUser = res.user;
+        } catch (signInErr: any) {
+          if (signInErr?.code === 'auth/user-not-found' || signInErr?.code === 'auth/invalid-credential') {
+            try {
+              const createRes = await createUserWithEmailAndPassword(auth, email.trim(), password);
+              fbUser = createRes.user;
+            } catch {
+              throw signInErr;
+            }
+          } else {
+            throw signInErr;
+          }
+        }
+
+        if (fbUser) {
+          try {
+            await fbUser.reload();
+          } catch {}
+          const userObj = auth.currentUser || fbUser;
+          const cleanEmail = (userObj.email || email).toLowerCase().trim();
+          const displayName = userObj.displayName || cleanEmail.split('@')[0];
+          const avatar = userObj.photoURL || `https://api.dicebear.com/7.x/identicon/svg?seed=${userObj.uid}`;
+
+          if (db) {
+            await setDoc(doc(db, 'users', userObj.uid), {
+              id: userObj.uid,
+              name: displayName,
+              email: cleanEmail,
+              avatar: avatar,
+              role: 'user',
+              authMethod: 'password',
+              online: true,
+              lastSeen: serverTimestamp(),
+              joinedAt: serverTimestamp(),
+            }, { merge: true }).catch(() => {});
+          }
+
+          loginWithGoogle(cleanEmail, displayName, avatar, 'password');
+          handlePostLogin(cleanEmail);
+          setIsAuthenticating(false);
+          return;
+        }
+      } catch (fbErr: any) {
+        console.error('Email sign in error:', fbErr);
+        if (fbErr?.code === 'auth/wrong-password' || fbErr?.code === 'auth/invalid-credential') {
+          setErrorMessage('Incorrect password or account credentials.');
+        } else if (fbErr?.code === 'auth/invalid-email') {
+          setErrorMessage('Please enter a valid email address.');
+        } else if (fbErr?.code === 'auth/weak-password') {
+          setErrorMessage('Password must be at least 6 characters.');
+        } else {
+          setErrorMessage(fbErr?.message || 'Email authentication failed.');
+        }
+        setIsAuthenticating(false);
+        return;
+      }
+    }
+
+    loginWithGoogle(clean, clean.split('@')[0], undefined, 'password');
+    navigate('/client/profile');
+    setIsAuthenticating(false);
   };
 
   // ── Google Sign-In ───────────────────────────────────────────────────────
@@ -103,15 +196,30 @@ export const AuthPage: React.FC = () => {
         const provider = new GoogleAuthProvider();
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await signInWithPopup(auth, provider);
-        const gu = result.user;
-        const email = (gu.email || '').toLowerCase().trim();
+
+        // Fetch fresh profile data directly
+        try {
+          await result.user.reload();
+        } catch {}
+        const gu = auth.currentUser || result.user;
+        const addInfo = getAdditionalUserInfo(result);
+        const profile = addInfo?.profile as Record<string, any> | undefined;
+
+        let avatar = profile?.picture || gu.photoURL || '';
+        if (avatar && !avatar.includes('&t=') && !avatar.includes('?t=')) {
+          avatar = avatar.includes('?') ? `${avatar}&t=${Date.now()}` : `${avatar}?t=${Date.now()}`;
+        }
+
+        const email = (gu.email || profile?.email || '').toLowerCase().trim();
+        const displayName = gu.displayName || profile?.name || (email ? email.split('@')[0] : 'Google User');
         const isLeadDev = email === 'opendev-labs.office@gmail.com' || email === 'opendev.office@gmail.com';
+
         if (db) {
-          setDoc(doc(db, 'users', gu.uid), {
+          await setDoc(doc(db, 'users', gu.uid), {
             id: gu.uid,
-            name: gu.displayName || email.split('@')[0],
-            email: gu.email || '',
-            avatar: gu.photoURL || '',
+            name: displayName,
+            email: email,
+            avatar: avatar,
             role: isLeadDev ? 'developer' : 'user',
             authMethod: 'google',
             online: true,
@@ -119,13 +227,13 @@ export const AuthPage: React.FC = () => {
             joinedAt: serverTimestamp(),
           }, { merge: true }).catch(() => {});
         }
-        loginWithGoogle(gu.email || undefined, gu.displayName || undefined, gu.photoURL || undefined);
+        loginWithGoogle(email, displayName, avatar, 'google');
         handlePostLogin(email);
         return;
       }
       // fallback GSI
       const gp = await promptGoogleSignIn();
-      loginWithGoogle(gp.email, gp.name, gp.picture);
+      loginWithGoogle(gp.email, gp.name, gp.picture, 'google');
       handlePostLogin(gp.email);
     } catch (err: any) {
       if (!err?.message?.includes('closed_by_user')) {
@@ -145,14 +253,33 @@ export const AuthPage: React.FC = () => {
       const provider = new GithubAuthProvider();
       provider.addScope('user:email');
       const result = await signInWithPopup(auth, provider);
-      const gu = result.user;
-      const email = (gu.email || '').toLowerCase().trim();
+
+      // Force reload to bypass Firebase local cached profile
+      try {
+        await result.user.reload();
+      } catch (e) {
+        console.warn('User reload error:', e);
+      }
+
+      const gu = auth.currentUser || result.user;
+      const addInfo = getAdditionalUserInfo(result);
+      const profile = addInfo?.profile as Record<string, any> | undefined;
+
+      // Extract real-time fresh avatar directly from the provider response
+      let avatar = profile?.avatar_url || gu.photoURL || '';
+      if (avatar) {
+        avatar = avatar.includes('?') ? `${avatar}&t=${Date.now()}` : `${avatar}?t=${Date.now()}`;
+      }
+
+      const email = (gu.email || profile?.email || '').toLowerCase().trim();
+      const displayName = gu.displayName || profile?.name || profile?.login || (email ? email.split('@')[0] : 'GitHub User');
+
       if (db) {
-        setDoc(doc(db, 'users', gu.uid), {
+        await setDoc(doc(db, 'users', gu.uid), {
           id: gu.uid,
-          name: gu.displayName || email.split('@')[0],
-          email: gu.email || '',
-          avatar: gu.photoURL || '',
+          name: displayName,
+          email: email,
+          avatar: avatar,
           role: 'user',
           authMethod: 'github',
           online: true,
@@ -160,8 +287,9 @@ export const AuthPage: React.FC = () => {
           joinedAt: serverTimestamp(),
         }, { merge: true }).catch(() => {});
       }
-      loginWithGoogle(gu.email || undefined, gu.displayName || undefined, gu.photoURL || undefined);
-      handlePostLogin(email);
+
+      loginWithGoogle(email || undefined, displayName, avatar, 'github');
+      handlePostLogin(email || 'github-user@opendev-labs.com');
     } catch (err: any) {
       if (!err?.message?.includes('closed_by_user')) {
         setErrorMessage(err?.message || 'GitHub Sign-In failed.');
@@ -171,9 +299,131 @@ export const AuthPage: React.FC = () => {
     }
   };
 
+  // ── Phone OTP Sign-In ────────────────────────────────────────────────────
+  const setupRecaptcha = () => {
+    if (!auth) throw new Error('Firebase Auth not available');
+    if ((window as any).recaptchaVerifier) {
+      try {
+        (window as any).recaptchaVerifier.clear();
+      } catch {}
+      (window as any).recaptchaVerifier = null;
+    }
+
+    const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      size: 'invisible',
+      callback: () => {},
+      'expired-callback': () => {
+        setErrorMessage('Verification expired. Please try again.');
+      },
+    });
+    (window as any).recaptchaVerifier = verifier;
+    return verifier;
+  };
+
+  const handleSendPhoneOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setErrorMessage('');
+    const raw = phone.trim();
+    if (!raw) {
+      setErrorMessage('Please enter your phone number.');
+      return;
+    }
+
+    let formattedPhone = raw.replace(/\s+/g, '');
+    if (!formattedPhone.startsWith('+')) {
+      if (formattedPhone.length === 10) {
+        formattedPhone = `+91${formattedPhone}`;
+      } else {
+        formattedPhone = `+${formattedPhone}`;
+      }
+    }
+
+    setIsSendingOtp(true);
+    try {
+      const verifier = setupRecaptcha();
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
+      setConfirmationResult(confirmation);
+      setOtpSent(true);
+      setErrorMessage('');
+    } catch (err: any) {
+      console.error('Phone auth send error:', err);
+      if ((window as any).recaptchaVerifier) {
+        try {
+          (window as any).recaptchaVerifier.clear();
+          (window as any).recaptchaVerifier = null;
+        } catch {}
+      }
+      if (err?.code === 'auth/invalid-phone-number') {
+        setErrorMessage('Invalid phone number format. Please include country code (e.g. +91 98765 43210).');
+      } else if (err?.code === 'auth/too-many-requests') {
+        setErrorMessage('Too many attempts. Please wait a few moments and try again.');
+      } else {
+        setErrorMessage(err?.message || 'Failed to send OTP. Please check the phone number.');
+      }
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyPhoneOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!confirmationResult) {
+      setErrorMessage('No pending OTP request. Please request a new code.');
+      return;
+    }
+    const cleanCode = otpCode.trim();
+    if (!cleanCode || cleanCode.length < 6) {
+      setErrorMessage('Please enter the 6-digit verification code.');
+      return;
+    }
+
+    setIsVerifyingOtp(true);
+    setErrorMessage('');
+    try {
+      const result = await confirmationResult.confirm(cleanCode);
+      const phoneUser = result.user;
+      const phoneNum = phoneUser.phoneNumber || phone;
+      const phoneEmail = `${phoneNum.replace(/[^0-9]/g, '')}@phone.opendev-labs.com`;
+      const phoneName = `User ${phoneNum.slice(-4)}`;
+      const avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${phoneUser.uid}`;
+
+      if (db) {
+        await setDoc(doc(db, 'users', phoneUser.uid), {
+          id: phoneUser.uid,
+          name: phoneName,
+          phoneNumber: phoneNum,
+          email: phoneEmail,
+          avatar: avatar,
+          role: 'user',
+          authMethod: 'phone',
+          online: true,
+          lastSeen: serverTimestamp(),
+          joinedAt: serverTimestamp(),
+        }, { merge: true }).catch(() => {});
+      }
+
+      loginWithGoogle(phoneEmail, phoneName, avatar, 'phone');
+      handlePostLogin(phoneEmail);
+    } catch (err: any) {
+      console.error('Phone OTP verify error:', err);
+      if (err?.code === 'auth/invalid-verification-code') {
+        setErrorMessage('Invalid verification code. Please check the code and try again.');
+      } else if (err?.code === 'auth/code-expired') {
+        setErrorMessage('Verification code has expired. Please request a new code.');
+      } else {
+        setErrorMessage(err?.message || 'Failed to verify OTP. Please try again.');
+      }
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
+
+      {/* Invisible reCAPTCHA container for Phone Auth */}
+      <div id="recaptcha-container" />
 
       {/* Canvas bg */}
       <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" particleCount={40} />
@@ -201,7 +451,7 @@ export const AuthPage: React.FC = () => {
       >
         <AirplaneAnimation />
 
-        {/* ★ BRAND — top-left of hero, clicking = back to home */}
+        {/* BRAND — top-left of hero, clicking = back to home */}
         <Link
           to="/"
           className="relative z-10 flex items-center gap-2 sm:gap-3 group"
@@ -239,7 +489,7 @@ export const AuthPage: React.FC = () => {
           <div className="inline-flex p-0.5 sm:p-1 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm">
             <button
               type="button"
-              onClick={() => { setIsAdminMode(false); setEmail(''); setActiveMethod(null); }}
+              onClick={() => { setIsAdminMode(false); setEmail(''); setActiveMethod(null); setErrorMessage(''); }}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                 !isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
@@ -248,7 +498,7 @@ export const AuthPage: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); setActiveMethod(null); }}
+              onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); setActiveMethod(null); setErrorMessage(''); }}
               className={`px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all ${
                 isAdminMode ? 'bg-black dark:bg-white text-white dark:text-black shadow-xs' : 'text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white'
               }`}
@@ -291,7 +541,7 @@ export const AuthPage: React.FC = () => {
                 disabled={isAuthenticating}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98] disabled:opacity-60"
               >
-                {isAuthenticating ? (
+                {isAuthenticating && activeMethod === 'google' ? (
                   <div className="w-5 h-5 border-2 border-zinc-300 border-t-zinc-700 rounded-full animate-spin" />
                 ) : (
                   <svg className="w-5 h-5 shrink-0" viewBox="0 0 48 48">
@@ -329,15 +579,17 @@ export const AuthPage: React.FC = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   onSubmit={handleSubmit}
-                  className="space-y-2"
+                  className="space-y-2 p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50"
                 >
+                  <p className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">Sign in with Email</p>
                   <Input
                     type="email"
                     placeholder="your@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl"
-                    required autoFocus
+                    className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl"
+                    required
+                    autoFocus
                   />
                   <div className="relative">
                     <Input
@@ -345,29 +597,30 @@ export const AuthPage: React.FC = () => {
                       placeholder="Password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-11 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl pr-10"
+                      className="h-10 bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white placeholder:text-zinc-400 text-xs rounded-xl pr-10"
+                      required
                     />
                     <button type="button" onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
+                      className="absolute right-3 top-2.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">
                       {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
                   </div>
-                  <div className="flex gap-2">
-                    <button type="button" onClick={() => setActiveMethod(null)}
-                      className="flex-1 h-10 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
-                      Back
+                  <div className="flex gap-2 pt-1">
+                    <button type="button" onClick={() => { setActiveMethod(null); setErrorMessage(''); }}
+                      className="flex-1 h-9 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                      Cancel
                     </button>
                     <Button type="submit" disabled={isAuthenticating}
-                      className="flex-1 h-10 text-xs font-extrabold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5">
+                      className="flex-1 h-9 text-xs font-bold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5">
                       {isAuthenticating
-                        ? <div className="size-4 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
-                        : <><span>Sign In</span><ArrowRight className="size-3.5" /></>}
+                        ? <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                        : <><span>Continue</span><ArrowRight className="size-3.5" /></>}
                     </Button>
                   </div>
                 </motion.form>
               ) : (
                 <button
-                  onClick={() => setActiveMethod('email')}
+                  onClick={() => { setActiveMethod('email'); setErrorMessage(''); }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98]"
                 >
                   <Mail className="w-5 h-5 shrink-0 text-zinc-500" />
@@ -375,26 +628,124 @@ export const AuthPage: React.FC = () => {
                 </button>
               )}
 
-              {/* Phone (placeholder — Firebase phone auth requires server-side setup) */}
+              {/* Phone (Firebase Real Phone Auth with Recaptcha + OTP) */}
               {activeMethod === 'phone' ? (
-                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-center space-y-2">
-                  <p className="text-xs text-zinc-500">Enter your mobile number</p>
-                  <Input
-                    type="tel"
-                    placeholder="+91 98765 43210"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-10 text-xs rounded-xl bg-white dark:bg-zinc-900"
-                    autoFocus
-                  />
-                  <p className="text-[10px] text-zinc-400">OTP verification coming soon</p>
-                  <button onClick={() => setActiveMethod(null)}
-                    className="text-xs text-zinc-400 hover:text-zinc-900 dark:hover:text-white underline">Cancel</button>
-                </motion.div>
+                <AnimatePresence mode="wait">
+                  {!otpSent ? (
+                    <motion.form
+                      key="phone-input"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      onSubmit={handleSendPhoneOtp}
+                      className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-left space-y-2.5 bg-zinc-50/50 dark:bg-zinc-900/50"
+                    >
+                      <div>
+                        <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">
+                          Mobile Number
+                        </label>
+                        <Input
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                          className="h-10 text-xs rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                          autoFocus
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-400 mt-1">Include country code (e.g. +91 or +1)</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => { setActiveMethod(null); setErrorMessage(''); }}
+                          className="flex-1 h-9 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <Button
+                          type="submit"
+                          disabled={isSendingOtp || !phone.trim()}
+                          className="flex-1 h-9 text-xs font-bold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5"
+                        >
+                          {isSendingOtp ? (
+                            <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <span>Send OTP</span>
+                              <ArrowRight className="size-3.5" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </motion.form>
+                  ) : (
+                    <motion.form
+                      key="otp-input"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      onSubmit={handleVerifyPhoneOtp}
+                      className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-left space-y-2.5 bg-zinc-50/50 dark:bg-zinc-900/50"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
+                            Enter 6-Digit OTP
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => { setOtpSent(false); setOtpCode(''); setErrorMessage(''); }}
+                            className="text-[10px] text-blue-500 hover:underline"
+                          >
+                            Change number
+                          </button>
+                        </div>
+                        <Input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          maxLength={6}
+                          placeholder="123456"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                          className="h-10 text-center tracking-widest text-sm font-mono font-bold rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
+                          autoFocus
+                          required
+                        />
+                        <p className="text-[10px] text-zinc-400 mt-1">SMS code sent to {phone}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSendPhoneOtp()}
+                          disabled={isSendingOtp}
+                          className="flex-1 h-9 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
+                        >
+                          <RotateCw className={`size-3 ${isSendingOtp ? 'animate-spin' : ''}`} />
+                          <span>{isSendingOtp ? 'Resending...' : 'Resend'}</span>
+                        </button>
+                        <Button
+                          type="submit"
+                          disabled={isVerifyingOtp || otpCode.length < 6}
+                          className="flex-1 h-9 text-xs font-bold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5"
+                        >
+                          {isVerifyingOtp ? (
+                            <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <>
+                              <span>Verify & Login</span>
+                              <ArrowRight className="size-3.5" />
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </motion.form>
+                  )}
+                </AnimatePresence>
               ) : (
                 <button
-                  onClick={() => setActiveMethod('phone')}
+                  onClick={() => { setActiveMethod('phone'); setOtpSent(false); setErrorMessage(''); }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98]"
                 >
                   <Phone className="w-5 h-5 shrink-0 text-zinc-500" />
@@ -443,14 +794,14 @@ export const AuthPage: React.FC = () => {
           {!isAdminMode && (
             <div className="flex items-center justify-center gap-1.5 text-[11px] font-medium text-zinc-400">
               <ShieldCheck className="size-3.5 text-emerald-500" />
-              <span>Secure · No passwords stored</span>
+              <span>Secure authentication · OpenDev Cloud</span>
             </div>
           )}
           <div className="text-center pt-2 border-t border-zinc-100 dark:border-zinc-800 text-[11px] text-zinc-500">
             {isAdminMode ? (
               <span>
                 Not admin?{' '}
-                <button onClick={() => { setIsAdminMode(false); setEmail(''); }}
+                <button onClick={() => { setIsAdminMode(false); setEmail(''); setErrorMessage(''); }}
                   className="font-bold text-black dark:text-white hover:underline">
                   Sign in as user
                 </button>
@@ -458,7 +809,7 @@ export const AuthPage: React.FC = () => {
             ) : (
               <span>
                 Agency admin?{' '}
-                <button onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); }}
+                <button onClick={() => { setIsAdminMode(true); setEmail('opendev-labs.office@gmail.com'); setErrorMessage(''); }}
                   className="font-bold text-black dark:text-white hover:underline">
                   Admin sign in
                 </button>

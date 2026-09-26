@@ -20,7 +20,7 @@ export interface AuthUser {
   role: UserRole;
   clientId?: string;
   avatar?: string;
-  authMethod?: 'google' | 'password';
+  authMethod?: 'google' | 'password' | 'github' | 'phone' | string;
 }
 
 interface AuthContextType {
@@ -29,7 +29,7 @@ interface AuthContextType {
   registeredUsers: RegisteredUser[];
   loginAsDeveloper: () => void;
   loginAsClient: (clientId: string, clientName?: string, clientEmail?: string) => void;
-  loginWithGoogle: (email?: string, name?: string, avatar?: string) => void;
+  loginWithGoogle: (email?: string, name?: string, avatar?: string, authMethod?: string) => void;
   convertRegisteredUserToClient: (userId: string, clientId: string, clientName?: string) => void;
   deleteRegisteredUser: (userId: string) => void;
   logout: () => void;
@@ -380,28 +380,58 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!auth) return;
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const cleanEmail = (firebaseUser.email || '').toLowerCase().trim();
+        try {
+          await firebaseUser.reload();
+        } catch (e) {
+          // ignore reload error if offline
+        }
+
+        const freshUser = auth.currentUser || firebaseUser;
+        const cleanEmail = (freshUser.email || '').toLowerCase().trim();
         const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
         const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
+        let avatarUrl = freshUser.photoURL || undefined;
+        if (!avatarUrl && freshUser.providerData?.length) {
+          const providerWithPhoto = freshUser.providerData.find((p: any) => p.photoURL);
+          if (providerWithPhoto?.photoURL) {
+            avatarUrl = providerWithPhoto.photoURL;
+          }
+        }
+        // Cache bust if GitHub or Google avatar to ensure updated pictures reflect immediately
+        if (avatarUrl && avatarUrl.includes('githubusercontent.com') && !avatarUrl.includes('&t=') && !avatarUrl.includes('?t=')) {
+          avatarUrl = avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`;
+        }
+
+        const authProviderId = freshUser.providerData?.[0]?.providerId || '';
+        const detectedAuthMethod = authProviderId.includes('github')
+          ? 'github'
+          : authProviderId.includes('phone')
+          ? 'phone'
+          : authProviderId.includes('password')
+          ? 'password'
+          : 'google';
+
         setUser({
-          id: firebaseUser.uid,
-          name: firebaseUser.displayName || (firebaseUser.email ? firebaseUser.email.split('@')[0] : 'Google User'),
-          email: firebaseUser.email || '',
+          id: freshUser.uid,
+          name: freshUser.displayName || (freshUser.phoneNumber ? freshUser.phoneNumber : freshUser.email ? freshUser.email.split('@')[0] : 'User'),
+          email: freshUser.email || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : ''),
           role: role,
           clientId: existingRegistered?.clientId,
-          authMethod: 'google',
-          avatar: firebaseUser.photoURL || undefined,
+          authMethod: detectedAuthMethod,
+          avatar: avatarUrl,
         });
 
         // Non-blocking presence update in Firestore
         if (db) {
-          setDoc(doc(db, "users", firebaseUser.uid), {
+          setDoc(doc(db, "users", freshUser.uid), {
             online: true,
             lastSeen: serverTimestamp(),
+            ...(avatarUrl ? { avatar: avatarUrl } : {}),
+            authMethod: detectedAuthMethod,
           }, { merge: true }).catch(e => console.warn("Presence bg update error:", e));
         }
       }
@@ -441,7 +471,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithGoogle = (
     googleEmail = 'user@gmail.com',
     googleName = 'Google User',
-    googleAvatar = 'https://lh3.googleusercontent.com/a/default-user'
+    googleAvatar = 'https://lh3.googleusercontent.com/a/default-user',
+    authMethod = 'google'
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
     const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
@@ -449,7 +480,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;
-    const nameToUse = googleName || (googleEmail.includes('@') ? googleEmail.split('@')[0] : 'Google User');
+    const nameToUse = googleName || (googleEmail.includes('@') ? googleEmail.split('@')[0] : 'User');
 
     // Set state instantly for 0ms UI lag
     setUser({
@@ -458,7 +489,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: googleEmail,
       role: userRole,
       clientId: existingRegistered?.clientId,
-      authMethod: 'google',
+      authMethod: authMethod as any,
       avatar: googleAvatar,
     });
 
@@ -471,7 +502,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       role: userRole,
       ...(existingRegistered?.clientId ? { clientId: existingRegistered.clientId } : {}),
       online: true,
-      authMethod: 'google',
+      authMethod: authMethod as any,
     };
 
     // Perform Firestore update asynchronously in background with clean fields (no undefined values)
@@ -484,7 +515,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         joinedAt: existingRegistered?.joinedAt || new Date().toISOString().split('T')[0],
         role: userRole,
         online: true,
-        authMethod: 'google',
+        authMethod: authMethod,
         lastSeen: serverTimestamp(),
       };
       if (existingRegistered?.clientId) {

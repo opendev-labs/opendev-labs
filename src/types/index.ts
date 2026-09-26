@@ -10,7 +10,7 @@ export interface RegisteredUser {
   clientId?: string;
   online?: boolean;
   team?: string;
-  authMethod?: 'google' | 'password';
+  authMethod?: 'google' | 'password' | 'github' | 'phone' | string;
   ipAddress?: string;
   location?: string;
   lastActive?: string;
