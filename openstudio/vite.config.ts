@@ -24,6 +24,9 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
       },
+      // @mlc-ai/web-llm is dynamically imported only when user picks a local model.
+      // It's WASM-heavy — mark external so Rollup doesn't try to bundle it.
+      external: ['@mlc-ai/web-llm'],
     },
   },
   server: {

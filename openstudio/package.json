@@ -11,6 +11,7 @@
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.20.0",
     "@google/genai": "^1.22.0",
+    "@mlc-ai/web-llm": "^0.2.84",
     "@monaco-editor/react": "4.6.0",
     "@radix-ui/react-avatar": "^1.2.2",
     "@radix-ui/react-dialog": "^1.1.5",
@@ -28,6 +29,7 @@
     "@radix-ui/react-tooltip": "^1.1.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
     "firebase": "^11.2.0",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.473.0",
