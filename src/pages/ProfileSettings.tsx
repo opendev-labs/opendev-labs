@@ -21,15 +21,18 @@ import { Input } from '../components/ui/input';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 import { getOpenRouterKey, setOpenRouterKey } from '../services/openrouterService';
 import { useAISupport } from '../context/AISupportContext';
+import { useAuth } from '../context/AuthContext';
 
 export const ProfileSettings: React.FC = () => {
+  const { user } = useAuth();
   const { isAIEnabled, setAIEnabled } = useAISupport();
 
-  const [name, setName] = useState('Yash Shirish Ramteke');
-  const [email, setEmail] = useState('opendev.office@gmail.com');
-  const [phone, setPhone] = useState('+91 81695 68582');
-  const [github, setGithub] = useState('github.com/opendev-labs');
-  const [website, setWebsite] = useState('www.opendev-labs.com');
+  const isDev = user?.role === 'developer';
+  const [name, setName] = useState(user?.name || (isDev ? 'Yash Shirish Ramteke' : 'User'));
+  const [email, setEmail] = useState(user?.email || (isDev ? 'opendev.office@gmail.com' : ''));
+  const [phone, setPhone] = useState(user?.phoneNumber || (isDev ? '+91 81695 68582' : ''));
+  const [github, setGithub] = useState((user as any)?.githubHandle ? `github.com/${(user as any).githubHandle}` : (isDev ? 'github.com/opendev-labs' : ''));
+  const [website, setWebsite] = useState(isDev ? 'www.opendev-labs.com' : '');
   const [saved, setSaved] = useState(false);
 
   const [apiKey, setApiKey] = useState(getOpenRouterKey());

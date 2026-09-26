@@ -72,6 +72,12 @@ class GitHubPATService {
             return stored;
         }
 
+        const oauthToken = localStorage.getItem('opendev_gh_token');
+        if (oauthToken) {
+            this.pat = oauthToken;
+            return oauthToken;
+        }
+
         return null;
     }
 

@@ -282,8 +282,9 @@ I am your AI Copilot. Ask me about our engineering services, client portal, or w
                     alt="OpenDev"
                     className="h-10 sm:h-11 w-auto object-contain"
                   />
-                  <span className="font-extrabold text-sm sm:text-base tracking-tight text-zinc-900 dark:text-white">
-                    24/7 Support
+                  <span className="font-extrabold text-sm sm:text-base tracking-tight text-zinc-900 dark:text-white flex items-center gap-1.5">
+                    <span>TARS</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00f2fe]/10 border border-[#00f2fe]/30 text-[#00f2fe] font-mono">24/7 AI</span>
                   </span>
                 </div>
 
@@ -308,9 +309,9 @@ I am your AI Copilot. Ask me about our engineering services, client portal, or w
                       setMessages([{
                         id: 'welcome',
                         role: 'assistant',
-                        content: `👋 Welcome to OpenDev-Labs 24/7 AI Support Chat!
+                        content: `👋 Welcome to TARS · 24/7 Autonomous AI Engineer & Support Copilot!
 
-I am your AI Copilot. Ask me about our engineering services, client portal, or website features!`,
+I am TARS. Ask me about our software engineering services, custom webapps, client portal, or full-stack architectures!`,
                         timestamp: 'Just now'
                       }]);
                     }}

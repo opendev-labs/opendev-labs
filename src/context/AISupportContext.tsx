@@ -21,12 +21,12 @@ export const AISupportProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return saved !== null ? saved === 'true' : true;
   });
 
-  let isAuthPage = false;
+  let isExcludedPage = false;
   try {
     const location = useLocation();
-    isAuthPage = location.pathname === '/auth';
+    isExcludedPage = location.pathname === '/auth' || location.pathname.startsWith('/open-studio');
   } catch (e) {
-    isAuthPage = typeof window !== 'undefined' && window.location.pathname === '/auth';
+    isExcludedPage = typeof window !== 'undefined' && (window.location.pathname === '/auth' || window.location.pathname.startsWith('/open-studio'));
   }
 
   const setAIEnabled = (enabled: boolean) => {
@@ -38,7 +38,7 @@ export const AISupportProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const openSupport = () => {
-    if (isAIEnabled && !isAuthPage) {
+    if (isAIEnabled && !isExcludedPage) {
       setIsOpen(true);
     }
   };
@@ -46,7 +46,7 @@ export const AISupportProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const closeSupport = () => setIsOpen(false);
 
   const toggleSupport = () => {
-    if (isAIEnabled && !isAuthPage) {
+    if (isAIEnabled && !isExcludedPage) {
       setIsOpen(prev => !prev);
     }
   };
@@ -64,8 +64,8 @@ export const AISupportProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     >
       {children}
 
-      {/* Global 24/7 AI Support Floating Icon Widget (Bottom Right on All Pages EXCEPT Auth Page) */}
-      {isAIEnabled && !isOpen && !isAuthPage && (
+      {/* Global 24/7 AI Support Floating Icon Widget (Bottom Right on All Pages EXCEPT Auth Page & Studio) */}
+      {isAIEnabled && !isOpen && !isExcludedPage && (
         <motion.div
           initial={{ opacity: 0, scale: 0.8, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -116,7 +116,7 @@ export const AISupportProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       )}
 
       {/* Global Super Agent AI Panel */}
-      {isAIEnabled && !isAuthPage && <SuperAgentSidePanel open={isOpen} onClose={closeSupport} />}
+      {isAIEnabled && !isExcludedPage && <SuperAgentSidePanel open={isOpen} onClose={closeSupport} />}
     </AISupportContext.Provider>
   );
 };

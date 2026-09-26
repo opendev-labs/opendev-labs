@@ -19,6 +19,153 @@ const generateId = () => Date.now().toString() + Math.random().toString(36).subs
 
 type GeneratedFileObject = { path: string; content?: string; action: 'created' | 'modified' | 'deleted' };
 
+// Pure code sanitizer: ensures NO conversational text, markdown fences, or JSON artifacts leak into Monaco editor
+function sanitizeCodeContent(rawCode: string): string {
+  if (!rawCode) return '';
+  let code = rawCode.trim();
+
+  // 1. If wrapped in markdown code blocks
+  const mdMatch = code.match(/```(?:tsx|jsx|typescript|javascript|html|css)?\n([\s\S]*?)```/);
+  if (mdMatch && mdMatch[1]) {
+    code = mdMatch[1].trim();
+  } else if (code.startsWith('```')) {
+    code = code.replace(/^```[a-zA-Z0-9_\-+.]*\n?/, '').replace(/```$/, '').trim();
+  }
+
+  // 2. Strip any introductory conversational prose before the first code keyword
+  const codeStartMatch = code.search(/(?:^|\n)\s*(?:import\s|export\s|function\s|const\s|class\s|<!DOCTYPE|<[a-zA-Z]|body\s*\{|\.[a-zA-Z])/);
+  if (codeStartMatch > 0) {
+    code = code.substring(codeStartMatch).trim();
+  }
+
+  // 3. Strip any leaked JSON file boundary (e.g. , { "path": "src/index.css" or path: "src/index.css")
+  const jsonLeakMatch = code.search(/(?:^|\n|;)\s*(?:,\s*\{|\{)?\s*["']?path["']?\s*:\s*["'][^"']+["']/);
+  if (jsonLeakMatch > 0) {
+    code = code.substring(0, jsonLeakMatch).trim();
+  }
+
+  // 4. Unescape any escaped characters if raw JSON was passed through
+  if (code.includes('\\n') || code.includes('\\"')) {
+    code = code
+      .replace(/\\n/g, '\n')
+      .replace(/\\r/g, '\r')
+      .replace(/\\t/g, '\t')
+      .replace(/\\"/g, '"')
+      .replace(/\\\\/g, '\\');
+  }
+
+  // 5. Strip trailing JSON artifacts like "} ] }" or trailing quotes
+  code = code.replace(/[\s\n]*["'}\]]+\s*$/g, (match) => {
+    return code.includes('export default') && !code.endsWith(';') ? match : '';
+  }).trim();
+
+  return code;
+}
+
+// Real-time streaming code extractor for Monaco editor
+function extractStreamingCode(text: string): string {
+  if (!text) return '';
+
+  // 1. JSON streaming format: extract content field of the current file being streamed
+  const contentMarker = '"content": "';
+  const idx = text.lastIndexOf(contentMarker);
+  if (idx !== -1) {
+    let raw = text.substring(idx + contentMarker.length);
+    let endIdx = -1;
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i] === '"' && (i === 0 || raw[i - 1] !== '\\')) {
+        const rest = raw.substring(i + 1).trim();
+        if (rest.startsWith(',') || rest.startsWith('}') || rest.startsWith(']') || rest.length === 0) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    const snippet = endIdx !== -1 ? raw.substring(0, endIdx) : raw;
+    return snippet
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, '\t')
+      .replace(/\\r/g, '\r')
+      .replace(/\\\\/g, '\\');
+  }
+
+  // 2. Markdown code block stream
+  const mdMatch = text.match(/```(?:tsx|jsx|typescript|javascript|html|css)?\n([\s\S]*?)(?:```|$)/);
+  if (mdMatch && mdMatch[1]) {
+    return mdMatch[1];
+  }
+
+  // 3. Raw code with leading prose
+  const codeStartMatch = text.search(/(?:^|\n)\s*(?:import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/);
+  if (codeStartMatch !== -1) {
+    return text.substring(codeStartMatch).trim();
+  }
+
+  return '';
+}
+
+// Real-time extraction of currently streaming file path and content
+function extractCurrentStreamingFile(text: string): { path: string; content: string } | null {
+  if (!text) return null;
+
+  const contentMarker = '"content": "';
+  const lastContentIdx = text.lastIndexOf(contentMarker);
+  if (lastContentIdx !== -1) {
+    const beforeContent = text.substring(0, lastContentIdx);
+    const lastPathRegex = /"path"\s*:\s*"([^"]+)"/g;
+    let m;
+    let lastPath = '';
+    while ((m = lastPathRegex.exec(beforeContent)) !== null) {
+      lastPath = m[1];
+    }
+    const targetPath = lastPath.trim() || 'src/App.tsx';
+
+    let raw = text.substring(lastContentIdx + contentMarker.length);
+    let endIdx = -1;
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i] === '"' && (i === 0 || raw[i - 1] !== '\\')) {
+        const rest = raw.substring(i + 1).trim();
+        if (rest.startsWith(',') || rest.startsWith('}') || rest.startsWith(']') || rest.length === 0) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    const snippet = endIdx !== -1 ? raw.substring(0, endIdx) : raw;
+    const cleanSnippet = snippet
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, '\t')
+      .replace(/\\r/g, '\r')
+      .replace(/\\\\/g, '\\');
+
+    return { path: targetPath, content: cleanSnippet };
+  }
+
+  const mdMatch = text.match(/(?:###?\s+`?([a-zA-Z0-9_./\-]+)`?[\s\S]*?)?```([a-zA-Z0-9_\-+.]+)?\n([\s\S]*?)(?:```|$)/);
+  if (mdMatch) {
+    const headerPath = mdMatch[1];
+    const lang = (mdMatch[2] || '').toLowerCase();
+    let path = headerPath;
+    if (!path) {
+      if (lang === 'tsx' || lang === 'jsx') path = 'src/App.tsx';
+      else if (lang === 'html') path = 'index.html';
+      else if (lang === 'css') path = 'src/index.css';
+      else if (lang === 'js' || lang === 'ts') path = 'src/script.js';
+      else path = 'src/App.tsx';
+    }
+    return { path, content: mdMatch[3] };
+  }
+
+  const codeStartMatch = text.search(/(?:^|\n)\s*(?:import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/);
+  if (codeStartMatch !== -1) {
+    return { path: 'src/App.tsx', content: text.substring(codeStartMatch).trim() };
+  }
+
+  return null;
+}
+
 // 4-Stage Fail-Safe AI Response Extractor for HeroChatUI / OpenStudio
 function extractFilesFromAIResponse(text: string): { conversation: string; files: GeneratedFileObject[] } {
   let cleanText = text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
@@ -29,7 +176,7 @@ function extractFilesFromAIResponse(text: string): { conversation: string; files
     return { conversation: "No content generated.", files: [] };
   }
 
-  // STAGE 1: Standard JSON Parse
+  // STAGE 1: Standard Direct JSON Parse
   let jsonString = '';
   const jsonBlockMatch = cleanText.match(/```json\n([\s\S]*?)\n```/i);
   if (jsonBlockMatch && jsonBlockMatch[1]) {
@@ -44,36 +191,50 @@ function extractFilesFromAIResponse(text: string): { conversation: string; files
 
   if (jsonString) {
     try {
-      const sanitized = jsonString.replace(/[\u0000-\u001F]+/g, (match) => {
-        if (match === '\n') return '\\n';
-        if (match === '\r') return '\\r';
-        if (match === '\t') return '\\t';
-        return '';
-      });
-      const parsed = JSON.parse(sanitized);
+      // Direct parse first
+      const parsed = JSON.parse(jsonString);
       if (parsed.conversation) conversation = parsed.conversation;
       if (parsed.files && Array.isArray(parsed.files)) {
         generatedFiles = parsed.files
           .filter((f: any) => f && f.path && (f.content !== undefined || f.action))
           .map((f: any) => ({
             path: f.path,
-            content: f.content || '',
+            content: sanitizeCodeContent(f.content || ''),
             action: f.action || 'created'
           }));
       }
-    } catch (e) {
-      console.warn("Stage 1 JSON parse failed, moving to Stage 2 regex extraction.", e);
+    } catch (e1) {
+      // Fallback parse: attempt to sanitize unescaped newlines only inside strings
+      try {
+        const sanitized = jsonString.replace(/"content"\s*:\s*"([\s\S]*?)"(?=\s*,\s*"|\s*\}|\s*\])/g, (_, code) => {
+          return `"content": "${code.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')}"`;
+        });
+        const parsed = JSON.parse(sanitized);
+        if (parsed.conversation) conversation = parsed.conversation;
+        if (parsed.files && Array.isArray(parsed.files)) {
+          generatedFiles = parsed.files
+            .filter((f: any) => f && f.path && (f.content !== undefined || f.action))
+            .map((f: any) => ({
+              path: f.path,
+              content: sanitizeCodeContent(f.content || ''),
+              action: f.action || 'created'
+            }));
+        }
+      } catch (e2) {
+        console.warn("Stage 1 JSON parse failed, moving to Stage 2 regex extraction.");
+      }
     }
   }
 
-  // STAGE 2: Loose Regex JSON Field Extractor (handles unescaped quotes/newlines in code strings)
-  if (generatedFiles.length === 0 && jsonString) {
+  // STAGE 2: Multi-File Regex Extractor (supports quotes, template literals backticks, and loose JSON)
+  if (generatedFiles.length === 0 && (cleanText.includes('"path"') || cleanText.includes('path:'))) {
     try {
-      const fileRegex = /"path"\s*:\s*"([^"]+)"[\s\S]*?"content"\s*:\s*"((?:\\.|[^"\\])*)"/g;
+      const fileRegex = /["']?path["']?\s*:\s*["']([^"']+)["'][\s\S]*?["']?content["']?\s*:\s*(?:`([\s\S]*?)`|"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)')/g;
       let fileMatch;
-      while ((fileMatch = fileRegex.exec(jsonString)) !== null) {
-        const filePath = fileMatch[1];
-        let fileContent = fileMatch[2]
+      while ((fileMatch = fileRegex.exec(cleanText)) !== null) {
+        const filePath = fileMatch[1].trim();
+        let fileContent = fileMatch[2] ?? fileMatch[3] ?? fileMatch[4] ?? '';
+        fileContent = fileContent
           .replace(/\\n/g, '\n')
           .replace(/\\r/g, '\r')
           .replace(/\\t/g, '\t')
@@ -81,18 +242,71 @@ function extractFilesFromAIResponse(text: string): { conversation: string; files
           .replace(/\\\\/g, '\\');
         if (filePath && fileContent) {
           generatedFiles.push({
-            path: filePath.trim(),
-            content: fileContent,
+            path: filePath,
+            content: sanitizeCodeContent(fileContent),
             action: 'created'
           });
         }
       }
-      const convMatch = jsonString.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"/);
+      const convMatch = cleanText.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"/);
       if (convMatch && convMatch[1]) {
         conversation = convMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
       }
     } catch (e) {
       console.warn("Stage 2 Regex extraction failed, moving to Stage 3.", e);
+    }
+  }
+
+  // STAGE 2.5: Resilient JSON File Boundary Extractor (handles unescaped HTML quotes inside "content")
+  if (generatedFiles.length === 0 && (cleanText.includes('"path"') || cleanText.includes('"files"'))) {
+    try {
+      const pathRegex = /"path"\s*:\s*"([^"]+)"/g;
+      let pMatch;
+      while ((pMatch = pathRegex.exec(cleanText)) !== null) {
+        const filePath = pMatch[1].trim();
+        const pathIdx = pMatch.index;
+
+        const contentMarkerRegex = /"content"\s*:\s*(["'`])/g;
+        contentMarkerRegex.lastIndex = pathIdx;
+        const markerMatch = contentMarkerRegex.exec(cleanText);
+        if (markerMatch) {
+          const quoteChar = markerMatch[1];
+          const contentStart = markerMatch.index + markerMatch[0].length;
+
+          const nextPathMatch = /"path"\s*:\s*"/g;
+          nextPathMatch.lastIndex = contentStart;
+          const nextPath = nextPathMatch.exec(cleanText);
+          const contentEnd = nextPath ? nextPath.index : cleanText.length;
+
+          let rawSlice = cleanText.substring(contentStart, contentEnd);
+          rawSlice = rawSlice.replace(/\s*,\s*"action"[\s\S]*$/, '');
+          rawSlice = rawSlice.replace(/\s*["'`]?\s*\}[\s\S]*$/, '');
+          if (rawSlice.endsWith(quoteChar)) {
+            rawSlice = rawSlice.slice(0, -1);
+          }
+
+          let fileContent = rawSlice
+            .replace(/\\n/g, '\n')
+            .replace(/\\r/g, '\r')
+            .replace(/\\t/g, '\t')
+            .replace(/\\"/g, '"')
+            .replace(/\\\\/g, '\\');
+
+          if (filePath && fileContent.trim()) {
+            generatedFiles.push({
+              path: filePath,
+              content: sanitizeCodeContent(fileContent),
+              action: 'created'
+            });
+          }
+        }
+      }
+      const convMatch = cleanText.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"/);
+      if (convMatch && convMatch[1]) {
+        conversation = convMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"');
+      }
+    } catch (e) {
+      console.warn("Stage 2.5 Resilient extraction failed:", e);
     }
   }
 
@@ -119,7 +333,7 @@ function extractFilesFromAIResponse(text: string): { conversation: string; files
       if (code && code.trim()) {
         generatedFiles.push({
           path: path.trim(),
-          content: code.trim(),
+          content: sanitizeCodeContent(code),
           action: 'created'
         });
         fileIndex++;
@@ -132,15 +346,27 @@ function extractFilesFromAIResponse(text: string): { conversation: string; files
     }
   }
 
-  // STAGE 4: Raw Code Catch-All Fallback (Wraps raw React code directly into src/App.tsx)
-  if (generatedFiles.length === 0 && (cleanText.includes('import ') || cleanText.includes('export ') || cleanText.includes('<div') || cleanText.includes('function '))) {
-    console.log("Stage 4: Raw React code detected, assigning directly to src/App.tsx");
-    generatedFiles.push({
-      path: 'src/App.tsx',
-      content: cleanText,
-      action: 'created'
-    });
-    conversation = "Materialized code directly into src/App.tsx";
+  // STAGE 4: Raw Code Catch-All Fallback (strictly isolates code from conversation)
+  if (generatedFiles.length === 0 && (cleanText.includes('import ') || cleanText.includes('export ') || cleanText.includes('<div') || cleanText.includes('function ') || cleanText.includes('<!DOCTYPE html>'))) {
+    // CRITICAL: NEVER treat raw JSON response as code!
+    const isRawJson = cleanText.trim().startsWith('{') && (cleanText.includes('"conversation"') || cleanText.includes('"files"'));
+    if (!isRawJson) {
+      const codeStartMatch = cleanText.search(/(?:^|\n)\s*(?:<!DOCTYPE|import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/);
+      let codeOnly = cleanText;
+      let prose = "Materialized components into workspace";
+      if (codeStartMatch > 0) {
+        prose = cleanText.substring(0, codeStartMatch).trim();
+        codeOnly = cleanText.substring(codeStartMatch).trim();
+      }
+      const isHtmlDoc = codeOnly.includes('<!DOCTYPE html') || codeOnly.includes('<html') || codeOnly.includes('<body') || codeOnly.includes('<head>');
+      const targetPath = isHtmlDoc ? 'index.html' : 'src/App.tsx';
+      generatedFiles.push({
+        path: targetPath,
+        content: sanitizeCodeContent(codeOnly),
+        action: 'created'
+      });
+      conversation = prose || `Materialized code directly into ${targetPath}`;
+    }
   }
 
   return { conversation, files: generatedFiles };
@@ -155,28 +381,54 @@ function getCleanStreamConversation(text: string): string {
   if (!clean) return '';
 
   // 2. Check for JSON "conversation" key (handles standard JSON format)
-  const convMatch = clean.match(/"conversation"\s*:\s*"((?:\\.|[^"\\])*)"?/);
-  if (convMatch && convMatch[1]) {
-    const unescaped = convMatch[1]
+  const convMarker = '"conversation": "';
+  const idx = clean.indexOf(convMarker);
+  if (idx !== -1) {
+    let raw = clean.substring(idx + convMarker.length);
+    let endIdx = -1;
+    for (let i = 0; i < raw.length; i++) {
+      if (raw[i] === '"' && (i === 0 || raw[i - 1] !== '\\')) {
+        const rest = raw.substring(i + 1).trim();
+        if (rest.startsWith(',') || rest.startsWith('}') || rest.length === 0) {
+          endIdx = i;
+          break;
+        }
+      }
+    }
+    const snippet = endIdx !== -1 ? raw.substring(0, endIdx) : raw;
+    return snippet
       .replace(/\\n/g, '\n')
       .replace(/\\"/g, '"')
       .replace(/\\t/g, '\t')
-      .replace(/\\\\/g, '\\');
-    return unescaped.trim();
+      .replace(/\\r/g, '\r')
+      .replace(/\\\\/g, '\\')
+      .trim();
   }
 
-  // 3. If streaming starts with JSON '{' or '```json' before conversation key arrives
+  // 3. Text before markdown codeblock
+  const mdIdx = clean.indexOf('```');
+  if (mdIdx > 0) {
+    return clean.substring(0, mdIdx).trim();
+  }
+
+  // 4. Text before raw code
+  const codeIdx = clean.search(/(?:^|\n)\s*(?:import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/);
+  if (codeIdx > 0) {
+    return clean.substring(0, codeIdx).trim();
+  }
+
+  // 5. If streaming starts with JSON '{' or '```json' before conversation key arrives
   if (clean.startsWith('{') || clean.startsWith('```json')) {
     return '';
   }
 
-  // 4. Strip markdown code blocks including unclosed streaming code blocks
+  // 6. Strip markdown code blocks including unclosed streaming code blocks
   clean = clean.replace(/```[a-zA-Z0-9_\-+.]*(\n[\s\S]*?(?:```|$)|[\s\S]*?$)/g, '').trim();
 
-  // 5. Strip raw JSON blocks
+  // 7. Strip raw JSON blocks
   clean = clean.replace(/\{[\s\S]*?\}/g, '').trim();
 
-  // 6. Check if text is raw code imports or functions
+  // 8. Check if text is raw code imports or functions
   if (/^(import\s|export\s|function\s|const\s|class\s|<[a-zA-Z])/m.test(clean)) {
     return "Materializing requested components into the live workspace...";
   }
@@ -232,7 +484,7 @@ function App() {
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [isThinking, setIsThinking] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -242,7 +494,7 @@ function App() {
   useEffect(() => {
     try {
       const savedModel = localStorage.getItem('opendev-selectedModelId');
-      if (savedModel && savedModel !== 'gemini-1.5-pro') {
+      if (savedModel && savedModel !== 'gemini-1.5-pro' && savedModel !== 'gemini-2.0-flash' && SUPPORTED_MODELS.some(m => m.id === savedModel)) {
         setSelectedModelId(savedModel);
       } else {
         setSelectedModelId(SUPPORTED_MODELS[0].id);
@@ -547,9 +799,15 @@ function App() {
   };
 
   const isThinkingRef = useRef(false);
+  const lastSubmitTimeRef = useRef(0);
 
   const handleSendMessage = async (prompt: string) => {
-    if (isThinkingRef.current) return;
+    const now = Date.now();
+    if (isThinkingRef.current || (now - lastSubmitTimeRef.current < 600)) {
+      console.warn("Blocked duplicate submit attempt in App.tsx");
+      return;
+    }
+    lastSubmitTimeRef.current = now;
     isThinkingRef.current = true;
     setIsThinking(true);
 
@@ -626,6 +884,7 @@ function App() {
 
         const cleanText = getCleanStreamConversation(fullResponse);
         const streamFiles = extractStreamFilePaths(fullResponse);
+        const activeStreamFile = extractCurrentStreamingFile(fullResponse);
 
         if (cleanText && cleanText !== conversationText) {
           conversationText = cleanText;
@@ -633,8 +892,38 @@ function App() {
 
         setSessions(prev => prev.map(s => {
           if (s.id !== currentSessionId) return s;
+
+          // Stream code live into Monaco editor and workspace file tree in real time with real names!
+          let updatedFileTree = [...s.fileTree];
+          let updatedActiveFile = s.activeFile;
+
+          // 1. Ensure all detected files in streamFiles exist in the workspace fileTree immediately
+          for (const sf of streamFiles) {
+            if (!updatedFileTree.some(f => f.path === sf.path)) {
+              updatedFileTree.push({ path: sf.path, content: '' });
+            }
+          }
+
+          // 2. Stream code live into the file currently receiving chunks
+          if (activeStreamFile) {
+            const targetPath = activeStreamFile.path;
+            const fileIndex = updatedFileTree.findIndex(f => f.path === targetPath);
+            if (fileIndex !== -1) {
+              updatedFileTree = updatedFileTree.map((f, i) =>
+                i === fileIndex ? { ...f, content: activeStreamFile.content } : f
+              );
+              updatedActiveFile = { path: targetPath, content: activeStreamFile.content };
+            } else {
+              const newFile: FileNode = { path: targetPath, content: activeStreamFile.content };
+              updatedFileTree.push(newFile);
+              updatedActiveFile = newFile;
+            }
+          }
+
           return {
             ...s,
+            fileTree: updatedFileTree,
+            activeFile: updatedActiveFile,
             messages: s.messages.map(m => {
               if (m.id !== openStudioMessageId) return m;
               return {
@@ -642,7 +931,7 @@ function App() {
                 content: conversationText || m.content,
                 generationInfo: {
                   status: 'generating' as const,
-                  files: streamFiles.length > 0 ? streamFiles : (m.generationInfo?.files || [])
+                  files: streamFiles.length > 0 ? streamFiles : (m.generationInfo?.files || [{ path: updatedActiveFile?.path || 'src/App.tsx', action: 'created', status: 'generating' }])
                 }
               };
             })
@@ -680,8 +969,27 @@ function App() {
           }
         }
 
+        // Check if pure vanilla HTML build (no App.tsx generated)
+        const hasReactApp = generatedFileObjects.some(f => /App\.(tsx|jsx)$/.test(f.path));
+        if (!hasReactApp) {
+          const htmlFile = updatedFileTree.find(f => f.path === 'index.html' || f.path.endsWith('.html'));
+          if (htmlFile) {
+            newActiveFile = htmlFile;
+            // Purge any corrupted or phantom App.tsx so Sandpack doesn't compile them
+            updatedFileTree = updatedFileTree.filter(f => {
+              if (/App\.(tsx|jsx)$/.test(f.path)) {
+                const c = (f.content || '').trim();
+                return !(c.startsWith('{') || !c.includes('export default'));
+              }
+              return true;
+            });
+          }
+        }
+
         if (!newActiveFile && updatedFileTree.length > 0) {
-          newActiveFile = updatedFileTree.find(f => /App\.(tsx|jsx)$/.test(f.path)) || updatedFileTree[0];
+          newActiveFile = updatedFileTree.find(f => f.path === 'index.html' || f.path.endsWith('.html')) ||
+                          updatedFileTree.find(f => /App\.(tsx|jsx)$/.test(f.path)) ||
+                          updatedFileTree[0];
         }
 
         const completedGenerationFiles: GenerationFile[] = generatedFileObjects.map(f => ({
@@ -713,18 +1021,21 @@ function App() {
         };
       }));
 
+      isThinkingRef.current = false;
+      setIsThinking(false);
+
       if (generatedFileObjects.length > 0) {
         const lastUserPrompt = prompt;
         const generatedFilePaths = generatedFileObjects.map(f => f.path);
         const suggestionContext = `Based on the user's request to "${lastUserPrompt}", I have generated or modified the following files: ${generatedFilePaths.join(', ')}.`;
-        const newSuggestions = await generateSuggestions(suggestionContext);
-
-        setSessions(prevSessions => prevSessions.map(s => {
-          if (s.id === currentSessionId) {
-            return { ...s, suggestions: newSuggestions };
-          }
-          return s;
-        }));
+        generateSuggestions(suggestionContext).then(newSuggestions => {
+          setSessions(prevSessions => prevSessions.map(s => {
+            if (s.id === currentSessionId) {
+              return { ...s, suggestions: newSuggestions };
+            }
+            return s;
+          }));
+        }).catch(err => console.warn("Failed to generate suggestions:", err));
       }
 
     } catch (error) {
@@ -763,6 +1074,7 @@ function App() {
         onDeleteSession={handleDeleteSession}
         activeView={view}
         activeChatId={activeSessionId}
+        isOpen={isSidebarOpen}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
       />
       

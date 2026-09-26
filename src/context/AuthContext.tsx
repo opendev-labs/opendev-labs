@@ -20,6 +20,8 @@ export interface AuthUser {
   role: UserRole;
   clientId?: string;
   avatar?: string;
+  phoneNumber?: string;
+  githubHandle?: string;
   authMethod?: 'google' | 'password' | 'github' | 'phone' | string;
 }
 
@@ -389,9 +391,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const freshUser = auth.currentUser || firebaseUser;
-        const cleanEmail = (freshUser.email || '').toLowerCase().trim();
+        let savedUser: any = null;
+        try {
+          const s = localStorage.getItem('opendev_auth_user');
+          if (s) savedUser = JSON.parse(s);
+        } catch (_) {}
+
+        const emailToUse = freshUser.email || (savedUser?.id === freshUser.uid ? savedUser.email : '') || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : '');
+        const cleanEmail = (emailToUse || '').toLowerCase().trim();
         const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
-        const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
+        const existingRegistered = cleanEmail ? registeredUsers.find(u => u.email.toLowerCase() === cleanEmail) : undefined;
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
         let avatarUrl = freshUser.photoURL || undefined;
@@ -401,6 +410,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             avatarUrl = providerWithPhoto.photoURL;
           }
         }
+        if (!avatarUrl && savedUser?.id === freshUser.uid && savedUser.avatar) {
+          avatarUrl = savedUser.avatar;
+        }
+
         // Cache bust if GitHub or Google avatar to ensure updated pictures reflect immediately
         if (avatarUrl && avatarUrl.includes('githubusercontent.com') && !avatarUrl.includes('&t=') && !avatarUrl.includes('?t=')) {
           avatarUrl = avatarUrl.includes('?') ? `${avatarUrl}&t=${Date.now()}` : `${avatarUrl}?t=${Date.now()}`;
@@ -415,14 +428,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? 'password'
           : 'google';
 
+        const nameToUse = freshUser.displayName || (savedUser?.id === freshUser.uid ? savedUser.name : '') || (freshUser.phoneNumber ? freshUser.phoneNumber : emailToUse ? emailToUse.split('@')[0] : 'Member');
+
         setUser({
           id: freshUser.uid,
-          name: freshUser.displayName || (freshUser.phoneNumber ? freshUser.phoneNumber : freshUser.email ? freshUser.email.split('@')[0] : 'User'),
-          email: freshUser.email || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : ''),
+          name: nameToUse,
+          email: emailToUse,
           role: role,
           clientId: existingRegistered?.clientId,
           authMethod: detectedAuthMethod,
           avatar: avatarUrl,
+          githubHandle: savedUser?.id === freshUser.uid ? savedUser.githubHandle : undefined,
         });
 
         // Non-blocking presence update in Firestore
@@ -432,6 +448,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             lastSeen: serverTimestamp(),
             ...(avatarUrl ? { avatar: avatarUrl } : {}),
             authMethod: detectedAuthMethod,
+            name: nameToUse,
+            email: emailToUse,
           }, { merge: true }).catch(e => console.warn("Presence bg update error:", e));
         }
       }

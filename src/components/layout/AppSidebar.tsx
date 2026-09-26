@@ -379,10 +379,10 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
             {(!collapsed || mobileOpen) && (
               <div className="flex flex-col min-w-0">
                 <span className="text-xs font-bold text-zinc-900 dark:text-white truncate">
-                  {user?.name || 'Yash Ramteke'}
+                  {user?.name || 'User'}
                 </span>
                 <span className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate">
-                  {user?.email || 'opendev.office@gmail.com'}
+                  {user?.email || ''}
                 </span>
               </div>
             )}

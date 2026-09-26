@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 type SettingsTab = 'general' | 'team' | 'billing' | 'tokens';
 
 export const SettingsPage: React.FC = () => {
-    const { user, loginWithGitHub } = useAuth();
+    const { user, loginWithGitHub, isGithubConnected, githubUser } = useAuth();
     const [activeTab, setActiveTab] = useState<SettingsTab>('general');
     const [isLoading, setIsLoading] = useState(false);
 
@@ -91,14 +91,22 @@ export const SettingsPage: React.FC = () => {
                                                 <div>
                                                     <p className="text-white text-sm font-bold">GitHub</p>
                                                     <p className="text-zinc-600 text-xs mt-1">
-                                                        {user?.providers?.includes('github.com')
-                                                            ? `Connected as ${user?.email}`
+                                                        {isGithubConnected || githubUser || user?.providers?.includes('github.com')
+                                                            ? `Connected as @${githubUser?.login || user?.name || user?.email}`
                                                             : 'Not connected'}
                                                     </p>
                                                 </div>
                                             </div>
-                                            {user?.providers?.includes('github.com') ? (
-                                                <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest px-2 py-1 bg-emerald-500/10 border border-emerald-500/20">Connected</span>
+                                            {isGithubConnected || githubUser || user?.providers?.includes('github.com') ? (
+                                                <div className="flex items-center gap-3">
+                                                    <span className="text-xs font-bold text-emerald-500 uppercase tracking-widest px-2 py-1 bg-emerald-500/10 border border-emerald-500/20">Connected</span>
+                                                    <Button size="sm" variant="ghost" className="text-xs text-zinc-400 hover:text-red-400" onClick={() => {
+                                                        localStorage.removeItem('opendev_gh_token');
+                                                        localStorage.removeItem('github_pat');
+                                                        localStorage.removeItem('github_username');
+                                                        window.location.reload();
+                                                    }}>Disconnect</Button>
+                                                </div>
                                             ) : (
                                                 <Button size="sm" variant="outline" onClick={async () => {
                                                     try {

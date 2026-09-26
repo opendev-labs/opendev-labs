@@ -238,7 +238,16 @@ export const AuthPage: React.FC = () => {
       if (!auth) throw new Error('Firebase not initialised');
       const provider = new GithubAuthProvider();
       provider.addScope('user:email');
+      provider.addScope('read:user');
+      // Prompt select_account so GitHub asks which account to authorize and allows switching accounts
+      provider.setCustomParameters({ prompt: 'select_account' });
       const result = await signInWithPopup(auth, provider);
+
+      // Save user's GitHub access token to localStorage so OpenStudio connects to their personal GitHub
+      const credential = GithubAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        localStorage.setItem('opendev_gh_token', credential.accessToken);
+      }
 
       try {
         await result.user.reload();
@@ -250,21 +259,30 @@ export const AuthPage: React.FC = () => {
       const addInfo = getAdditionalUserInfo(result);
       const profile = addInfo?.profile as Record<string, any> | undefined;
 
-      let avatar = profile?.avatar_url || gu.photoURL || '';
+      const githubLogin = profile?.login || '';
+      let avatar = profile?.avatar_url || gu.photoURL || (githubLogin ? `https://github.com/${githubLogin}.png` : '');
       if (avatar) {
         avatar = avatar.includes('?') ? `${avatar}&t=${Date.now()}` : `${avatar}?t=${Date.now()}`;
       }
 
-      const email = (gu.email || profile?.email || '').toLowerCase().trim();
-      const displayName = gu.displayName || profile?.name || profile?.login || (email ? email.split('@')[0] : 'GitHub User');
+      const displayName = gu.displayName || profile?.name || githubLogin || 'GitHub User';
+      const email = (
+        gu.email ||
+        profile?.email ||
+        (githubLogin ? `${githubLogin}@github.opendev-labs.com` : `user-${gu.uid.slice(0, 6)}@opendev-labs.com`)
+      ).toLowerCase().trim();
+
+      const isDev = email === 'opendev-labs.office@gmail.com' || email === 'opendev.office@gmail.com';
+      const userRole = isDev ? 'developer' : 'user';
 
       if (db) {
         await setDoc(doc(db, 'users', gu.uid), {
           id: gu.uid,
           name: displayName,
+          githubHandle: githubLogin,
           email: email,
           avatar: avatar,
-          role: 'user',
+          role: userRole,
           authMethod: 'github',
           online: true,
           lastSeen: serverTimestamp(),
@@ -272,8 +290,8 @@ export const AuthPage: React.FC = () => {
         }, { merge: true }).catch(() => {});
       }
 
-      loginWithGoogle(email || undefined, displayName, avatar, 'github');
-      handlePostLogin(email || 'github-user@opendev-labs.com');
+      loginWithGoogle(email, displayName, avatar, 'github');
+      handlePostLogin(email);
     } catch (err: any) {
       if (!err?.message?.includes('closed_by_user')) {
         setErrorMessage(err?.message || 'GitHub Sign-In failed.');

@@ -84,9 +84,8 @@ Do NOT output raw markdown syntax like double asterisks (**bold**), single aster
   // Try requested model first, then fallback models if 404 occurs
   const candidateModels = Array.from(new Set([
     model,
-    'google/gemini-2.0-flash-exp:free',
-    'google/gemini-flash-1.5',
-    'google/gemini-2.0-flash-lite-001',
+    'qwen/qwen-2.5-coder-32b-instruct',
+    'google/gemini-2.5-flash',
     'openai/gpt-4o-mini',
     'anthropic/claude-3.5-sonnet'
   ]));
@@ -108,6 +107,7 @@ Do NOT output raw markdown syntax like double asterisks (**bold**), single aster
           model: currentModel,
           messages: fullMessages,
           temperature: 0.2,
+          max_tokens: 4096,
         })
       });
 

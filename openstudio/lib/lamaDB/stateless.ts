@@ -185,6 +185,7 @@ export class LamaAuthService {
         const provider = new GithubAuthProvider();
         provider.addScope('repo');
         provider.addScope('user');
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         try {
             const result = await signInWithPopup(this.auth, provider);
@@ -216,6 +217,7 @@ export class LamaAuthService {
         const provider = new GithubAuthProvider();
         provider.addScope('repo');
         provider.addScope('user');
+        provider.setCustomParameters({ prompt: 'select_account' });
 
         try {
             const result = await linkWithPopup(this.auth.currentUser, provider);

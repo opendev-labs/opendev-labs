@@ -35,8 +35,8 @@ export function ChatView({ messages, isThinking, onSendMessage, suggestions, sel
         })()}
         {isThinking && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
            <div className="animate-pulse flex items-center gap-3 px-8 text-zinc-600">
-             <div className="w-1.5 h-1.5 rounded-full bg-zinc-600" />
-             <span className="text-[12px] font-medium lowercase">Nexus is thinking...</span>
+             <div className="w-1.5 h-1.5 rounded-full bg-[#00f2fe]" />
+             <span className="text-[12px] font-medium text-zinc-400 font-mono">TARS is thinking...</span>
            </div>
         )}
         <div className="h-32" /> {/* Space for floating input */}

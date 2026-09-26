@@ -27,6 +27,7 @@ const getApiKeyFromEnv = (provider: string): string | undefined => {
             );
         case 'OpenRouter':
             return (
+                localStorage.getItem('openrouter_api_key') ||
                 localStorage.getItem('opendev-openRouterApiKey') ||
                 import.meta.env.VITE_OPENROUTER_API_KEY ||
                 import.meta.env.OPENROUTER_API_KEY ||
@@ -54,28 +55,46 @@ const getApiKeyFromEnv = (provider: string): string | undefined => {
     }
 };
 
-const TARS_SYSTEM_INSTRUCTION_GENERIC = `You are OpenStudio Intelligence v2026 — official AI Web Generator & Designer for OpenDev Labs. You are an elite $1M AI Master Engineer, Principal Web Designer, and Full-Stack Architect.
+const TARS_SYSTEM_INSTRUCTION_GENERIC = `You are TARS — Lead AI Principal Engineer, Elite Creative Technologist & 24/7 Autonomous Full-Stack Copilot for OpenDev Labs. You engineer award-winning, $1M-tier web experiences and software architectures modeled directly after opendev-labs.com and vishwaleder.com.
 
-YOUR DOMAIN MASTERY & CAPABILITIES:
-1. VANILLA WEB EXPERT (HTML5 + CSS3 + JS ES6+):
-   - You build pure, ultra-clean HTML5, responsive CSS3 (Flexbox, CSS Grid, CSS Variables, Glassmorphism, Neumorphism, CSS Keyframe Animations), and Vanilla Modern JS (DOM APIs, Canvas, SVG, Fetch API).
-2. REACT & NEXT.JS EXPERT:
-   - You build production-grade React 18/19 Single-Page Apps & Next.js Applications.
-   - Use TailwindCSS classes, Lucide Icons, interactive state, and modern component architecture.
-3. PRINCIPAL WEB DESIGNER & AESTHETICS MASTER:
-   - Max Visual Fidelity: Cinematic dark mode, glassmorphism, glowing accents, smooth micro-interactions, responsive mobile-first layouts, and typography hierarchy.
+ELITE DOMAIN MASTERY & $1M ARCHITECTURAL STANDARDS:
+1. DESIGN SYSTEM & VISUAL EXCELLENCE (opendev-labs.com & vishwaleder.com TIER):
+   • Deep Obsidian Dark Aesthetics: Primary canvas #050505 / #09090b, elevated surfaces #0e0e12 / #18181b, precision borders border-zinc-800/80 or border-white/10.
+   • Hero Spotlights & Cyber Glows: Radial gradient ambient spotlights (e.g. from-violet-600/20 via-indigo-600/10 to-transparent, or cyan/blue glows), subtle grid scanlines.
+   • Interactive 3D Canvas & Three.js Mastery:
+     - For hero backgrounds and interactive showcases, implement 60fps HTML5 Canvas or Three.js particle networks responding dynamically to mouse movement, connecting nodes with proximity lines and ambient light pulses.
+   • Anime.js & Fluid Micro-Interactions:
+     - Ultra-smooth physics, hover scale transitions (hover:scale-[1.02] active:scale-[0.98]), glowing gradient border cards, pill badges with live pulsing emerald dots.
+     - Dynamic typewriter headings, bento grids with variable span layouts, interactive pricing toggle cards (monthly vs annual), animated FAQ accordions, and statistics counters.
+   • Typography & Copywriting:
+     - Crisp modern typography (Plus Jakarta Sans, Inter, Outfit).
+     - Authoritative, enterprise-grade copy (NO dummy placeholders or "lorem ipsum").
 
-CRITICAL CODE GENERATION RULES:
-1. ALWAYS provide full, complete, production-ready code — NEVER use diff snippets, placeholders, or "// TODO" comments.
-2. For React web applications, ALWAYS provide complete, fully styled, working code in \`src/App.tsx\` and \`src/index.css\`.
-3. Ensure every UI component is fully dynamic with state (\`useState\`, \`useEffect\`), interactive controls (buttons, inputs, tabs, search, forms), realistic mock data, and high-fidelity styling.
+2. ENGINE ALLOCATION: FRONTEND SANDPACK vs PYTHON DEVBOX VM:
+   • FRONTEND (REACT / NEXT-GEN WEBAPPS / THREE.JS / ANIME.JS / VANILLA HTML):
+     - Target Engine: Fast Sandpack (in-browser zero-latency bundler).
+     - For React apps: Write full production code in \`src/App.tsx\` and \`src/index.css\`.
+     - ALWAYS use \`export default function App() { ... }\` for seamless mounting.
+     - Brand OAuth Icons: lucide-react does NOT export "Google" or "Apple" icons. Use inline SVG components or valid icons (Github, Chrome, Globe, Shield).
+     - For pure vanilla HTML: Generate standalone \`index.html\` with CDN Tailwind and embedded scripts.
+   • PYTHON BACKENDS & FULL-STACK APPS:
+     - Target Engine: CodeDevBox VM (Linux runtime container).
+     - Structure: Complete \`main.py\` (FastAPI, Flask, or CLI script) and \`requirements.txt\`.
+     - Include full CORS middleware, Pydantic request/response schemas, and comprehensive endpoints.
+
+3. TERMINAL & CONSOLE MONITORING & AUTO-REPAIR:
+   • You are connected to the live DevBox VM terminal, Monaco editor diagnostics, and preview console logs.
+   • When the user or system provides error logs, compiler diagnostics, or console warnings:
+     - Diagnose the exact failing file, line, missing import, or broken syntax.
+     - Provide a complete fix with updated, working files (action: "modified" or "created").
+     - Explain clearly what caused the issue and how you resolved it in your conversational statement.
 
 RESPONSE FORMAT RULES:
-1. ALWAYS begin with a concise conversational statement in natural language explaining what you are building (e.g., "I understand you want a modern login page. I am materializing src/App.tsx with glassmorphism and animations now...").
-2. NEVER include code dumps, raw JSON brackets, or raw code blocks in the conversational bubble.
+1. ALWAYS begin with a concise conversational statement in natural language explaining what you are building (e.g., "TARS report: Engineering a $1M tech platform with interactive 3D particle canvas and glassmorphic bento grid...").
+2. NEVER include raw code dumps, unescaped JSON brackets, or markdown code blocks in the conversational bubble.
 3. Provide your output as a valid JSON object with "conversation" and "files" array:
 {
-  "conversation": "I understand your requirement for [x]. Materializing components now...",
+  "conversation": "TARS report: Materializing requested components...",
   "files": [
     {
       "path": "src/App.tsx",
@@ -166,14 +185,20 @@ async function* streamOpenAICompatibleResponse(fullPrompt: string, history: Mess
         { role: 'user', content: fullPrompt }
     ];
 
-    const response = await fetch(`${apiBaseUrl}/chat/completions`, {
+    // Specify max_tokens to prevent OpenRouter from reserving full model context against credit balance
+    const maxTokens = modelConfig.provider === 'OpenRouter' ? 4096 : 8192;
+
+    const requestPayload: any = {
+        model: modelConfig.apiIdentifier,
+        messages: messages,
+        stream: true,
+        max_tokens: maxTokens,
+    };
+
+    let response = await fetch(`${apiBaseUrl}/chat/completions`, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({
-            model: modelConfig.apiIdentifier,
-            messages: messages,
-            stream: true,
-        })
+        body: JSON.stringify(requestPayload)
     });
 
     if (!response.ok) {
@@ -182,11 +207,33 @@ async function* streamOpenAICompatibleResponse(fullPrompt: string, history: Mess
             const errorBody = await response.json();
             errorMessage = errorBody?.error?.message || errorMessage;
             console.error(`API Error from ${modelConfig.provider}:`, errorBody);
+
+            // If OpenRouter credit limit / token affordability error is encountered, auto-retry with compact max_tokens
+            if (modelConfig.provider === 'OpenRouter' && (errorMessage.includes('fewer max_tokens') || errorMessage.includes('more credits') || response.status === 402)) {
+                console.warn("OpenRouter token affordability limit reached, retrying with optimized max_tokens budget (2048)...");
+                const retryResponse = await fetch(`${apiBaseUrl}/chat/completions`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        ...requestPayload,
+                        max_tokens: 2048,
+                    })
+                });
+                if (retryResponse.ok) {
+                    response = retryResponse;
+                    errorMessage = '';
+                } else {
+                    const retryErr = await retryResponse.json();
+                    errorMessage = retryErr?.error?.message || errorMessage;
+                }
+            }
         } catch (e) {
             const errorText = await response.text();
             console.error(`API Error from ${modelConfig.provider}:`, errorText);
         }
-        throw new Error(errorMessage);
+        if (!response.ok) {
+            throw new Error(errorMessage);
+        }
     }
 
     if (!response.body) {
@@ -391,8 +438,13 @@ export async function* streamChatResponse(
         return;
     }
 
-    // Resolve Effective API Key: LocalStorage > User Profile > Env Vars
-    let effectiveApiKey: string | undefined = localStorage.getItem(`opendev-${modelConfig.provider.toLowerCase()}ApiKey`) || undefined;
+    // Resolve Effective API Key: LocalStorage (with 24/7 support key support) > User Profile > Env Vars
+    let effectiveApiKey: string | undefined = undefined;
+    if (modelConfig.provider === 'OpenRouter') {
+        effectiveApiKey = localStorage.getItem('openrouter_api_key') || localStorage.getItem('opendev-openRouterApiKey') || undefined;
+    } else {
+        effectiveApiKey = localStorage.getItem(`opendev-${modelConfig.provider.toLowerCase()}ApiKey`) || undefined;
+    }
 
     if (!effectiveApiKey && userProfile) {
         const { decryptApiKey } = await import('../../../lib/crypto');
@@ -442,7 +494,7 @@ export async function* streamChatResponse(
                 try {
                     yield* streamGeminiResponse(fullPrompt, history, modelConfig, effectiveApiKey);
                 } catch (geminiErr) {
-                    console.warn("Gemini API failed, attempting automatic failover to OpenRouter...", geminiErr);
+                    console.warn("Gemini API failed, attempting automatic failover to OpenRouter Qwen 2.5 Coder...", geminiErr);
                     const openRouterKey = getApiKeyFromEnv('OpenRouter') || (userProfile && userProfile.openRouterApiKey);
                     if (openRouterKey) {
                         const fallbackModel: ModelConfig = {
@@ -462,9 +514,24 @@ export async function* streamChatResponse(
                 yield* streamOllamaResponse(fullPrompt, history, modelConfig);
                 break;
 
+            case 'OpenRouter':
+                try {
+                    yield* streamOpenAICompatibleResponse(fullPrompt, history, modelConfig, effectiveApiKey || "");
+                } catch (openRouterErr) {
+                    console.warn("OpenRouter API failed, attempting automatic failover to Google Gemini 2.5 Flash...", openRouterErr);
+                    const fallbackModel: ModelConfig = {
+                        id: 'gemini-2.5-flash',
+                        name: 'Gemini 2.5 Flash',
+                        provider: 'Google',
+                        apiIdentifier: 'gemini-2.5-flash'
+                    };
+                    const geminiKey = getApiKeyFromEnv('Google');
+                    yield* streamGeminiResponse(fullPrompt, history, fallbackModel, geminiKey);
+                }
+                break;
+
             case 'OpenAI':
             case 'DeepSeek':
-            case 'OpenRouter':
                 yield* streamOpenAICompatibleResponse(fullPrompt, history, modelConfig, effectiveApiKey || "");
                 break;
 
@@ -493,22 +560,6 @@ export async function* streamChatResponse(
         }
     } catch (error) {
         console.error(`Error with ${modelConfig.provider} API:`, error);
-        const openRouterKey = getApiKeyFromEnv('OpenRouter');
-        if (openRouterKey && modelConfig.provider !== 'OpenRouter') {
-            try {
-                console.log("Attempting final recovery via OpenRouter Qwen 2.5 Coder...");
-                const fallbackModel: ModelConfig = {
-                    id: 'openrouter-qwen-2-5-coder',
-                    name: 'Qwen 2.5 Coder 32B (OpenRouter)',
-                    provider: 'OpenRouter',
-                    apiIdentifier: 'qwen/qwen-2.5-coder-32b-instruct'
-                };
-                yield* streamOpenAICompatibleResponse(fullPrompt, history, fallbackModel, openRouterKey);
-                return;
-            } catch (fallbackError) {
-                console.error("OpenRouter fallback also failed:", fallbackError);
-            }
-        }
         const errorMsg = error instanceof Error ? error.message : "An unknown error occurred.";
         const errJson = JSON.stringify({ conversation: `An error occurred with ${modelConfig.provider}: ${errorMsg}`, files: [] });
         yield { text: errJson };

@@ -23,14 +23,35 @@ const EXCLUDED_PACKAGES = new Set([
   'tailwindcss', 'postcss', 'autoprefixer',
 ]);
 
+function extractPackageName(rawImport: string): string | null {
+  if (!rawImport || rawImport.startsWith('.') || rawImport.startsWith('/')) {
+    return null;
+  }
+  const parts = rawImport.trim().split('/');
+  if (rawImport.startsWith('@')) {
+    // Scoped package: needs at least 2 parts (e.g., @scope/pkg)
+    if (parts.length >= 2 && parts[1]) {
+      return `${parts[0]}/${parts[1]}`;
+    }
+    return null; // Bare @scope is not an installable package
+  }
+  return parts[0];
+}
+
 /**
  * Scan all file contents for import statements and extract npm package names.
  */
 function detectDependencies(files: FileNode[]): Record<string, string> {
-  const deps: Record<string, string> = {};
+  const deps: Record<string, string> = {
+    'lucide-react': 'latest',
+    'framer-motion': 'latest',
+    'clsx': 'latest',
+    'tailwind-merge': 'latest',
+    '@iconify/react': 'latest',
+  };
 
   // Match both: import x from 'pkg' and import 'pkg' and require('pkg')
-  const importRegex = /(?:import\s+(?:[\w\s{},*]+\s+from\s+)?['"]([^'"./][^'"]*?)(?:\/[^'"]*)?['"]|require\s*\(\s*['"]([^'"./][^'"]*?)(?:\/[^'"]*)?['"]\s*\))/g;
+  const importRegex = /(?:import\s+(?:[\w\s{},*]+\s+from\s+)?['"]([^'"./][^'"]+)['"]|require\s*\(\s*['"]([^'"./][^'"]+)['"]\s*\))/g;
 
   for (const file of files) {
     if (!file.content) continue;
@@ -39,16 +60,12 @@ function detectDependencies(files: FileNode[]): Record<string, string> {
 
     let match: RegExpExecArray | null;
     while ((match = importRegex.exec(file.content)) !== null) {
-      const pkg = match[1] || match[2];
+      const rawPkg = match[1] || match[2];
+      const pkg = extractPackageName(rawPkg);
       if (!pkg) continue;
 
-      // Extract the root package name (handle scoped packages like @org/pkg)
-      const rootPkg = pkg.startsWith('@')
-        ? pkg.split('/').slice(0, 2).join('/')
-        : pkg.split('/')[0];
-
-      if (!BUILT_IN_MODULES.has(rootPkg) && !EXCLUDED_PACKAGES.has(rootPkg)) {
-        deps[rootPkg] = 'latest';
+      if (!BUILT_IN_MODULES.has(pkg) && !EXCLUDED_PACKAGES.has(pkg)) {
+        deps[pkg] = 'latest';
       }
     }
   }
@@ -117,6 +134,21 @@ import App from '../${appImport}';
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);
 `;
+    }
+  }
+
+  // Sanitize all CSS files to prevent Vite PostCSS from failing when looking for npm package 'tailwindcss'
+  for (const path of Object.keys(sandpackFiles)) {
+    if (path.endsWith('.css') && typeof sandpackFiles[path] === 'string') {
+      sandpackFiles[path] = sandpackFiles[path]
+        .replace(/@import\s+['"]tailwindcss['"];?/g, '/* tailwindcss loaded via CDN */')
+        .replace(/@import\s+['"]tailwindcss\/[^'"]+['"];?/g, '/* tailwindcss loaded via CDN */')
+        .replace(/@tailwind\s+[a-zA-Z]+;?/g, '/* tailwindcss loaded via CDN */');
+    }
+
+    // Normalize any bare @iconify imports to @iconify/react
+    if (/\.(tsx?|jsx?|js|ts)$/.test(path) && typeof sandpackFiles[path] === 'string') {
+      sandpackFiles[path] = sandpackFiles[path].replace(/from\s+['"]@iconify['"]/g, "from '@iconify/react'");
     }
   }
 

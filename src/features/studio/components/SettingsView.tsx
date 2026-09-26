@@ -7,7 +7,7 @@ export function SettingsView() {
     const { user, profile, updateProfile } = useAuth();
     
     const [apiKeys, setApiKeys] = useState({
-        openRouterApiKey: localStorage.getItem('opendev-openRouterApiKey') || profile?.openRouterApiKey || '',
+        openRouterApiKey: localStorage.getItem('openrouter_api_key') || localStorage.getItem('opendev-openRouterApiKey') || profile?.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '',
         geminiApiKey: localStorage.getItem('opendev-geminiApiKey') || profile?.geminiApiKey || '',
         openaiApiKey: localStorage.getItem('opendev-openaiApiKey') || profile?.openaiApiKey || '',
         deepseekApiKey: localStorage.getItem('opendev-deepseekApiKey') || profile?.deepseekApiKey || '',
@@ -17,7 +17,7 @@ export function SettingsView() {
     const [savedNotice, setSavedNotice] = useState(false);
 
     useEffect(() => {
-        const localOpenRouter = localStorage.getItem('opendev-openRouterApiKey');
+        const localOpenRouter = localStorage.getItem('openrouter_api_key') || localStorage.getItem('opendev-openRouterApiKey') || import.meta.env.VITE_OPENROUTER_API_KEY;
         const localGemini = localStorage.getItem('opendev-geminiApiKey');
         const localOpenai = localStorage.getItem('opendev-openaiApiKey');
         const localDeepseek = localStorage.getItem('opendev-deepseekApiKey');
@@ -34,14 +34,23 @@ export function SettingsView() {
         setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }));
     };
 
+    const handleResetToAdminSupportKey = () => {
+        localStorage.removeItem('opendev-openRouterApiKey');
+        const adminKey = localStorage.getItem('openrouter_api_key') || import.meta.env.VITE_OPENROUTER_API_KEY || '';
+        setApiKeys(prev => ({ ...prev, openRouterApiKey: adminKey }));
+        toast.success("Switched to Admin 24/7 Support API Key!");
+    };
+
     const handleSaveKeys = async () => {
         setIsSaving(true);
         try {
-            // Store directly in browser localStorage so guest & unauthenticated sessions work immediately
+            // Store in both openrouter_api_key (24/7 Support Engine) and opendev-openRouterApiKey for complete sync
             if (apiKeys.openRouterApiKey.trim()) {
                 localStorage.setItem('opendev-openRouterApiKey', apiKeys.openRouterApiKey.trim());
+                localStorage.setItem('openrouter_api_key', apiKeys.openRouterApiKey.trim());
             } else {
                 localStorage.removeItem('opendev-openRouterApiKey');
+                localStorage.removeItem('openrouter_api_key');
             }
 
             if (apiKeys.geminiApiKey.trim()) {
@@ -130,11 +139,21 @@ export function SettingsView() {
                                 <label className="block text-xs font-bold text-zinc-300">
                                     OpenRouter API Key <span className="text-emerald-400 text-[10px] font-semibold">(Recommended)</span>
                                 </label>
-                                {apiKeys.openRouterApiKey && (
-                                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
-                                    </span>
-                                )}
+                                <div className="flex items-center gap-2">
+                                    {apiKeys.openRouterApiKey && (
+                                        <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Active
+                                        </span>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={handleResetToAdminSupportKey}
+                                        className="text-[10px] text-zinc-400 hover:text-emerald-400 underline transition-colors cursor-pointer"
+                                        title="Reset and synchronize with Admin 24/7 Support API Key"
+                                    >
+                                        Use 24/7 Support Key
+                                    </button>
+                                </div>
                             </div>
                             <div className="relative">
                                 <input
@@ -152,9 +171,21 @@ export function SettingsView() {
                                     {showKeys['openRouter'] ? "Hide" : "Show"}
                                 </button>
                             </div>
-                            <p className="text-[10px] text-zinc-500 mt-1">
-                                Unlocks all models (Qwen 2.5 Coder, DeepSeek R1, Claude 3.5 Sonnet, Llama 3) via <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-[#f02050] hover:underline">openrouter.ai/keys</a>.
-                            </p>
+                            <div className="flex items-center justify-between text-[10px] text-zinc-500 mt-1">
+                                <span>Unlocks Qwen 2.5 Coder, DeepSeek, Claude 3.5 via 24/7 Support Engine.</span>
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        localStorage.removeItem('opendev-openRouterApiKey');
+                                        localStorage.removeItem('openrouter_api_key');
+                                        setApiKeys(prev => ({ ...prev, openRouterApiKey: '' }));
+                                        toast.info("OpenRouter API key removed.");
+                                    }}
+                                    className="text-zinc-500 hover:text-red-400 transition-colors"
+                                >
+                                    Clear key
+                                </button>
+                            </div>
                         </div>
 
                         {/* GEMINI KEY */}

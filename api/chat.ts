@@ -29,8 +29,10 @@ export default async function handler(req: Request) {
       });
     }
 
-    // Normalize model name - strip any "models/" prefix
-    const rawModel = model || 'gemini-2.0-flash';
+    // Normalize model name - strip any "models/" prefix and map deprecated models
+    const rawModel = (!model || model === 'gemini-2.0-flash' || model === 'gemini-2.0-flash-exp') 
+        ? 'gemini-2.5-flash' 
+        : model;
     const modelId = rawModel.replace(/^models\//, '');
     
     // Prepare system instruction part safely

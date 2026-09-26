@@ -48,8 +48,8 @@ export const UserSecurityPage: React.FC = () => {
     user?.email?.toLowerCase().endsWith('@gmail.com') ||
     user?.id?.startsWith('user-g-');
 
-  const userName = user?.name || (user?.email ? user.email.split('@')[0] : 'Yash Ramteke');
-  const userEmail = user?.email || 'yashramteke55555@gmail.com';
+  const userName = user?.name || (user?.email ? user.email.split('@')[0] : 'Member');
+  const userEmail = user?.email || 'user@opendev-labs.com';
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto text-zinc-900 dark:text-zinc-100 font-sans">

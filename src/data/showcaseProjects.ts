@@ -92,8 +92,8 @@ export const showcaseProjects: ShowcaseProject[] = [
   {
     id: 'ebookstall',
     name: 'EbookStall Platform',
-    url: 'https://ebookstall.vercel.app/',
-    displayUrl: 'ebookstall.vercel.app',
+    url: 'https://ebookstall.opendev-labs.com/',
+    displayUrl: 'ebookstall.opendev-labs.com',
     category: 'experimental',
     categoryLabel: 'Digital Storefront',
     badgeColor: 'hover:border-rose-500',

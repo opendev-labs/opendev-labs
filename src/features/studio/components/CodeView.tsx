@@ -25,6 +25,7 @@ interface CodeViewProps {
     onDeleteFileOrFolder: (path: string, isFile: boolean) => void;
     onRenameFileOrFolder: (oldPath: string, newPath: string, isFile: boolean) => void;
     activeTab: 'code' | 'preview';
+    onFixError?: (errorPrompt: string) => void;
 }
 
 type TreeNode = {
@@ -152,7 +153,15 @@ const FileTreeView: React.FC<{
                                         <span className="truncate">{name}</span>
                                     </div>
                                     <div className="flex items-center gap-2 flex-shrink-0">
-                                        {generationStatusMap.get(currentPath)?.status === 'generating' && <SpinnerIcon className="w-3.5 h-3.5 animate-spin text-gray-500" />}
+                                        {generationStatusMap.get(currentPath)?.status === 'generating' && (
+                                            <svg className="w-3.5 h-3.5 animate-spin text-[#00f2fe]" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                        )}
+                                        {generationStatusMap.get(currentPath)?.status === 'complete' && (
+                                            <span className="text-[9px] font-mono text-emerald-400 font-bold">✓</span>
+                                        )}
                                     </div>
                                 </button>
                                 <div className="absolute top-1/2 -translate-y-1/2 right-1 flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 rounded-md">
@@ -191,26 +200,42 @@ const FileTreeView: React.FC<{
 
 // Client-side & Cloud DevBox VM powered live preview engine
 import { LiveDevBoxPreview } from './LiveDevBoxPreview';
-const PreviewPane: React.FC<{ files: FileNode[] }> = ({ files }) => {
-    return <LiveDevBoxPreview files={files} />;
+const PreviewPane: React.FC<{ files: FileNode[]; onFixError?: (prompt: string) => void }> = ({ files, onFixError }) => {
+    return <LiveDevBoxPreview files={files} onFixError={onFixError} />;
 };
 
-export function CodeView({ session, setActiveFile, onFileContentChange, generationInfo, onAddFileOrFolder, onDeleteFileOrFolder, onRenameFileOrFolder, activeTab }: CodeViewProps) {
+export function CodeView({ session, setActiveFile, onFileContentChange, generationInfo, onAddFileOrFolder, onDeleteFileOrFolder, onRenameFileOrFolder, activeTab, onFixError }: CodeViewProps) {
     const { fileTree, activeFile } = session;
     const [rootCreating, setRootCreating] = useState<'file' | 'folder' | null>(null);
     const [isFileTreeVisible, setIsFileTreeVisible] = useState(true);
     const [isTerminalOpen, setIsTerminalOpen] = useState(true);
     const [activeTerminalTab, setActiveTerminalTab] = useState<'terminal' | 'problems' | 'output' | 'debug' | 'ports'>('terminal');
     const [terminalInput, setTerminalInput] = useState('');
+    const [problems, setProblems] = useState<{ message: string; line: number; severity: string }[]>([]);
     const [terminalLogs, setTerminalLogs] = useState<string[]>([
         'VITE v6.3.5  ready in 149 ms',
         '➜  Local:   http://localhost:5173/',
         '➜  Network: use --host to expose',
         '➜  press h + enter to show help',
-        '✔  Agent Engine: OpenStudio Intelligence Materializer Connected.',
+        '✔  Agent Engine: TARS Live Terminal & Console Inspector Connected.',
     ]);
     const inputRef = useRef<HTMLInputElement>(null);
     const terminalEndRef = useRef<HTMLDivElement>(null);
+    const monacoEditorRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (monacoEditorRef.current && generationInfo?.status === 'generating') {
+            try {
+                const model = monacoEditorRef.current.getModel();
+                if (model) {
+                    const lineCount = model.getLineCount();
+                    monacoEditorRef.current.revealLine(lineCount);
+                }
+            } catch (e) {
+                // Ignore transient scroll errors
+            }
+        }
+    }, [activeFile?.content, generationInfo?.status]);
 
     useEffect(() => {
         if (generationInfo && generationInfo.files.length > 0) {
@@ -240,11 +265,22 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
             setTerminalInput('');
             return;
         }
+
+        if (cmd.toLowerCase().includes('fix') || cmd.toLowerCase().includes('tars') || cmd.toLowerCase().includes('build') || cmd.toLowerCase().includes('error')) {
+            response = `⚡ TARS Agent dispatched to inspect workspace, terminal logs, and resolve issues...`;
+            if (onFixError) {
+                onFixError(`TARS Terminal Command: "${cmd}". Please inspect all workspace files and terminal/console diagnostics, repair any syntax, package, or build errors, and ensure the build succeeds.`);
+            }
+        }
+
         setTerminalLogs(prev => [...prev, `dev@opendev-studio:~$ ${cmd}`, response]);
         setTerminalInput('');
     };
 
     const handleEditorDidMount: OnMount = (editor, monaco) => {
+        monacoEditorRef.current = editor;
+        (window as any).monaco = monaco;
+
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             target: monaco.languages.typescript.ScriptTarget.ESNext,
             allowNonTsExtensions: true,
@@ -254,6 +290,24 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
             jsx: monaco.languages.typescript.JsxEmit.ReactJSX,
             reactNamespace: "React",
             typeRoots: ["file:///node_modules/@types"]
+        });
+
+        // Watch for editor problems / diagnostics in real time
+        editor.onDidChangeModelDecorations(() => {
+            const model = editor.getModel();
+            if (model) {
+                try {
+                    const markers = monaco.editor.getModelMarkers({ resource: model.uri });
+                    const errorList = markers.map((m: any) => ({
+                        message: m.message,
+                        line: m.startLineNumber,
+                        severity: m.severity === 8 ? 'Error' : 'Warning'
+                    }));
+                    setProblems(errorList);
+                } catch (e) {
+                    // ignore
+                }
+            }
         });
 
         const addExtraLibs = async () => {
@@ -377,6 +431,20 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                     </div>
 
                                     <div className="flex items-center gap-3">
+                                        {generationInfo?.status === 'generating' ? (
+                                            <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#00f2fe]/10 border border-[#00f2fe]/30 text-[10px] font-mono font-bold text-[#00f2fe]">
+                                                <svg className="w-3 h-3 animate-spin text-[#00f2fe]" viewBox="0 0 24 24" fill="none">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                <span>GENERATING...</span>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                <span className="text-[10px] font-mono text-zinc-400">SAVED</span>
+                                            </div>
+                                        )}
                                         <button
                                             onClick={() => setIsTerminalOpen(!isTerminalOpen)}
                                             className={`px-2 py-0.5 rounded text-[10px] font-mono font-semibold transition-all ${
@@ -385,10 +453,6 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                         >
                                             TERMINAL
                                         </button>
-                                        <div className="flex items-center gap-1.5">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                            <span className="text-[10px] font-mono text-zinc-400">SAVED</span>
-                                        </div>
                                     </div>
                                 </div>
 
@@ -437,12 +501,22 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                                                 : 'text-zinc-500 border-transparent hover:text-zinc-300'
                                                         }`}
                                                     >
-                                                        {tab === 'ports' ? 'PORTS (5173)' : tab === 'problems' ? 'PROBLEMS (0)' : tab}
+                                                        {tab === 'ports' ? 'PORTS (5173)' : tab === 'problems' ? `PROBLEMS (${problems.length})` : tab}
                                                     </button>
                                                 ))}
                                             </div>
 
                                             <div className="flex items-center gap-2">
+                                                {onFixError && (
+                                                    <button
+                                                        onClick={() => onFixError(`TARS Terminal & Console Diagnostics: Run a comprehensive check of all workspace files, inspect console/terminal errors, and repair the build.`)}
+                                                        className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#00f2fe]/10 border border-[#00f2fe]/30 text-[#00f2fe] hover:bg-[#00f2fe]/20 text-[10px] font-mono font-bold transition-all shadow-[0_0_8px_rgba(0,242,254,0.15)]"
+                                                        title="Ask TARS to analyze terminal logs and fix build"
+                                                    >
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00f2fe] animate-pulse" />
+                                                        ⚡ Fix with TARS
+                                                    </button>
+                                                )}
                                                 <button
                                                     onClick={() => setTerminalLogs([])}
                                                     className="text-[10px] text-zinc-500 hover:text-white"
@@ -465,7 +539,7 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                             {activeTerminalTab === 'terminal' && (
                                                 <>
                                                     {terminalLogs.map((log, idx) => (
-                                                        <div key={idx} className={`leading-tight ${log.includes('VITE') || log.includes('Local:') ? 'text-emerald-400 font-bold' : log.includes('Agent') ? 'text-[#00f2fe]' : 'text-zinc-300'}`}>
+                                                        <div key={idx} className={`leading-tight ${log.includes('VITE') || log.includes('Local:') ? 'text-emerald-400 font-bold' : log.includes('Agent') || log.includes('TARS') ? 'text-[#00f2fe]' : 'text-zinc-300'}`}>
                                                             {log}
                                                         </div>
                                                     ))}
@@ -476,7 +550,7 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                                             value={terminalInput}
                                                             onChange={(e) => setTerminalInput(e.target.value)}
                                                             className="flex-1 bg-transparent text-white focus:outline-none font-mono text-[11px]"
-                                                            placeholder="type terminal command..."
+                                                            placeholder="type terminal command or 'tars fix'..."
                                                         />
                                                     </form>
                                                     <div ref={terminalEndRef} />
@@ -484,11 +558,35 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                             )}
 
                                             {activeTerminalTab === 'problems' && (
-                                                <div className="text-zinc-500 py-2">No problems detected in workspace code.</div>
+                                                <div className="space-y-1.5 py-1">
+                                                    {problems.length === 0 ? (
+                                                        <div className="text-zinc-500 py-1 flex items-center gap-2">
+                                                            <span className="text-emerald-400">✔</span>
+                                                            <span>No problems detected in workspace code. TARS inspector active.</span>
+                                                        </div>
+                                                    ) : (
+                                                        problems.map((p, idx) => (
+                                                            <div key={idx} className="flex items-center justify-between gap-2 p-1.5 rounded bg-red-950/20 border border-red-900/30 text-xs">
+                                                                <div className="flex items-center gap-2 truncate text-red-300">
+                                                                    <span className="font-bold text-red-400">[{p.severity} L{p.line}]:</span>
+                                                                    <span className="truncate font-mono text-[11px]">{p.message}</span>
+                                                                </div>
+                                                                {onFixError && (
+                                                                    <button
+                                                                        onClick={() => onFixError(`Fix ${p.severity} on line ${p.line} in ${activeFile?.path || 'workspace'}: "${p.message}". Inspect and correct the code.`)}
+                                                                        className="px-2 py-0.5 rounded bg-red-500/20 border border-red-500/40 text-red-300 hover:text-white hover:bg-red-500 text-[10px] font-mono font-bold shrink-0 transition-colors flex items-center gap-1"
+                                                                    >
+                                                                        ⚡ Fix with TARS
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))
+                                                    )}
+                                                </div>
                                             )}
 
                                             {activeTerminalTab === 'output' && (
-                                                <div className="text-zinc-400 py-1">[Agent Pipeline] Output stream connected to local Vite server.</div>
+                                                <div className="text-zinc-400 py-1">[Agent Pipeline] Output stream connected to local Vite server & TARS VM monitor.</div>
                                             )}
 
                                             {activeTerminalTab === 'debug' && (
@@ -513,12 +611,12 @@ export function CodeView({ session, setActiveFile, onFileContentChange, generati
                                     <FileIcon className="h-4 w-4 text-zinc-500" />
                                 </div>
                                 <p className="text-xs font-bold text-zinc-400">Select a file from the workspace</p>
-                                <p className="text-[11px] text-zinc-600 mt-1">OpenStudio Agent will materialize code on prompt</p>
+                                <p className="text-[11px] text-zinc-600 mt-1">TARS AI will materialize code on prompt</p>
                             </div>
                         )
                     ) : (
-                        <div className="flex-1 h-full bg-black">
-                            <PreviewPane files={fileTree} />
+                        <div className="flex-1 h-full w-full bg-black min-w-0 overflow-hidden">
+                            <PreviewPane files={fileTree} onFixError={onFixError} />
                         </div>
                     )}
                 </main>

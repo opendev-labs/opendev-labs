@@ -20,9 +20,9 @@ export const SUPPORTED_MODELS: ModelConfig[] = [
     { id: 'openrouter-llama-3-3-70b', name: 'Llama 3.3 70B (OpenRouter)', provider: 'OpenRouter', apiIdentifier: 'meta-llama/llama-3.3-70b-instruct' },
 
     // Google Gemini Models
-    { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'Google', apiIdentifier: 'gemini-2.0-flash' },
-    { id: 'gemini-2.0-flash-lite', name: 'Gemini 2.0 Flash Lite', provider: 'Google', apiIdentifier: 'gemini-2.0-flash-lite' },
-    { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'Google', apiIdentifier: 'gemini-1.5-flash' },
+    { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash (Ultra Fast)', provider: 'Google', apiIdentifier: 'gemini-2.5-flash' },
+    { id: 'gemini-3.8-flash', name: 'Gemini 3.8 Flash (Next-Gen)', provider: 'Google', apiIdentifier: 'gemini-3.8-flash' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro (Deep Reasoning)', provider: 'Google', apiIdentifier: 'gemini-2.5-pro' },
 
     // Top Free Coding Models
     { id: 'deepseek-coder-v2', name: 'DeepSeek Coder V2', provider: 'DeepSeek', apiIdentifier: 'deepseek-coder' },
