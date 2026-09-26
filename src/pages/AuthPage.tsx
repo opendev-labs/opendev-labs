@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   GoogleAuthProvider,
   GithubAuthProvider,
   signInWithPopup,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  ConfirmationResult,
   getAdditionalUserInfo,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -23,8 +20,6 @@ import {
   Mail,
   Sun,
   Moon,
-  Phone,
-  RotateCw,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useClients } from '../context/ClientContext';
@@ -35,7 +30,7 @@ import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 import { AirplaneAnimation } from '../components/ui/AirplaneAnimation';
 
 // ── Social button types ─────────────────────────────────────────────────────
-type SocialMethod = 'google' | 'github' | 'email' | 'phone';
+type SocialMethod = 'google' | 'github' | 'email';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
@@ -46,13 +41,6 @@ export const AuthPage: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [otpSent, setOtpSent] = useState(false);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-  const [isSendingOtp, setIsSendingOtp] = useState(false);
-  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
-
   const [showPassword, setShowPassword] = useState(false);
   const [activeMethod, setActiveMethod] = useState<SocialMethod | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
@@ -197,7 +185,6 @@ export const AuthPage: React.FC = () => {
         provider.setCustomParameters({ prompt: 'select_account' });
         const result = await signInWithPopup(auth, provider);
 
-        // Fetch fresh profile data directly
         try {
           await result.user.reload();
         } catch {}
@@ -231,7 +218,6 @@ export const AuthPage: React.FC = () => {
         handlePostLogin(email);
         return;
       }
-      // fallback GSI
       const gp = await promptGoogleSignIn();
       loginWithGoogle(gp.email, gp.name, gp.picture, 'google');
       handlePostLogin(gp.email);
@@ -254,7 +240,6 @@ export const AuthPage: React.FC = () => {
       provider.addScope('user:email');
       const result = await signInWithPopup(auth, provider);
 
-      // Force reload to bypass Firebase local cached profile
       try {
         await result.user.reload();
       } catch (e) {
@@ -265,7 +250,6 @@ export const AuthPage: React.FC = () => {
       const addInfo = getAdditionalUserInfo(result);
       const profile = addInfo?.profile as Record<string, any> | undefined;
 
-      // Extract real-time fresh avatar directly from the provider response
       let avatar = profile?.avatar_url || gu.photoURL || '';
       if (avatar) {
         avatar = avatar.includes('?') ? `${avatar}&t=${Date.now()}` : `${avatar}?t=${Date.now()}`;
@@ -299,148 +283,9 @@ export const AuthPage: React.FC = () => {
     }
   };
 
-  // ── Phone OTP Sign-In ────────────────────────────────────────────────────
-  const setupRecaptcha = () => {
-    if (!auth) throw new Error('Firebase Auth not available');
-    
-    // Clear DOM container before re-initializing
-    const container = document.getElementById('recaptcha-container');
-    if (container) {
-      container.innerHTML = '';
-    }
-
-    if ((window as any).recaptchaVerifier) {
-      try {
-        (window as any).recaptchaVerifier.clear();
-      } catch {}
-      (window as any).recaptchaVerifier = null;
-    }
-
-    const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      size: 'invisible',
-      callback: () => {},
-      'expired-callback': () => {
-        setErrorMessage('Verification expired. Please try again.');
-      },
-    });
-    (window as any).recaptchaVerifier = verifier;
-    return verifier;
-  };
-
-  const handleSendPhoneOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setErrorMessage('');
-    const raw = phone.trim();
-    if (!raw) {
-      setErrorMessage('Please enter your phone number.');
-      return;
-    }
-
-    let formattedPhone = raw.replace(/\s+/g, '');
-    if (!formattedPhone.startsWith('+')) {
-      if (formattedPhone.length === 10) {
-        formattedPhone = `+91${formattedPhone}`;
-      } else {
-        formattedPhone = `+${formattedPhone}`;
-      }
-    }
-
-    setIsSendingOtp(true);
-    try {
-      const verifier = setupRecaptcha();
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, verifier);
-      setConfirmationResult(confirmation);
-      setOtpSent(true);
-      setErrorMessage('');
-    } catch (err: any) {
-      console.error('Phone auth send error:', err);
-      setOtpSent(false);
-      if ((window as any).recaptchaVerifier) {
-        try {
-          (window as any).recaptchaVerifier.clear();
-          (window as any).recaptchaVerifier = null;
-        } catch {}
-      }
-      const errCode = err?.code || '';
-      const errMsg = err?.message || '';
-
-      if (errCode === 'auth/billing-not-enabled' || errMsg.includes('billing-not-enabled')) {
-        setErrorMessage(
-          'Firebase SMS requires Blaze (Pay-as-you-go) plan or adding this number as a "Phone number for testing" in Firebase Console (Authentication > Sign-in method > Phone).'
-        );
-      } else if (errCode === 'auth/invalid-phone-number') {
-        setErrorMessage('Invalid phone number format. Please include country code (e.g. +91 98765 43210).');
-      } else if (errCode === 'auth/too-many-requests') {
-        setErrorMessage('Too many attempts. Please wait a few moments and try again.');
-      } else if (errCode === 'auth/quota-exceeded') {
-        setErrorMessage('Daily SMS quota exceeded in Firebase project.');
-      } else {
-        setErrorMessage(errMsg || 'Failed to send OTP. Please check the phone number.');
-      }
-    } finally {
-      setIsSendingOtp(false);
-    }
-  };
-
-  const handleVerifyPhoneOtp = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!confirmationResult) {
-      setErrorMessage('No pending OTP request. Please request a new code.');
-      return;
-    }
-    const cleanCode = otpCode.trim();
-    if (!cleanCode || cleanCode.length < 6) {
-      setErrorMessage('Please enter the 6-digit verification code.');
-      return;
-    }
-
-    setIsVerifyingOtp(true);
-    setErrorMessage('');
-    try {
-      const result = await confirmationResult.confirm(cleanCode);
-      const phoneUser = result.user;
-      const phoneNum = phoneUser.phoneNumber || phone;
-      const phoneEmail = `${phoneNum.replace(/[^0-9]/g, '')}@phone.opendev-labs.com`;
-      const phoneName = `User ${phoneNum.slice(-4)}`;
-      const avatar = `https://api.dicebear.com/7.x/bottts/svg?seed=${phoneUser.uid}`;
-
-      if (db) {
-        await setDoc(doc(db, 'users', phoneUser.uid), {
-          id: phoneUser.uid,
-          name: phoneName,
-          phoneNumber: phoneNum,
-          email: phoneEmail,
-          avatar: avatar,
-          role: 'user',
-          authMethod: 'phone',
-          online: true,
-          lastSeen: serverTimestamp(),
-          joinedAt: serverTimestamp(),
-        }, { merge: true }).catch(() => {});
-      }
-
-      loginWithGoogle(phoneEmail, phoneName, avatar, 'phone');
-      handlePostLogin(phoneEmail);
-    } catch (err: any) {
-      console.error('Phone OTP verify error:', err);
-      if (err?.code === 'auth/invalid-verification-code') {
-        setErrorMessage('Invalid verification code. Please check the code and try again.');
-      } else if (err?.code === 'auth/code-expired') {
-        setErrorMessage('Verification code has expired. Please request a new code.');
-      } else {
-        setErrorMessage(err?.message || 'Failed to verify OTP. Please try again.');
-      }
-    } finally {
-      setIsVerifyingOtp(false);
-    }
-  };
-
   // ── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="h-screen max-h-screen w-full flex flex-col lg:flex-row bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-zinc-200 selection:text-black relative overflow-hidden">
-
-      {/* Invisible reCAPTCHA container for Phone Auth */}
-      <div id="recaptcha-container" />
 
       {/* Canvas bg */}
       <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" particleCount={40} />
@@ -552,7 +397,7 @@ export const AuthPage: React.FC = () => {
           {!isAdminMode ? (
             <div className="space-y-2.5">
 
-              {/* Google */}
+              {/* 1. Google */}
               <button
                 onClick={handleGoogleAuth}
                 disabled={isAuthenticating}
@@ -571,7 +416,7 @@ export const AuthPage: React.FC = () => {
                 <span>Continue with Google</span>
               </button>
 
-              {/* GitHub */}
+              {/* 2. GitHub */}
               <button
                 onClick={handleGithubAuth}
                 disabled={isAuthenticating}
@@ -590,7 +435,7 @@ export const AuthPage: React.FC = () => {
                 <div className="flex-1 h-px bg-zinc-200 dark:bg-zinc-800" />
               </div>
 
-              {/* Email */}
+              {/* 3. Email */}
               {activeMethod === 'email' ? (
                 <motion.form
                   initial={{ opacity: 0, y: 8 }}
@@ -642,131 +487,6 @@ export const AuthPage: React.FC = () => {
                 >
                   <Mail className="w-5 h-5 shrink-0 text-zinc-500" />
                   <span>Continue with Email</span>
-                </button>
-              )}
-
-              {/* Phone (Firebase Real Phone Auth with Recaptcha + OTP) */}
-              {activeMethod === 'phone' ? (
-                <AnimatePresence mode="wait">
-                  {!otpSent ? (
-                    <motion.form
-                      key="phone-input"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      onSubmit={handleSendPhoneOtp}
-                      className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-left space-y-2.5 bg-zinc-50/50 dark:bg-zinc-900/50"
-                    >
-                      <div>
-                        <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400 block mb-1">
-                          Mobile Number
-                        </label>
-                        <Input
-                          type="tel"
-                          placeholder="+91 98765 43210"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="h-10 text-xs rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                          autoFocus
-                          required
-                        />
-                        <p className="text-[10px] text-zinc-400 mt-1">Include country code (e.g. +91 or +1)</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => { setActiveMethod(null); setErrorMessage(''); }}
-                          className="flex-1 h-9 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <Button
-                          type="submit"
-                          disabled={isSendingOtp || !phone.trim()}
-                          className="flex-1 h-9 text-xs font-bold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5"
-                        >
-                          {isSendingOtp ? (
-                            <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Send OTP</span>
-                              <ArrowRight className="size-3.5" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </motion.form>
-                  ) : (
-                    <motion.form
-                      key="otp-input"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      onSubmit={handleVerifyPhoneOtp}
-                      className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 text-left space-y-2.5 bg-zinc-50/50 dark:bg-zinc-900/50"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <label className="text-[11px] font-semibold text-zinc-600 dark:text-zinc-400">
-                            Enter 6-Digit OTP
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => { setOtpSent(false); setOtpCode(''); setErrorMessage(''); }}
-                            className="text-[10px] text-blue-500 hover:underline"
-                          >
-                            Change number
-                          </button>
-                        </div>
-                        <Input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          maxLength={6}
-                          placeholder="123456"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
-                          className="h-10 text-center tracking-widest text-sm font-mono font-bold rounded-xl bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800"
-                          autoFocus
-                          required
-                        />
-                        <p className="text-[10px] text-zinc-400 mt-1">SMS code sent to {phone}</p>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleSendPhoneOtp()}
-                          disabled={isSendingOtp}
-                          className="flex-1 h-9 text-xs font-semibold rounded-xl border border-zinc-200 dark:border-zinc-800 text-zinc-500 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center justify-center gap-1"
-                        >
-                          <RotateCw className={`size-3 ${isSendingOtp ? 'animate-spin' : ''}`} />
-                          <span>{isSendingOtp ? 'Resending...' : 'Resend'}</span>
-                        </button>
-                        <Button
-                          type="submit"
-                          disabled={isVerifyingOtp || otpCode.length < 6}
-                          className="flex-1 h-9 text-xs font-bold rounded-xl bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 flex items-center justify-center gap-1.5"
-                        >
-                          {isVerifyingOtp ? (
-                            <div className="size-3.5 border-2 border-white dark:border-black border-t-transparent rounded-full animate-spin" />
-                          ) : (
-                            <>
-                              <span>Verify & Login</span>
-                              <ArrowRight className="size-3.5" />
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </motion.form>
-                  )}
-                </AnimatePresence>
-              ) : (
-                <button
-                  onClick={() => { setActiveMethod('phone'); setOtpSent(false); setErrorMessage(''); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all text-sm font-semibold text-zinc-900 dark:text-white shadow-sm hover:shadow-md active:scale-[0.98]"
-                >
-                  <Phone className="w-5 h-5 shrink-0 text-zinc-500" />
-                  <span>Continue with Phone</span>
                 </button>
               )}
             </div>
