@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { db } from '../../../../lib/firebase';
+import { db } from '../../../lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 
 // Puter.js is loaded via CDN in index.html — gives free AI access (GPT-4o, Claude, etc.)

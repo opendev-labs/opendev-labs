@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useEffect, useState } from 'react';
 import type { User } from '../types';
 import { safeNavigate } from '../services/navigation';
-import { LamaDB } from '../../../lib/lamaDB/config'; // ✅ SINGLETON - Single source of truth
+import { LamaDB } from '../../lib/lamaDB/config'; // ✅ SINGLETON - Single source of truth
 const lama = LamaDB as any;
 import { GithubAuthProvider } from 'firebase/auth';
 
@@ -434,7 +434,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       let finalData = { ...data };
       if (Object.keys(keysToEncrypt).length > 0) {
-        const { encryptApiKeys } = await import('../../../lib/crypto');
+        const { encryptApiKeys } = await import('../../lib/crypto');
         const encrypted = await encryptApiKeys(keysToEncrypt);
         finalData = { ...finalData, ...encrypted };
       }

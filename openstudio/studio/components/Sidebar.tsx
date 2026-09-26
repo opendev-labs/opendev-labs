@@ -4,7 +4,7 @@ import {
   ChatsIcon, SettingsIcon, TrashIcon, PlusIcon, StarIcon 
 } from './icons/Icons';
 import type { View, ChatSession } from '../types';
-import { useAuth } from '../../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   onNavigate: (view: View) => void;

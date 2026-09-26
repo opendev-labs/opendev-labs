@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircleIcon, XCircleIcon, SparklesIcon, CpuChipIcon, UserGroupIcon, RocketLaunchIcon, ChartBarIcon } from '../common/Icons';
-import { openRazorpayCheckout } from '../../../../lib/payment/razorpay';
+import { openRazorpayCheckout } from '../../../lib/payment/razorpay';
 
 const FeatureRow: React.FC<{ feature: string; hobby: React.ReactNode; pro: React.ReactNode; icon: React.ReactNode }> = ({ feature, hobby, pro, icon }) => (
     <tr className="border-b border-zinc-900 last:border-b-0 group">

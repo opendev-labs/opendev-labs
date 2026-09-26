@@ -2,11 +2,11 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-// All imports from self-contained local copies inside openstudio/
-import StudioApp from './studio/App';
-import { AuthProvider as VoidAuthProvider } from './void/contexts/AuthContext';
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
+// ../  = from openstudio/src/ up to openstudio/
+import StudioApp from '../studio/App';
+import { AuthProvider as VoidAuthProvider } from '../void/contexts/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
+import { ThemeProvider } from '../context/ThemeContext';
 
 /**
  * Root App for openstudio.opendev-labs.com

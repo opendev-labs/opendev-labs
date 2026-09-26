@@ -8,7 +8,7 @@ import {
 } from '@codesandbox/sandpack-react';
 import type { FileNode } from '../types';
 import { SpinnerIcon } from './icons/Icons';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../lib/utils';
 import {
   Monitor,
   Tablet,

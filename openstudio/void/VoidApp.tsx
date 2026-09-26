@@ -26,7 +26,7 @@ import { GitHubCallbackHandler } from './components/auth/GitHubCallbackHandler';
 import { REAL_TEMPLATES } from './real_templates';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { LamaDB } from '../../lib/lamaDB';
+import { LamaDB } from '../lib/lamaDB';
 
 const MotionDiv = motion.div;
 

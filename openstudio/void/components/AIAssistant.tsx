@@ -3,7 +3,7 @@ import type { LogEntry, AiChatMessage } from '../types';
 import { LogLevel, DeploymentStatus } from '../types';
 import { getAIAssistance } from '../services/geminiService';
 import { SparklesIcon, SendIcon } from './common/Icons';
-import { ThreeLoadingAnimation } from '../../../components/ui/ThreeLoadingAnimation';
+import { ThreeLoadingAnimation } from '../../components/ui/ThreeLoadingAnimation';
 
 interface AIAssistantProps {
   logs: LogEntry[];

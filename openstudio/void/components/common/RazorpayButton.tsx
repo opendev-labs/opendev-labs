@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { openRazorpayCheckout } from '../../../../lib/payment/razorpay';
+import { openRazorpayCheckout } from '../../../lib/payment/razorpay';
 
 interface RazorpayButtonProps {
   amount?: number;

@@ -447,7 +447,7 @@ export async function* streamChatResponse(
     }
 
     if (!effectiveApiKey && userProfile) {
-        const { decryptApiKey } = await import('../../../lib/crypto');
+        const { decryptApiKey } = await import('../../lib/crypto');
         switch (modelConfig.provider) {
             case 'Google':
                 effectiveApiKey = decryptApiKey(userProfile.geminiApiKey);

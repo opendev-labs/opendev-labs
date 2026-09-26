@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { FileNode } from '../types';
 import { useAuth } from '../../void/hooks/useAuth';
-import { deployToGitHub, slugifyRepoName } from '../../../services/deploymentService';
-import { hubService } from '../../../services/hubService';
+import { deployToGitHub, slugifyRepoName } from '../../services/deploymentService';
+import { hubService } from '../../services/hubService';
 import { DeployIcon, SpinnerIcon } from './icons/Icons';
 import { toast } from 'sonner';
 

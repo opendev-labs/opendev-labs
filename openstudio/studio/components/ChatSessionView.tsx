@@ -5,7 +5,7 @@ import { ChatView } from './ChatView';
 import { CodeView } from './CodeView';
 import { DeployDialog } from './DeployDialog';
 import { DeployIcon, PanelLeftCloseIcon, PanelRightCloseIcon, CodeIcon, PlayIcon, ShareIcon, ChevronsRightIcon } from './icons/Icons';
-import { hubService } from '../../../services/hubService';
+import { hubService } from '../../services/hubService';
 import { useAuth } from '../../void/hooks/useAuth';
 import { toast } from 'sonner';
 import { LocalSyncService } from '../services/localSyncService';

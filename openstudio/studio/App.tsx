@@ -8,11 +8,11 @@ import type { Message, FileNode, View, ChatSession, GenerationInfo, GenerationFi
 import { streamChatResponse, generateSuggestions } from './services/llmService';
 import { SidebarIcon } from './components/icons/Icons';
 import { SUPPORTED_MODELS } from './constants';
-import { hubService } from '../../services/hubService';
+import { hubService } from '../services/hubService';
 import { useAuth } from '../void/hooks/useAuth';
 import { ShareIcon } from './components/icons/Icons';
 import { toast } from 'sonner';
-import { LamaDB } from '../../lib/lamaDB';
+import { LamaDB } from '../lib/lamaDB';
 
 // A simple ID generator
 const generateId = () => Date.now().toString() + Math.random().toString(36).substring(2);

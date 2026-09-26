@@ -7,7 +7,7 @@ import {
 } from '@codesandbox/sandpack-react';
 import type { FileNode } from '../types';
 import { SpinnerIcon, FilePlusIcon } from './icons/Icons';
-import { cn } from '../../../lib/utils';
+import { cn } from '../../lib/utils';
 
 // Known built-in / browser modules to exclude from dependency detection
 const BUILT_IN_MODULES = new Set([

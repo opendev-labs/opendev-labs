@@ -1,5 +1,5 @@
 import React from 'react';
-import { RunwayPricing } from '../../../../components/pricing/RunwayPricing';
+import { RunwayPricing } from '../../../components/pricing/RunwayPricing';
 
 export const PricingPage: React.FC = () => {
     return (
