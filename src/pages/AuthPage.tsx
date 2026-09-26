@@ -302,6 +302,13 @@ export const AuthPage: React.FC = () => {
   // ── Phone OTP Sign-In ────────────────────────────────────────────────────
   const setupRecaptcha = () => {
     if (!auth) throw new Error('Firebase Auth not available');
+    
+    // Clear DOM container before re-initializing
+    const container = document.getElementById('recaptcha-container');
+    if (container) {
+      container.innerHTML = '';
+    }
+
     if ((window as any).recaptchaVerifier) {
       try {
         (window as any).recaptchaVerifier.clear();
@@ -347,18 +354,28 @@ export const AuthPage: React.FC = () => {
       setErrorMessage('');
     } catch (err: any) {
       console.error('Phone auth send error:', err);
+      setOtpSent(false);
       if ((window as any).recaptchaVerifier) {
         try {
           (window as any).recaptchaVerifier.clear();
           (window as any).recaptchaVerifier = null;
         } catch {}
       }
-      if (err?.code === 'auth/invalid-phone-number') {
+      const errCode = err?.code || '';
+      const errMsg = err?.message || '';
+
+      if (errCode === 'auth/billing-not-enabled' || errMsg.includes('billing-not-enabled')) {
+        setErrorMessage(
+          'Firebase SMS requires Blaze (Pay-as-you-go) plan or adding this number as a "Phone number for testing" in Firebase Console (Authentication > Sign-in method > Phone).'
+        );
+      } else if (errCode === 'auth/invalid-phone-number') {
         setErrorMessage('Invalid phone number format. Please include country code (e.g. +91 98765 43210).');
-      } else if (err?.code === 'auth/too-many-requests') {
+      } else if (errCode === 'auth/too-many-requests') {
         setErrorMessage('Too many attempts. Please wait a few moments and try again.');
+      } else if (errCode === 'auth/quota-exceeded') {
+        setErrorMessage('Daily SMS quota exceeded in Firebase project.');
       } else {
-        setErrorMessage(err?.message || 'Failed to send OTP. Please check the phone number.');
+        setErrorMessage(errMsg || 'Failed to send OTP. Please check the phone number.');
       }
     } finally {
       setIsSendingOtp(false);
