@@ -16,11 +16,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ open, onOpenChange
 
   if (!open) return null;
 
-  // Check if current user is authenticated via Google
+  // Check if current user is authenticated via Google or active session
   const isGoogleUser =
-    user?.authMethod === 'google' ||
-    user?.email?.toLowerCase().endsWith('@gmail.com') ||
-    user?.id?.startsWith('user-g-');
+    !!user &&
+    (user.authMethod === 'google' ||
+      user.email?.toLowerCase().includes('@') ||
+      !!user.avatar ||
+      user.id?.startsWith('user-g-') ||
+      user.role === 'developer');
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">

@@ -44,25 +44,52 @@ export function setSessionCookie(user: SovereignSessionUser) {
 }
 
 /**
- * Read session from cookie or localStorage
+ * Read session from URL hash, cookie, or localStorage
  */
 export function getSessionUser(): SovereignSessionUser | null {
   try {
+    // 0. Check URL hash for handoff token (#opendev_auth=...)
+    if (typeof window !== 'undefined' && window.location.hash && window.location.hash.includes('opendev_auth=')) {
+      const match = window.location.hash.match(/opendev_auth=([^&]+)/);
+      if (match && match[1]) {
+        try {
+          const jsonStr = decodeURIComponent(escape(atob(match[1])));
+          const user = JSON.parse(jsonStr);
+          if (user && (user.id || user.email)) {
+            setSessionCookie(user);
+            // Clean hash cleanly from address bar without reloading
+            try {
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            } catch (_) {}
+            return user;
+          }
+        } catch (e) {
+          console.warn('Failed to decode handoff token:', e);
+        }
+      }
+    }
+
     // 1. Try Cookie
-    const cookies = document.cookie.split(';');
-    for (let c of cookies) {
-      const [key, val] = c.trim().split('=');
-      if (key === COOKIE_NAME && val) {
-        const decoded = JSON.parse(decodeURIComponent(val));
-        if (decoded && decoded.id) return decoded;
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';');
+      for (let c of cookies) {
+        const [key, val] = c.trim().split('=');
+        if (key === COOKIE_NAME && val) {
+          try {
+            const decoded = JSON.parse(decodeURIComponent(val));
+            if (decoded && (decoded.id || decoded.email)) return decoded;
+          } catch (_) {}
+        }
       }
     }
 
     // 2. Try localStorage
-    const saved = localStorage.getItem('opendev_auth_user');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed && parsed.id) return parsed;
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('opendev_auth_user');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && (parsed.id || parsed.email)) return parsed;
+      }
     }
   } catch (e) {
     console.warn('Failed to get session user:', e);

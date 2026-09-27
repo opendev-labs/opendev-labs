@@ -10,6 +10,7 @@ import { GithubAuthProvider } from 'firebase/auth';
 // lama.auth.loginWithGithub() returns the UserCredential.
 
 import { SyncStatus, UserProfile } from '../types';
+import { getSessionUser } from '../../../lib/authSession';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -43,15 +44,27 @@ interface AuthContextType extends AuthState {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const initialSession = getSessionUser();
+  const [user, setUser] = useState<User | null>(() => {
+    if (initialSession && (initialSession.id || initialSession.email)) {
+      return {
+        uid: initialSession.id,
+        name: initialSession.name || 'User',
+        email: initialSession.email || '',
+        avatar: initialSession.avatar || undefined,
+        providers: [initialSession.authMethod || 'google'],
+      };
+    }
+    return null;
+  });
   const [token, setToken] = useState<string | null>(null);
   const [githubUser, setGithubUser] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!initialSession);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(SyncStatus.IDLE);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(localStorage.getItem('opendev_last_sync'));
   const [agentOnline, setAgentOnline] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialSession?.avatar || null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
 
   const checkLocalAgent = useCallback(async () => {

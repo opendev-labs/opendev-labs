@@ -283,14 +283,17 @@ const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(() => {
-    const saved = localStorage.getItem('opendev_auth_user');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.id) return parsed;
-      } catch (e) {
-        console.error('Failed to parse saved user', e);
-      }
+    const session = getSessionUser();
+    if (session && (session.id || session.email)) {
+      return {
+        id: session.id,
+        name: session.name || (session.email ? session.email.split('@')[0] : 'User'),
+        email: session.email || '',
+        role: (session.role as UserRole) || 'user',
+        avatar: session.avatar,
+        githubHandle: session.githubHandle,
+        authMethod: session.authMethod || 'google',
+      };
     }
     return null;
   });
@@ -410,14 +413,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const freshUser = auth.currentUser || firebaseUser;
-        let savedUser: any = null;
+        const sessionUser = getSessionUser();
+        let savedUser: any = sessionUser;
         try {
           const s = localStorage.getItem('opendev_auth_user');
           if (s) savedUser = JSON.parse(s);
         } catch (_) {}
 
-        const emailToUse = freshUser.email || (savedUser?.id === freshUser.uid ? savedUser.email : '') || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : '');
+        const emailToUse = freshUser.email || (savedUser?.email) || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : '');
         const cleanEmail = (emailToUse || '').toLowerCase().trim();
+        const existingRegistered = registeredUsers.find(u => (cleanEmail && u.email.toLowerCase() === cleanEmail) || u.id === freshUser.uid);
         const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer' || savedUser?.role === 'developer';
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
@@ -428,7 +433,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             avatarUrl = providerWithPhoto.photoURL;
           }
         }
-        if (!avatarUrl && savedUser?.id === freshUser.uid && savedUser.avatar) {
+        if (!avatarUrl && savedUser?.avatar) {
           avatarUrl = savedUser.avatar;
         }
 
@@ -444,9 +449,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ? 'phone'
           : authProviderId.includes('password')
           ? 'password'
-          : 'google';
+          : (savedUser?.authMethod || 'google');
 
-        const nameToUse = freshUser.displayName || (savedUser?.id === freshUser.uid ? savedUser.name : '') || (freshUser.phoneNumber ? freshUser.phoneNumber : emailToUse ? emailToUse.split('@')[0] : 'Member');
+        const nameToUse = freshUser.displayName || (savedUser?.name) || (freshUser.phoneNumber ? freshUser.phoneNumber : emailToUse ? emailToUse.split('@')[0] : 'User');
 
         setUser({
           id: freshUser.uid,
@@ -456,7 +461,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           clientId: existingRegistered?.clientId,
           authMethod: detectedAuthMethod,
           avatar: avatarUrl,
-          githubHandle: savedUser?.id === freshUser.uid ? savedUser.githubHandle : undefined,
+          githubHandle: savedUser?.githubHandle,
         });
 
         // Non-blocking presence update in Firestore
@@ -624,6 +629,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     setUser(null);
+    if (typeof window !== 'undefined') {
+      const isSubdomain = window.location.hostname.includes('openstudio') || window.location.port === '5174';
+      if (isSubdomain) {
+        window.location.href = '/';
+      }
+    }
   };
 
   return (

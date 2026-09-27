@@ -411,10 +411,10 @@ export function Sidebar({
                 )}
                 <div className="flex flex-col min-w-0">
                   <span className="text-xs font-extrabold text-white truncate">
-                    {user?.name || 'User Account'}
+                    {user?.name || (user?.email ? user.email.split('@')[0] : 'Guest User')}
                   </span>
                   <span className="text-[10px] text-zinc-400 truncate font-medium">
-                    {user?.email || 'user@opendev-labs.com'}
+                    {user?.email || 'Sign in with Google'}
                   </span>
                 </div>
               </div>
@@ -440,15 +440,6 @@ export function Sidebar({
                   <ExternalLink className="size-3 ml-auto opacity-60" />
                 </a>
               )}
-
-              <a
-                href={getMainDomainUrl()}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-colors text-left cursor-pointer"
-              >
-                <Globe className="size-4 text-zinc-400" />
-                <span>Return to opendev-labs.com</span>
-                <ExternalLink className="size-3 ml-auto opacity-60" />
-              </a>
 
               <button
                 onClick={() => {
@@ -492,10 +483,10 @@ export function Sidebar({
             
             <div className="flex flex-col min-w-0">
               <span className="text-xs font-bold text-zinc-100 truncate">
-                {user?.name || 'Developer'}
+                {user?.name || (user?.email ? user.email.split('@')[0] : 'Guest')}
               </span>
               <span className="text-[10px] text-zinc-400 truncate">
-                {user?.email || 'opendev-labs.office@gmail.com'}
+                {user?.email || 'Signed in via Google'}
               </span>
             </div>
           </div>
