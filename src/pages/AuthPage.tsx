@@ -21,20 +21,22 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, isDeveloperEmail } from '../context/AuthContext';
 import { useClients } from '../context/ClientContext';
 import { useTheme } from '../context/ThemeContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/input';
 import { Live2DCanvas } from '../components/ui/Live2DCanvas';
 import { AirplaneAnimation } from '../components/ui/AirplaneAnimation';
+import { setSessionCookie, createHandoffUrl } from '../lib/authSession';
+import { adminLogin } from '../lib/adminAuth';
 
 // ── Social button types ─────────────────────────────────────────────────────
 type SocialMethod = 'google' | 'github' | 'email';
 
 export const AuthPage: React.FC = () => {
   const navigate = useNavigate();
-  const { loginAsDeveloper, loginAsClient, loginWithGoogle } = useAuth();
+  const { loginAsDeveloper, loginAsClient, loginWithGoogle, registeredUsers = [] } = useAuth();
   const { clients } = useClients();
   const { theme, toggleTheme } = useTheme();
 
@@ -47,13 +49,56 @@ export const AuthPage: React.FC = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   // ── Helpers ──────────────────────────────────────────────────────────────
-  const handlePostLogin = (email: string) => {
-    const clean = email.toLowerCase().trim();
+  const handlePostLogin = (userEmail: string, userObj?: any) => {
+    const clean = userEmail.toLowerCase().trim();
     const isAdmin =
-      clean === 'opendev-labs.office@gmail.com' ||
-      clean === 'opendev.office@gmail.com';
+      isAdminMode ||
+      isDeveloperEmail(clean) ||
+      userObj?.role === 'developer' ||
+      registeredUsers.some((u) => u.email.toLowerCase() === clean && u.role === 'developer');
     const matched = clients.find((c) => c.email.toLowerCase() === clean);
-    navigate(isAdmin ? '/dashboard' : matched ? '/client/portal' : '/client/profile');
+
+    const sessionPayload = {
+      id: userObj?.id || userObj?.uid || `user-${Date.now()}`,
+      name: userObj?.name || userObj?.displayName || clean.split('@')[0],
+      email: clean,
+      role: isAdmin ? 'developer' : matched ? 'client' : 'user',
+      avatar: userObj?.avatar || userObj?.photoURL,
+      githubHandle: userObj?.githubHandle,
+      authMethod: userObj?.authMethod || 'google',
+    };
+    setSessionCookie(sessionPayload);
+    if (isAdmin) {
+      adminLogin('opendev-labs.com', 'OPENCODE81695685829');
+    }
+
+    // Check redirect query param (e.g. ?redirect=https://openstudio.opendev-labs.com or ?redirect=/openstudio)
+    const searchParams = new URLSearchParams(window.location.search);
+    const redirectParam = searchParams.get('redirect');
+
+    if (redirectParam && !isAdminMode) {
+      try {
+        let decoded = decodeURIComponent(redirectParam);
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        // When on localhost, map openstudio live domain to local dev container on port 5174
+        if (isLocal && decoded.includes('openstudio.opendev-labs.com')) {
+          decoded = decoded.replace('https://openstudio.opendev-labs.com', 'http://localhost:5174');
+          decoded = decoded.replace('http://openstudio.opendev-labs.com', 'http://localhost:5174');
+        }
+        if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+          const handoffUrl = createHandoffUrl(decoded, sessionPayload);
+          window.location.href = handoffUrl;
+          return;
+        } else if (decoded.startsWith('/')) {
+          navigate(decoded, { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.warn('Failed to parse redirect param:', err);
+      }
+    }
+
+    navigate(isAdmin ? '/admin' : matched ? '/client/portal' : '/client/profile');
   };
 
   // ── Email/Password submit ──────────────────────────────────────────
@@ -66,7 +111,7 @@ export const AuthPage: React.FC = () => {
       const valid = ['opendev-labs.office@gmail.com', 'opendev.office@gmail.com', 'admin', 'yash', 'yashramteke'];
       if (valid.includes(email.trim().toLowerCase()) && password.length >= 4) {
         loginAsDeveloper();
-        navigate('/dashboard');
+        handlePostLogin(email, { id: 'dev-1', name: 'Yash Shirish Ramteke', role: 'developer' });
         setIsAuthenticating(false);
         return;
       }
@@ -74,7 +119,7 @@ export const AuthPage: React.FC = () => {
         try {
           await signInWithEmailAndPassword(auth, email.trim(), password);
           loginAsDeveloper();
-          navigate('/dashboard');
+          handlePostLogin(email, { id: 'dev-1', name: 'Yash Shirish Ramteke', role: 'developer' });
           setIsAuthenticating(false);
           return;
         } catch {
@@ -101,7 +146,7 @@ export const AuthPage: React.FC = () => {
         return;
       }
       loginAsClient(found.id, found.name, found.email);
-      navigate('/client/portal');
+      handlePostLogin(found.email, { id: found.id, name: found.name, role: 'client' });
       setIsAuthenticating(false);
       return;
     }
@@ -150,7 +195,7 @@ export const AuthPage: React.FC = () => {
           }
 
           loginWithGoogle(cleanEmail, displayName, avatar, 'password');
-          handlePostLogin(cleanEmail);
+          handlePostLogin(cleanEmail, { id: userObj.uid, name: displayName, email: cleanEmail, avatar, authMethod: 'password' });
           setIsAuthenticating(false);
           return;
         }
@@ -171,7 +216,7 @@ export const AuthPage: React.FC = () => {
     }
 
     loginWithGoogle(clean, clean.split('@')[0], undefined, 'password');
-    navigate('/client/profile');
+    handlePostLogin(clean, { id: `user-${Date.now()}`, name: clean.split('@')[0], email: clean });
     setIsAuthenticating(false);
   };
 
@@ -199,7 +244,9 @@ export const AuthPage: React.FC = () => {
 
         const email = (gu.email || profile?.email || '').toLowerCase().trim();
         const displayName = gu.displayName || profile?.name || (email ? email.split('@')[0] : 'Google User');
-        const isLeadDev = email === 'opendev-labs.office@gmail.com' || email === 'opendev.office@gmail.com';
+        const existingRec = registeredUsers.find(u => u.email.toLowerCase() === email);
+        const isDev = isDeveloperEmail(email) || isAdminMode || existingRec?.role === 'developer';
+        const assignedRole = isDev ? 'developer' : (existingRec?.role === 'client' ? 'client' : 'user');
 
         if (db) {
           await setDoc(doc(db, 'users', gu.uid), {
@@ -207,7 +254,7 @@ export const AuthPage: React.FC = () => {
             name: displayName,
             email: email,
             avatar: avatar,
-            role: isLeadDev ? 'developer' : 'user',
+            role: assignedRole,
             authMethod: 'google',
             online: true,
             lastSeen: serverTimestamp(),
@@ -215,12 +262,12 @@ export const AuthPage: React.FC = () => {
           }, { merge: true }).catch(() => {});
         }
         loginWithGoogle(email, displayName, avatar, 'google');
-        handlePostLogin(email);
+        handlePostLogin(email, { id: gu.uid, name: displayName, email, avatar, role: assignedRole, authMethod: 'google' });
         return;
       }
       const gp = await promptGoogleSignIn();
       loginWithGoogle(gp.email, gp.name, gp.picture, 'google');
-      handlePostLogin(gp.email);
+      handlePostLogin(gp.email, { id: `gp-${Date.now()}`, name: gp.name, email: gp.email, avatar: gp.picture, authMethod: 'google' });
     } catch (err: any) {
       if (!err?.message?.includes('closed_by_user')) {
         setErrorMessage(err?.message || 'Google Sign-In failed.');
@@ -291,7 +338,7 @@ export const AuthPage: React.FC = () => {
       }
 
       loginWithGoogle(email, displayName, avatar, 'github');
-      handlePostLogin(email);
+      handlePostLogin(email, { id: gu.uid, name: displayName, email, avatar, githubHandle: githubLogin, authMethod: 'github' });
     } catch (err: any) {
       if (!err?.message?.includes('closed_by_user')) {
         setErrorMessage(err?.message || 'GitHub Sign-In failed.');

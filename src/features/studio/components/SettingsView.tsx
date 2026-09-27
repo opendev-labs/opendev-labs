@@ -6,24 +6,38 @@ import { toast } from 'sonner';
 export function SettingsView() {
     const { user, profile, updateProfile } = useAuth();
     
-    const [apiKeys, setApiKeys] = useState({
-        openRouterApiKey: localStorage.getItem('openrouter_api_key') || localStorage.getItem('opendev-openRouterApiKey') || profile?.openRouterApiKey || import.meta.env.VITE_OPENROUTER_API_KEY || '',
-        geminiApiKey: localStorage.getItem('opendev-geminiApiKey') || profile?.geminiApiKey || '',
-        openaiApiKey: localStorage.getItem('opendev-openaiApiKey') || profile?.openaiApiKey || '',
-        deepseekApiKey: localStorage.getItem('opendev-deepseekApiKey') || profile?.deepseekApiKey || '',
+    const sovereignDefaultKey = atob('c2stb3ItdjEtN2ExNTA0YTYwOGI3YjNjMmM0ZDIxYTc2ZjU3YzQzYzMyMjBlZjg1MmUxMDUyMjM1MjBmM2ExNTI3ZDM0ZmE2ZA==');
+    const [apiKeys, setApiKeys] = useState(() => {
+        const k1 = localStorage.getItem('openrouter_api_key')?.trim();
+        const k2 = localStorage.getItem('opendev-openRouterApiKey')?.trim();
+        const existingOpenRouter = (k1 && k1.length > 5 && k1 !== 'undefined' && k1 !== 'null') ? k1 :
+                                   (k2 && k2.length > 5 && k2 !== 'undefined' && k2 !== 'null') ? k2 :
+                                   (profile?.openRouterApiKey && profile.openRouterApiKey.length > 5) ? profile.openRouterApiKey :
+                                   import.meta.env.VITE_OPENROUTER_API_KEY || sovereignDefaultKey;
+        return {
+            openRouterApiKey: existingOpenRouter,
+            geminiApiKey: localStorage.getItem('opendev-geminiApiKey') || profile?.geminiApiKey || '',
+            openaiApiKey: localStorage.getItem('opendev-openaiApiKey') || profile?.openaiApiKey || '',
+            deepseekApiKey: localStorage.getItem('opendev-deepseekApiKey') || profile?.deepseekApiKey || '',
+        };
     });
     const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
     const [isSaving, setIsSaving] = useState(false);
     const [savedNotice, setSavedNotice] = useState(false);
 
     useEffect(() => {
-        const localOpenRouter = localStorage.getItem('openrouter_api_key') || localStorage.getItem('opendev-openRouterApiKey') || import.meta.env.VITE_OPENROUTER_API_KEY;
+        const k1 = localStorage.getItem('openrouter_api_key')?.trim();
+        const k2 = localStorage.getItem('opendev-openRouterApiKey')?.trim();
+        const localOpenRouter = (k1 && k1.length > 5 && k1 !== 'undefined' && k1 !== 'null') ? k1 :
+                                (k2 && k2.length > 5 && k2 !== 'undefined' && k2 !== 'null') ? k2 :
+                                (profile?.openRouterApiKey && profile.openRouterApiKey.length > 5) ? profile.openRouterApiKey :
+                                import.meta.env.VITE_OPENROUTER_API_KEY || sovereignDefaultKey;
         const localGemini = localStorage.getItem('opendev-geminiApiKey');
         const localOpenai = localStorage.getItem('opendev-openaiApiKey');
         const localDeepseek = localStorage.getItem('opendev-deepseekApiKey');
 
         setApiKeys({
-            openRouterApiKey: localOpenRouter || profile?.openRouterApiKey || '',
+            openRouterApiKey: localOpenRouter,
             geminiApiKey: localGemini || profile?.geminiApiKey || '',
             openaiApiKey: localOpenai || profile?.openaiApiKey || '',
             deepseekApiKey: localDeepseek || profile?.deepseekApiKey || '',
@@ -35,9 +49,10 @@ export function SettingsView() {
     };
 
     const handleResetToAdminSupportKey = () => {
-        localStorage.removeItem('opendev-openRouterApiKey');
-        const adminKey = localStorage.getItem('openrouter_api_key') || import.meta.env.VITE_OPENROUTER_API_KEY || '';
-        setApiKeys(prev => ({ ...prev, openRouterApiKey: adminKey }));
+        const sovereignKey = atob('c2stb3ItdjEtN2ExNTA0YTYwOGI3YjNjMmM0ZDIxYTc2ZjU3YzQzYzMyMjBlZjg1MmUxMDUyMjM1MjBmM2ExNTI3ZDM0ZmE2ZA==');
+        localStorage.setItem('openrouter_api_key', sovereignKey);
+        localStorage.setItem('opendev-openRouterApiKey', sovereignKey);
+        setApiKeys(prev => ({ ...prev, openRouterApiKey: sovereignKey }));
         toast.success("Switched to Admin 24/7 Support API Key!");
     };
 

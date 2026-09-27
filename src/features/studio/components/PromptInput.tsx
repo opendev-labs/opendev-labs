@@ -57,7 +57,7 @@ export function PromptInput({ onSendMessage, disabled, selectedModelId, onModelC
         <input ref={fileInputRef} type="file" className="hidden" multiple accept="image/*,.js,.ts,.tsx,.json,.css,.html" />
 
         {/* VERCEL AI ELEMENTS INPUT CONTAINER */}
-        <div className="bg-[#0e0e11] border border-zinc-800 rounded-2xl flex flex-col p-2.5 transition-all duration-300 focus-within:border-zinc-700 shadow-xl">
+        <div className="bg-[#09090b] border border-zinc-800/90 rounded-2xl flex flex-col p-2.5 transition-all duration-300 focus-within:border-zinc-500 shadow-[0_20px_50px_rgba(0,0,0,0.95),0_0_25px_rgba(255,255,255,0.07)] relative backdrop-blur-xl">
           <textarea
             ref={textareaRef}
             value={prompt}
@@ -70,7 +70,7 @@ export function PromptInput({ onSendMessage, disabled, selectedModelId, onModelC
               }
             }}
             placeholder="Describe what you want to build..."
-            className="w-full bg-transparent text-white text-xs sm:text-sm placeholder-zinc-500 resize-none focus:outline-none font-normal px-2 py-1.5 min-h-[52px] max-h-[160px] scrollbar-hide selection:bg-[#00f2fe]/30 selection:text-white"
+            className="w-full bg-transparent text-white text-xs sm:text-sm placeholder-zinc-500 resize-none focus:outline-none font-normal px-2 py-1.5 min-h-[52px] max-h-[160px] scrollbar-hide selection:bg-white/20 selection:text-white"
             rows={1}
             disabled={disabled}
             autoFocus

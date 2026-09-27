@@ -78,6 +78,15 @@ export function convertFromUSD(usdAmount: number, targetCurrency: SupportedCurre
 }
 
 /**
+ * Converts a base INR amount to target currency.
+ */
+export function convertFromINR(inrAmount: number, targetCurrency: SupportedCurrency): number {
+  if (targetCurrency === 'INR') return inrAmount;
+  const usdAmount = inrAmount / 80;
+  return convertFromUSD(usdAmount, targetCurrency);
+}
+
+/**
  * Formats an amount with the correct symbol and number formatting for a given currency
  */
 export function formatCurrencyPrice(amount: number, currency: SupportedCurrency): string {

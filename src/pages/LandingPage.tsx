@@ -32,6 +32,7 @@ import { FrameworkMarquee } from '../components/ui/FrameworkMarquee';
 
 import { TypewriterHeading } from '../components/ui/TypewriterHeading';
 import { cn } from '../lib/utils';
+import { showcaseProjects } from '../data/showcaseProjects';
 
 const landingPhrases = [
   "Engineering High-Performance Web Applications",
@@ -44,6 +45,11 @@ const landingPhrases = [
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
+  const [projectCategory, setProjectCategory] = useState<'all' | 'production' | 'experimental'>('all');
+
+  const filteredShowcaseProjects = projectCategory === 'all'
+    ? showcaseProjects
+    : showcaseProjects.filter(p => p.category === projectCategory);
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white transition-colors duration-200">
@@ -230,6 +236,112 @@ export const LandingPage: React.FC = () => {
             </div>
 
           </div>
+        </div>
+      </section>
+
+      {/* 3.5 Featured Projects & Live Production Builds Section */}
+      <section className="py-16 sm:py-20 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/30 transition-colors">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          
+          {/* Professional Header & Subtitle */}
+          <div className="text-center max-w-3xl mx-auto mb-10">
+            <span className="inline-block px-3.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-3 border border-blue-500/20 font-sans">
+              DEPLOYED SYSTEMS & EXPERIMENTAL LABS
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
+              Featured Projects & Live Production Builds
+            </h2>
+            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mx-auto">
+              Explore high-performance web applications, interactive web terminal IDEs, neural AI engines, and experimental software systems engineered by OpenDev-Labs.
+            </p>
+
+            {/* Interactive Category Filter Pills */}
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8">
+              <button
+                onClick={() => setProjectCategory('all')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  projectCategory === 'all'
+                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700"
+                )}
+              >
+                All Projects ({showcaseProjects.length})
+              </button>
+              <button
+                onClick={() => setProjectCategory('production')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  projectCategory === 'production'
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50"
+                )}
+              >
+                Production Builds ({showcaseProjects.filter(p => p.category === 'production').length})
+              </button>
+              <button
+                onClick={() => setProjectCategory('experimental')}
+                className={cn(
+                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
+                  projectCategory === 'experimental'
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
+                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50"
+                )}
+              >
+                Experimental Labs ({showcaseProjects.filter(p => p.category === 'experimental').length})
+              </button>
+            </div>
+          </div>
+
+          {/* Live Desktop Miniature Screen Preview Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10">
+            {filteredShowcaseProjects.map((project) => (
+              <a
+                key={project.id}
+                href={project.url}
+                target="_blank"
+                rel="noreferrer"
+                className="hero-glass-card hover:border-blue-500/50 group flex flex-col justify-between transition-all duration-300 hover:shadow-2xl overflow-hidden rounded-2xl"
+              >
+                <div>
+                  <div className="relative border-b border-zinc-200 dark:border-zinc-800">
+                    <MiniDesktopPreview
+                      url={project.url}
+                      title={project.name}
+                    />
+
+                    <div className="absolute top-3 left-3 z-20">
+                      <span className={cn(
+                        "px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md border shadow-md",
+                        project.category === 'production'
+                          ? "bg-blue-950/80 text-blue-400 border-blue-500/30"
+                          : "bg-emerald-950/80 text-emerald-400 border-emerald-500/30"
+                      )}>
+                        {project.categoryLabel}
+                      </span>
+                    </div>
+
+                    <div className="absolute inset-0 bg-zinc-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 backdrop-blur-[2px]">
+                      <span className="px-4 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-extrabold text-xs flex items-center gap-2 shadow-xl">
+                        Open Project <ExternalLink className="size-3.5" />
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-5">
+                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-blue-500 transition-colors flex items-center justify-between">
+                      <span>{project.name}</span>
+                      <ExternalLink className="size-4 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </h3>
+                    <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1">
+                      {project.displayUrl}
+                    </p>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+
         </div>
       </section>
 

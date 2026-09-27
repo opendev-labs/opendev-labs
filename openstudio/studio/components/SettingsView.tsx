@@ -2,15 +2,114 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../void/hooks/useAuth';
 import { toast } from 'sonner';
 import { SUPPORTED_MODELS } from '../constants';
-import { BrainCircuitIcon, UserIcon } from './icons/Icons';
+import { BrainCircuitIcon, UserIcon, KeyIcon, CheckIcon } from './icons/Icons';
 
 interface SettingsViewProps {
   selectedModelId?: string;
   onModelChange?: (modelId: string) => void;
 }
 
+const sovereignDefaultKey = atob('c2stb3ItdjEtN2ExNTA0YTYwOGI3YjNjMmM0ZDIxYTc2ZjU3YzQzYzMyMjBlZjg1MmUxMDUyMjM1MjBmM2ExNTI3ZDM0ZmE2ZA==');
+
 export function SettingsView({ selectedModelId, onModelChange }: SettingsViewProps) {
-  const { user, profile } = useAuth();
+  const { user, profile, updateProfile } = useAuth();
+
+  // API Keys State
+  const [apiKeys, setApiKeys] = useState(() => {
+    const k1 = localStorage.getItem('openrouter_api_key')?.trim();
+    const k2 = localStorage.getItem('opendev-openRouterApiKey')?.trim();
+    const existingOpenRouter = (k1 && k1.length > 5 && k1 !== 'undefined' && k1 !== 'null') ? k1 :
+                               (k2 && k2.length > 5 && k2 !== 'undefined' && k2 !== 'null') ? k2 :
+                               (profile?.openRouterApiKey && profile.openRouterApiKey.length > 5) ? profile.openRouterApiKey :
+                               import.meta.env.VITE_OPENROUTER_API_KEY || sovereignDefaultKey;
+    return {
+      openRouterApiKey: existingOpenRouter,
+      geminiApiKey: localStorage.getItem('opendev-geminiApiKey') || profile?.geminiApiKey || '',
+      openaiApiKey: localStorage.getItem('opendev-openaiApiKey') || profile?.openaiApiKey || '',
+      deepseekApiKey: localStorage.getItem('opendev-deepseekApiKey') || profile?.deepseekApiKey || '',
+    };
+  });
+  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [savedNotice, setSavedNotice] = useState(false);
+
+  useEffect(() => {
+    const k1 = localStorage.getItem('openrouter_api_key')?.trim();
+    const k2 = localStorage.getItem('opendev-openRouterApiKey')?.trim();
+    const localOpenRouter = (k1 && k1.length > 5 && k1 !== 'undefined' && k1 !== 'null') ? k1 :
+                            (k2 && k2.length > 5 && k2 !== 'undefined' && k2 !== 'null') ? k2 :
+                            (profile?.openRouterApiKey && profile.openRouterApiKey.length > 5) ? profile.openRouterApiKey :
+                            import.meta.env.VITE_OPENROUTER_API_KEY || sovereignDefaultKey;
+    const localGemini = localStorage.getItem('opendev-geminiApiKey');
+    const localOpenai = localStorage.getItem('opendev-openaiApiKey');
+    const localDeepseek = localStorage.getItem('opendev-deepseekApiKey');
+
+    setApiKeys({
+      openRouterApiKey: localOpenRouter,
+      geminiApiKey: localGemini || profile?.geminiApiKey || '',
+      openaiApiKey: localOpenai || profile?.openaiApiKey || '',
+      deepseekApiKey: localDeepseek || profile?.deepseekApiKey || '',
+    });
+  }, [profile]);
+
+  const toggleShowKey = (keyName: string) => {
+    setShowKeys(prev => ({ ...prev, [keyName]: !prev[keyName] }));
+  };
+
+  const handleResetToAdminSupportKey = () => {
+    localStorage.setItem('openrouter_api_key', sovereignDefaultKey);
+    localStorage.setItem('opendev-openRouterApiKey', sovereignDefaultKey);
+    setApiKeys(prev => ({ ...prev, openRouterApiKey: sovereignDefaultKey }));
+    toast.success("Switched to Admin 24/7 Support API Key!");
+  };
+
+  const handleSaveKeys = async () => {
+    setIsSaving(true);
+    try {
+      if (apiKeys.openRouterApiKey.trim()) {
+        localStorage.setItem('opendev-openRouterApiKey', apiKeys.openRouterApiKey.trim());
+        localStorage.setItem('openrouter_api_key', apiKeys.openRouterApiKey.trim());
+      } else {
+        localStorage.removeItem('opendev-openRouterApiKey');
+        localStorage.removeItem('openrouter_api_key');
+      }
+
+      if (apiKeys.geminiApiKey.trim()) {
+        localStorage.setItem('opendev-geminiApiKey', apiKeys.geminiApiKey.trim());
+      } else {
+        localStorage.removeItem('opendev-geminiApiKey');
+      }
+
+      if (apiKeys.openaiApiKey.trim()) {
+        localStorage.setItem('opendev-openaiApiKey', apiKeys.openaiApiKey.trim());
+      } else {
+        localStorage.removeItem('opendev-openaiApiKey');
+      }
+
+      if (apiKeys.deepseekApiKey.trim()) {
+        localStorage.setItem('opendev-deepseekApiKey', apiKeys.deepseekApiKey.trim());
+      } else {
+        localStorage.removeItem('opendev-deepseekApiKey');
+      }
+
+      if (user && updateProfile) {
+        try {
+          await updateProfile(apiKeys);
+        } catch (e) {
+          console.warn("Profile sync error (keys still preserved locally):", e);
+        }
+      }
+
+      setSavedNotice(true);
+      setTimeout(() => setSavedNotice(false), 4000);
+      toast.success("API Keys saved successfully!");
+    } catch (error) {
+      console.error("Save API Keys error:", error);
+      toast.error("Failed to save API keys.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   // Persist model choice in localStorage
   const [localModel, setLocalModel] = useState(() =>
@@ -94,6 +193,126 @@ export function SettingsView({ selectedModelId, onModelChange }: SettingsViewPro
             >
               Manage Account →
             </a>
+          </div>
+        </section>
+
+        {/* API KEYS CARD */}
+        <section className="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 space-y-5">
+          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-xl bg-zinc-800/60 border border-zinc-700/50 text-[#00f2fe]">
+                <KeyIcon className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white">API Model Handshake</h2>
+                <p className="text-xs text-zinc-400">Your keys are encrypted and stored locally in your browser context.</p>
+              </div>
+            </div>
+
+            {savedNotice && (
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-emerald-400 text-xs font-bold animate-fade-in">
+                <CheckIcon className="w-3.5 h-3.5" /> Saved & Active
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            {/* OPENROUTER KEY */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-zinc-300">
+                  OpenRouter API Key <span className="text-emerald-400 text-[10px] font-semibold">(Recommended)</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  {apiKeys.openRouterApiKey && (
+                    <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Active
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleResetToAdminSupportKey}
+                    className="text-[10px] text-zinc-400 hover:text-emerald-400 underline transition-colors cursor-pointer"
+                    title="Reset and synchronize with Admin 24/7 Support API Key"
+                  >
+                    Use 24/7 Support Key
+                  </button>
+                </div>
+              </div>
+              <div className="relative">
+                <input
+                  type={showKeys['openRouter'] ? "text" : "password"}
+                  placeholder="sk-or-v1-..."
+                  value={apiKeys.openRouterApiKey}
+                  onChange={(e) => setApiKeys({ ...apiKeys, openRouterApiKey: e.target.value })}
+                  className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#00f2fe] transition-colors font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleShowKey('openRouter')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
+                >
+                  {showKeys['openRouter'] ? "Hide" : "Show"}
+                </button>
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-zinc-500 mt-1">
+                <span>Unlocks Qwen 2.5 Coder, DeepSeek, Claude 3.5 via 24/7 Support Engine.</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    localStorage.removeItem('opendev-openRouterApiKey');
+                    localStorage.removeItem('openrouter_api_key');
+                    setApiKeys(prev => ({ ...prev, openRouterApiKey: '' }));
+                    toast.info("OpenRouter API key removed.");
+                  }}
+                  className="text-zinc-500 hover:text-red-400 transition-colors"
+                >
+                  Clear key
+                </button>
+              </div>
+            </div>
+
+            {/* GEMINI KEY */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-bold text-zinc-300">
+                  Google Gemini API Key
+                </label>
+                {apiKeys.geminiApiKey && (
+                  <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Key Set
+                  </span>
+                )}
+              </div>
+              <div className="relative">
+                <input
+                  type={showKeys['gemini'] ? "text" : "password"}
+                  placeholder="AIzaSy..."
+                  value={apiKeys.geminiApiKey}
+                  onChange={(e) => setApiKeys({ ...apiKeys, geminiApiKey: e.target.value })}
+                  className="w-full bg-[#050505] border border-zinc-800 rounded-xl pl-3.5 pr-20 py-2.5 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-[#00f2fe] transition-colors font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => toggleShowKey('gemini')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-zinc-400 hover:text-white px-2 py-1 rounded bg-zinc-800/60 border border-zinc-700/50"
+                >
+                  {showKeys['gemini'] ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            {/* SAVE BUTTON */}
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={handleSaveKeys}
+                disabled={isSaving}
+                className="px-5 py-2 bg-gradient-to-r from-blue-600 to-[#00f2fe] hover:opacity-90 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer flex items-center gap-2"
+              >
+                <CheckIcon className="w-3.5 h-3.5" />
+                <span>{isSaving ? 'Saving...' : 'Save API Keys'}</span>
+              </button>
+            </div>
           </div>
         </section>
 

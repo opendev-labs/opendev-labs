@@ -9,6 +9,8 @@ import { hubService } from '../../services/hubService';
 import { useAuth } from '../../void/hooks/useAuth';
 import { toast } from 'sonner';
 import { LocalSyncService } from '../services/localSyncService';
+import { PublishTemplateModal } from './PublishTemplateModal';
+import { isUserPro, openPricingPage } from '../services/promptQuotaService';
 
 interface ChatSessionViewProps {
   session: ChatSession;
@@ -45,6 +47,7 @@ export function ChatSessionView({
     : null;
 
   const [showDeployDialog, setShowDeployDialog] = useState(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const [isCodeViewVisible, setIsCodeViewVisible] = useState(true);
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
@@ -169,9 +172,13 @@ export function ChatSessionView({
             </button>
           </div>
 
-          {/* EXPORT PROJECT BUTTON */}
+          {/* EXPORT PROJECT BUTTON (OPENSTUDIO PRO) */}
           <button
             onClick={() => {
+              if (!isUserPro()) {
+                openPricingPage();
+                return;
+              }
               try {
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(session.fileTree, null, 2));
                 const downloadAnchor = document.createElement('a');
@@ -185,10 +192,13 @@ export function ChatSessionView({
                 toast.error('Export failed.');
               }
             }}
-            className="hidden sm:flex items-center gap-1 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-300 hover:text-white transition-all cursor-pointer"
-            title="Export Project Files JSON"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-[10px] font-bold text-zinc-300 hover:text-white transition-all cursor-pointer group"
+            title="Export Project Files (OpenStudio Pro)"
           >
             <span>⬇ Export</span>
+            <span className="bg-gradient-to-r from-amber-400 to-amber-600 text-black text-[8px] font-black px-1.5 py-0.2 rounded tracking-wider shadow-sm group-hover:scale-105 transition-transform">
+              PRO
+            </span>
           </button>
 
           {/* SPLIT TOGGLE ICON */}
@@ -202,19 +212,13 @@ export function ChatSessionView({
             </svg>
           </button>
 
-          {/* PUBLISH BUTTON */}
+          {/* PUBLISH TO TEMPLATES BUTTON */}
           <button
-            onClick={async () => {
-              if (!user || !profile) { toast.error('Login required to publish.'); return; }
-              try {
-                const content = `🚀 Published "${session.title}" on OpenStudio!\n\n${session.fileTree.length} files materialized.`;
-                await hubService.shareToHub(user, profile, content, session.title);
-                toast.success('Project published successfully!');
-              } catch (e) {
-                toast.error('Failed to publish project.');
-              }
+            onClick={() => {
+              setIsPublishModalOpen(true);
             }}
-            className="flex items-center gap-1 px-3 py-1 bg-[#f02050] hover:bg-[#d01840] text-white font-extrabold rounded-lg text-[11px] shadow-[0_0_12px_rgba(240,32,80,0.3)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-[#00f2fe] to-cyan-500 hover:from-cyan-400 hover:to-cyan-500 text-black font-extrabold rounded-lg text-[11px] shadow-[0_0_12px_rgba(0,242,254,0.3)] transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            title="Save to opendev-labs.com/templates & OpenStudio Showcase"
           >
             <span>☆</span>
             <span>PUBLISH</span>
@@ -288,6 +292,17 @@ export function ChatSessionView({
         onClose={() => setShowDeployDialog(false)}
         files={session.fileTree}
         sessionTitle={session.title}
+      />
+
+
+
+      {/* Publish to Templates Modal */}
+      <PublishTemplateModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        sessionTitle={session.title}
+        fileTree={session.fileTree}
+        authorName={user?.name || profile?.username || 'OpenStudio Creator'}
       />
     </div>
   );

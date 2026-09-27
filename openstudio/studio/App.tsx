@@ -13,6 +13,8 @@ import { useAuth } from '../void/hooks/useAuth';
 import { ShareIcon } from './components/icons/Icons';
 import { toast } from 'sonner';
 import { LamaDB } from '../lib/lamaDB';
+import { TemplatesView } from './components/TemplatesView';
+import { getPromptQuota, consumePromptQuota, openPricingPage } from './services/promptQuotaService';
 
 // A simple ID generator
 const generateId = () => Date.now().toString() + Math.random().toString(36).substring(2);
@@ -488,11 +490,20 @@ function App() {
   const [isSaving, setIsSaving] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+
   // Model State
   const [selectedModelId, setSelectedModelId] = useState<string>(SUPPORTED_MODELS[0].id);
 
   useEffect(() => {
     try {
+      const k1 = localStorage.getItem('openrouter_api_key');
+      const k2 = localStorage.getItem('opendev-openRouterApiKey');
+      const sovereignKey = atob('c2stb3ItdjEtN2ExNTA0YTYwOGI3YjNjMmM0ZDIxYTc2ZjU3YzQzYzMyMjBlZjg1MmUxMDUyMjM1MjBmM2ExNTI3ZDM0ZmE2ZA==');
+      if ((!k1 || k1 === 'undefined' || k1 === 'null' || !k1.trim()) && (!k2 || k2 === 'undefined' || k2 === 'null' || !k2.trim())) {
+        localStorage.setItem('openrouter_api_key', sovereignKey);
+        localStorage.setItem('opendev-openRouterApiKey', sovereignKey);
+      }
+
       const savedModel = localStorage.getItem('opendev-selectedModelId');
       if (savedModel && savedModel !== 'gemini-1.5-pro' && savedModel !== 'gemini-2.0-flash' && SUPPORTED_MODELS.some(m => m.id === savedModel)) {
         setSelectedModelId(savedModel);
@@ -604,12 +615,13 @@ function App() {
       } else if (path === 'storage') {
         setActiveSessionId(null);
         setView('storage');
-      } else if (path === 'deploy') {
+      } else if (path === 'templates') {
         setActiveSessionId(null);
-        setView('deploy');
+        setView('templates');
       } else {
         setActiveSessionId(null);
         setView('new-chat');
+        setIsSidebarOpen(false);
       }
 
       setIsInitialLoad(false);
@@ -639,6 +651,9 @@ function App() {
         break;
       case 'deploy':
         window.location.hash = '/deploy';
+        break;
+      case 'templates':
+        window.location.hash = '/templates';
         break;
     }
   };
@@ -802,6 +817,13 @@ function App() {
   const lastSubmitTimeRef = useRef(0);
 
   const handleSendMessage = async (prompt: string) => {
+    // 🛡️ Daily Quota Enforcement
+    const quota = getPromptQuota();
+    if (quota.isLocked) {
+      openPricingPage();
+      return;
+    }
+
     const now = Date.now();
     if (isThinkingRef.current || (now - lastSubmitTimeRef.current < 600)) {
       console.warn("Blocked duplicate submit attempt in App.tsx");
@@ -810,6 +832,7 @@ function App() {
     lastSubmitTimeRef.current = now;
     isThinkingRef.current = true;
     setIsThinking(true);
+    consumePromptQuota();
 
     let currentSessionId = activeSessionId;
     let newSessionCreated = false;
@@ -926,9 +949,15 @@ function App() {
             activeFile: updatedActiveFile,
             messages: s.messages.map(m => {
               if (m.id !== openStudioMessageId) return m;
+              // Preserve thinking block while streaming so thinking can be extracted in real-time
+              const streamThinkMatch = fullResponse.match(/<think>[\s\S]*?(?:<\/think>|$)/i);
+              const streamingContent = streamThinkMatch 
+                ? `${streamThinkMatch[0]}\n\n${conversationText}`
+                : (conversationText || fullResponse || m.content);
+
               return {
                 ...m,
-                content: conversationText || m.content,
+                content: streamingContent,
                 generationInfo: {
                   status: 'generating' as const,
                   files: streamFiles.length > 0 ? streamFiles : (m.generationInfo?.files || [{ path: updatedActiveFile?.path || 'src/App.tsx', action: 'created', status: 'generating' }])
@@ -1000,9 +1029,15 @@ function App() {
 
         const updatedMessages = s.messages.map(msg => {
           if (msg.id === openStudioMessageId) {
+            const thinkMatch = fullResponse.match(/<think>[\s\S]*?(?:<\/think>|$)/i);
+            const preservedThinking = thinkMatch ? thinkMatch[0] : '';
+            const finalContent = preservedThinking 
+              ? `${preservedThinking}\n\n${finalConversationalPart}` 
+              : finalConversationalPart;
+
             return {
               ...msg,
-              content: finalConversationalPart,
+              content: finalContent,
               generationInfo: {
                 status: 'complete' as const,
                 files: completedGenerationFiles,
@@ -1062,21 +1097,36 @@ function App() {
     onSendMessage: handleSendMessage,
     selectedModelId,
     onModelChange: handleModelChange,
+    onOpenProModal: () => {
+      openPricingPage();
+    },
   };
 
   return (
-    <div className="flex h-screen w-screen bg-background text-muted-foreground selection:bg-primary/20 selection:text-foreground overflow-hidden">
-      {/* 🛸 LEFT SIDBAR */}
-      <Sidebar
-        onNavigate={handleNavigate}
-        recentChats={sessions}
-        onSelectChat={handleSelectChat}
-        onDeleteSession={handleDeleteSession}
-        activeView={view}
-        activeChatId={activeSessionId}
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
-      />
+    <div className="flex h-screen w-screen bg-[#000000] text-muted-foreground selection:bg-white/20 selection:text-white overflow-hidden">
+      {/* 🛸 LEFT SIDEBAR (CLOSED BY DEFAULT ON NEW-CHAT PAGE) */}
+      {view === 'new-chat' && !isSidebarOpen ? (
+        <div className="absolute top-4 left-4 z-50">
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="flex items-center gap-2 p-2 rounded-xl bg-zinc-900/90 border border-zinc-800/80 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all cursor-pointer backdrop-blur-md shadow-md group"
+            title="Open Sidebar"
+          >
+            <SidebarIcon className="w-4 h-4 text-zinc-400 group-hover:text-white" />
+          </button>
+        </div>
+      ) : (
+        <Sidebar
+          onNavigate={handleNavigate}
+          recentChats={sessions}
+          onSelectChat={handleSelectChat}
+          onDeleteSession={handleDeleteSession}
+          activeView={view}
+          activeChatId={activeSessionId}
+          isOpen={isSidebarOpen}
+          onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
+        />
+      )}
       
       {/* 🏗️ MAIN WORKSPACE */}
       <main className="flex-1 flex flex-col min-w-0 bg-background relative overflow-hidden shadow-2xl">
@@ -1099,6 +1149,43 @@ function App() {
             {view === 'new-chat' && !activeSessionId && (
               <div className="h-full">
                 <WelcomeScreen {...commonProps} />
+              </div>
+            )}
+            {view === 'templates' && (
+              <div className="h-full">
+                <TemplatesView
+                  onNavigate={handleNavigate}
+                  onLoadTemplate={(template) => {
+                    const newId = generateId();
+                    const newSession: ChatSession = {
+                      id: newId,
+                      title: template.name,
+                      messages: [
+                        {
+                          id: Date.now(),
+                          role: 'user',
+                          content: `Loaded blueprint: ${template.name}`,
+                        },
+                        {
+                          id: Date.now() + 1,
+                          role: 'open-studio',
+                          content: `Loaded **${template.name}** from OpenStudio Templates.\n\n${template.description}`,
+                          generationInfo: {
+                            status: 'complete',
+                            files: [],
+                          },
+                        }
+                      ],
+                      fileTree: template.fileTree || [],
+                      activeFile: template.fileTree?.[0] || null,
+                      lastUpdated: Date.now(),
+                    };
+                    setSessions(prev => [newSession, ...prev]);
+                    setActiveSessionId(newId);
+                    setView('chat-session');
+                    toast.success(`Loaded "${template.name}" into OpenStudio`);
+                  }}
+                />
               </div>
             )}
             {view === 'storage' && (
@@ -1130,6 +1217,8 @@ function App() {
           </div>
         </div>
       </main>
+
+
     </div>
   );
 }

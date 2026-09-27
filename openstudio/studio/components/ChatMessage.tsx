@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Message } from '../types';
 import { UserIcon } from './icons/Icons';
 import { GenerationStatusView } from './GenerationStatusView';
@@ -12,6 +12,7 @@ import {
   ChevronDown 
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '../../context/AuthContext';
 
 interface ChatMessageProps {
   message: Message;
@@ -53,48 +54,124 @@ const cleanMessageContent = (rawContent: string): string => {
   return str;
 };
 
-// Helper to extract raw thinking reasoning
-const extractThinkingContent = (rawContent: string): string[] => {
-  if (!rawContent) return [];
+interface CotStep {
+  title: string;
+  detail: string;
+}
+
+// Parses real thinking from <think>...</think> into the 3 canonical architectural stages
+const parseStructuredCot = (rawContent: string): CotStep[] => {
+  const defaultSteps: CotStep[] = [
+    {
+      title: 'Analyze architecture & requirements',
+      detail: 'Parsed requirements, determined responsive layout hierarchy and styling tokens.'
+    },
+    {
+      title: 'Materialize component structure',
+      detail: 'Constructed component logic with interactive state, animations, and Tailwind styling.'
+    },
+    {
+      title: 'Validate live sandbox preview',
+      detail: 'Verified zero-error export compatibility for live DevBox/Sandpack rendering.'
+    }
+  ];
+
+  if (!rawContent) return defaultSteps;
+
   const match = rawContent.match(/<think>([\s\S]*?)(?:<\/think>|$)/i);
-  if (!match || !match[1]) return [];
-  return match[1]
+  if (!match || !match[1]) return defaultSteps;
+
+  const thinkText = match[1].trim();
+  if (!thinkText) return defaultSteps;
+
+  // Check if thinkText contains our 3 core phase markers
+  const phase1Match = thinkText.match(/Analyze\s+architecture\s*&?\s*requirements:?([\s\S]*?)(?=Materialize\s+component|Validate\s+live|$)/i);
+  const phase2Match = thinkText.match(/Materialize\s+component\s*structure:?([\s\S]*?)(?=Validate\s+live|$)/i);
+  const phase3Match = thinkText.match(/Validate\s+live\s*(?:sandbox)?\s*preview:?([\s\S]*?)$/i);
+
+  const cleanDetail = (str?: string) => {
+    if (!str) return '';
+    return str
+      .split('\n')
+      .map(l => l.trim().replace(/^[-•*]\s*/, ''))
+      .filter(Boolean)
+      .join(' • ');
+  };
+
+  const p1Detail = cleanDetail(phase1Match?.[1]);
+  const p2Detail = cleanDetail(phase2Match?.[1]);
+  const p3Detail = cleanDetail(phase3Match?.[1]);
+
+  if (p1Detail || p2Detail || p3Detail) {
+    return [
+      {
+        title: 'Analyze architecture & requirements',
+        detail: p1Detail || defaultSteps[0].detail
+      },
+      {
+        title: 'Materialize component structure',
+        detail: p2Detail || defaultSteps[1].detail
+      },
+      {
+        title: 'Validate live sandbox preview',
+        detail: p3Detail || defaultSteps[2].detail
+      }
+    ];
+  }
+
+  // Freeform thinking lines: distribute across the 3 core stages
+  const lines = thinkText
     .split('\n')
-    .map(l => l.trim().replace(/^[•\-\*]\s*/, ''))
+    .map(l => l.trim().replace(/^[-•*]\s*/, ''))
     .filter(Boolean);
+
+  if (lines.length > 0) {
+    const third = Math.ceil(lines.length / 3);
+    const p1 = lines.slice(0, third).join(' • ');
+    const p2 = lines.slice(third, third * 2).join(' • ');
+    const p3 = lines.slice(third * 2).join(' • ');
+
+    return [
+      {
+        title: 'Analyze architecture & requirements',
+        detail: p1 || defaultSteps[0].detail
+      },
+      {
+        title: 'Materialize component structure',
+        detail: p2 || defaultSteps[1].detail
+      },
+      {
+        title: 'Validate live sandbox preview',
+        detail: p3 || defaultSteps[2].detail
+      }
+    ];
+  }
+
+  return defaultSteps;
 };
 
 export const ChatMessage: React.FC<ChatMessageProps> = ({ message, versionIndex }) => {
   const { role, content, generationInfo } = message;
+  const { user } = useAuth();
   const isUser = role === 'user';
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<'like' | 'dislike' | null>(null);
-  const [isCotOpen, setIsCotOpen] = useState(false);
 
   const isStudioGenerating = role === 'open-studio' && generationInfo?.status === 'generating';
   const hasFiles = !!(generationInfo && generationInfo.files.length > 0);
-  const isThinkingPhase = isStudioGenerating && !hasFiles && !content;
+  const isThinkingPhase = isStudioGenerating && !hasFiles;
+
+  const [isCotOpen, setIsCotOpen] = useState(isThinkingPhase);
+
+  // Auto-expand during live generation so the user sees real-time reasoning!
+  useEffect(() => {
+    if (isThinkingPhase) {
+      setIsCotOpen(true);
+    }
+  }, [isThinkingPhase]);
 
   const displayContent = cleanMessageContent(content);
-  const rawThoughts = extractThinkingContent(content);
-
-  // Default structured Chain of Thought steps inspired by HeroUI Pro
-  const cotSteps = rawThoughts.length > 0 
-    ? rawThoughts.map(t => ({ title: 'Reasoning step', detail: t }))
-    : [
-        {
-          title: 'Analyze architecture & requirements',
-          detail: 'Parsed requirements, determined responsive layout hierarchy and styling tokens.'
-        },
-        {
-          title: 'Materialize component structure',
-          detail: 'Constructed component logic with interactive state, animations, and Tailwind styling.'
-        },
-        {
-          title: 'Validate live sandbox preview',
-          detail: 'Verified zero-error export compatibility for live DevBox/Sandpack rendering.'
-        }
-      ];
+  const cotSteps = parseStructuredCot(content);
 
   const handleCopy = () => {
     if (displayContent) {
@@ -109,15 +186,39 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, versionIndex 
     <div className="flex flex-col gap-2 w-full max-w-4xl mx-auto mb-5 animate-in fade-in slide-in-from-bottom-2 duration-300 px-3 group">
       <div className={`flex gap-3.5 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
         
-        {/* AVATAR: HEROUI PRO STYLE */}
+        {/* AVATAR: HEROUI PRO STYLE WITH OFFICIAL OPENDEV-LABS LOGO & GOOGLE PROFILE PIC */}
         <div className="flex-shrink-0 pt-0.5 select-none">
           {isUser ? (
-            <div className="h-7 w-7 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-300 font-semibold text-xs shadow-sm">
-              <UserIcon className="h-3.5 w-3.5 text-zinc-300" />
-            </div>
+            user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.name || 'User'}
+                className="size-8 rounded-full object-cover border border-zinc-700/80 shadow-xs"
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="size-8 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-200 font-bold text-xs shadow-sm">
+                {user?.name ? user.name.charAt(0).toUpperCase() : <UserIcon className="size-4 text-zinc-300" />}
+              </div>
+            )
           ) : (
-            <div className="h-7 w-7 rounded-full bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-zinc-200 font-bold text-[11px] shadow-sm">
-              <span>AI</span>
+            /* FULL OFFICIAL OPENDEV-LABS BRAND LOGO (UNCONSTRAINED BY CIRCLE, MATCHING TOP LEFT CORNER) */
+            <div className="shrink-0 flex items-center justify-center pt-0.5">
+              <img
+                src="/logo-icon.webp"
+                alt="OpenDev-Labs"
+                className="h-8 sm:h-9 w-auto object-contain shrink-0 transition-transform duration-200"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.src.includes('logo-opendevlabs.png')) {
+                    target.src = '/logo-opendevlabs.png';
+                  } else if (!target.src.includes('opendev-labs.png')) {
+                    target.src = '/opendev-labs.png';
+                  }
+                }}
+              />
             </div>
           )}
         </div>

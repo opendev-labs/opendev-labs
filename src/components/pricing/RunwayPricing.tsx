@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X, Globe, ChevronDown, Upload, MessageSquare, ExternalLink } from 'lucide-react';
+import { Info, ShieldCheck, Zap, Layers, QrCode, Copy, Check, X, Globe, ChevronDown, Upload, MessageSquare, ExternalLink, Calendar } from 'lucide-react';
 import { openRazorpayCheckout } from '../../lib/payment/razorpay';
 import { SupportedCurrency, SUPPORTED_CURRENCIES, convertFromUSD, formatCurrencyPrice } from '../../lib/payment/currencies';
 import { useClients } from '../../context/ClientContext';
 import { useAuth } from '../../context/AuthContext';
+import { EnterpriseAppointmentSection } from './EnterpriseAppointmentSection';
+import { EnterpriseAppointmentModal } from './EnterpriseAppointmentModal';
 
 interface RunwayPricingProps {
   onSelectPlan?: (planName: string) => void;
@@ -18,6 +20,7 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annually'>('monthly');
   const [currency, setCurrency] = useState<SupportedCurrency>('USD');
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showAppointmentModal, setShowAppointmentModal] = useState(false);
   const [copiedUPI, setCopiedUPI] = useState(false);
   const [paymentScreenshot, setPaymentScreenshot] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
@@ -90,24 +93,31 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
       shortName: 'Enterprise',
       subtitle: 'Custom Architecture & SLA Retainer',
       description: 'Dedicated cloud infrastructure, custom API integrations, 99.99% SLA & immediate emergency response.',
-      usdMonthly: 125,
-      usdAnnual: 1350,
+      usdMonthly: 0,
+      usdAnnual: 0,
+      isCustomPrice: true,
       credits: 'Dedicated Architecture + 99.99% SLA',
       buttonVariant: 'blue',
-      badge: 'Best value',
+      badge: 'Custom Scope',
       pillTag: 'Enterprise Retainer',
       highlightBorder: true,
       features: [
         'Tailored full-stack SLA & dedicated cloud runner',
         'Custom database schema & API webhook maintenance',
         '99.99% Uptime Guarantee with SLA compliance',
-        'Dedicated Lead Architect (Yash Ramteke)',
-        'Annual billing discount: Save $150 / year',
+        'Direct access to Lead Architect (Yash Ramteke)',
+        'Private VPC & on-premise infrastructure support',
+        'Scope-based pricing & flexible milestone billing',
       ],
     },
   ];
 
   const handleSelectCard = (plan: typeof maintenancePlans[0]) => {
+    if (plan.isCustomPrice) {
+      setShowAppointmentModal(true);
+      return;
+    }
+
     if (!user) {
       navigate('/auth');
       return;
@@ -245,7 +255,9 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
             ? `Billed ${priceDisplay} / month`
             : `Billed ${priceDisplay} / year • Save ${savingsDisplay}`;
 
-          const buttonText = `Select ${plan.shortName} (${priceDisplay}/${isMonthly ? 'mo' : 'yr'})`;
+          const buttonText = plan.isCustomPrice
+            ? 'Book an Appointment →'
+            : `Select ${plan.shortName} (${priceDisplay}/${isMonthly ? 'mo' : 'yr'})`;
 
           const activeFeatures = plan.features.map((feature) => {
             if (feature.includes('Save')) {
@@ -312,19 +324,35 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
                   </div>
 
                   {/* Price Slot */}
-                  <div className="h-16 flex flex-col justify-center mb-4">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
-                        {priceDisplay}
-                      </span>
-                      <span className="text-xs font-bold text-zinc-500">
-                        {periodSuffix}
+                  {plan.isCustomPrice ? (
+                    <div className="h-16 flex flex-col justify-center mb-4">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight">
+                          Custom
+                        </span>
+                        <span className="text-xs font-bold text-zinc-500">
+                          / Scope-Based
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 block mt-0.5 truncate">
+                        Variable enterprise scale • Book appointment
                       </span>
                     </div>
-                    <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 block mt-0.5 truncate">
-                      {retainerDisplay}
-                    </span>
-                  </div>
+                  ) : (
+                    <div className="h-16 flex flex-col justify-center mb-4">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl sm:text-3xl font-extrabold text-zinc-900 dark:text-white tracking-tight">
+                          {priceDisplay}
+                        </span>
+                        <span className="text-xs font-bold text-zinc-500">
+                          {periodSuffix}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 block mt-0.5 truncate">
+                        {retainerDisplay}
+                      </span>
+                    </div>
+                  )}
 
                   {/* Credits / Tech Info Slot */}
                   <div className="h-10 flex items-center gap-1.5 text-xs font-bold text-zinc-800 dark:text-zinc-200 mb-5 pb-3 border-b border-zinc-100 dark:border-zinc-800 relative z-20">
@@ -416,9 +444,9 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
               {formatCurrencyPrice(convertFromUSD(1100, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(100, currency), currency)})
             </span>
             <br />
-            Enterprise ({formatCurrencyPrice(convertFromUSD(125, currency), currency)}/mo):{' '}
-            <span className="font-bold text-zinc-900 dark:text-white">
-              {formatCurrencyPrice(convertFromUSD(1350, currency), currency)}/yr (Save {formatCurrencyPrice(convertFromUSD(150, currency), currency)})
+            Enterprise Retainer:{' '}
+            <span className="font-bold text-blue-600 dark:text-blue-400">
+              Custom scope & SLA (Book appointment for bespoke quote)
             </span>
           </p>
         </div>
@@ -447,6 +475,9 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
         </div>
 
       </div>
+
+      {/* Enterprise Consultation & Appointment Booking Section */}
+      <EnterpriseAppointmentSection defaultService="Enterprise Maintenance & Custom Architecture" />
 
       {/* UPI QR Code Modal Popup */}
       {showQRModal && (
@@ -578,6 +609,13 @@ export const RunwayPricing: React.FC<RunwayPricingProps> = ({ onSelectPlan }) =>
           </div>
         </div>
       )}
+
+      {/* Enterprise Appointment Booking Modal */}
+      <EnterpriseAppointmentModal
+        isOpen={showAppointmentModal}
+        onClose={() => setShowAppointmentModal(false)}
+        defaultService="Enterprise Maintenance & Custom Architecture"
+      />
 
     </div>
   );

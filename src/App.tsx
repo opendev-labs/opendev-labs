@@ -22,13 +22,18 @@ import { ClientCredentialsPage } from './pages/ClientCredentialsPage';
 import { ProfileSettings } from './pages/ProfileSettings';
 import { OpenStudioPage } from './pages/OpenStudioPage';
 import OpenStudioLandingPage from './pages/OpenStudioLandingPage';
+import { OpenStudioPricingPage } from './pages/OpenStudioPricingPage';
+import { AIPage } from './pages/AIPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { ClientConversionPage } from './pages/ClientConversionPage';
 import { UserSecurityPage } from './pages/UserSecurityPage';
 import { ClientRequestsPage } from './pages/ClientRequestsPage';
 import { NotificationHistoryPage } from './pages/NotificationHistoryPage';
+import { AdminGatePage } from './pages/AdminGatePage';
+import { AdminControlCenter } from './pages/AdminControlCenter';
 
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 
 // Wrapper helper to pass outlet context props to page components
 const DevDashboardWrapper: React.FC = () => {
@@ -51,14 +56,54 @@ export function App() {
               <Routes>
                 {/* Public Pages */}
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/ai" element={<AIPage />} />
                 <Route path="/open-studio" element={<OpenStudioPage />} />
                 <Route path="/openstudio" element={<OpenStudioLandingPage />} />
+                <Route path="/openstudio/pricing" element={<OpenStudioPricingPage />} />
+                <Route path="/open-studio/pricing" element={<Navigate to="/openstudio/pricing" replace />} />
                 <Route path="/studio" element={<OpenStudioPage />} />
                 <Route path="/templates" element={<TemplatesPage />} />
                 <Route path="/solutions" element={<SolutionsPage />} />
                 <Route path="/pricing" element={<PricingStandalonePage />} />
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/notifications" element={<Navigate to="/client/notifications" replace />} />
+
+                {/* 🛡️ CENTRAL ADMIN CONTROL CENTER & CRM — Full OpenDev-Labs & Subdomain Control */}
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminControlCenter />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/*"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminControlCenter />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
+                <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
+
+                {/* 🔐 SECRET ADMIN GATE */}
+                <Route path="/xk9-admin-gate" element={<AdminGatePage />} />
+                <Route
+                  path="/xk9-admin-control"
+                  element={
+                    <ProtectedAdminRoute>
+                      <AdminControlCenter />
+                    </ProtectedAdminRoute>
+                  }
+                />
+                <Route path="/xk9-admin-control/*" element={
+                    <ProtectedAdminRoute>
+                      <AdminControlCenter />
+                    </ProtectedAdminRoute>
+                  }
+                />
 
                 {/* Developer Admin Dashboard */}
                 <Route

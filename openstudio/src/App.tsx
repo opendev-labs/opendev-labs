@@ -4,13 +4,14 @@ import { Toaster } from 'sonner';
 
 // ../  = from openstudio/src/ up to openstudio/
 import StudioApp from '../studio/App';
+import { OpenStudioAuthGate } from '../components/OpenStudioAuthGate';
 import { AuthProvider as VoidAuthProvider } from '../void/contexts/AuthContext';
 import { AuthProvider } from '../context/AuthContext';
 import { ThemeProvider } from '../context/ThemeContext';
 
 /**
  * Root App for openstudio.opendev-labs.com
- * Mounts the OpenStudio AI builder directly at / (root)
+ * Mounts the OpenStudio AI builder directly at / (root) protected by Sovereign AuthGate
  */
 export default function App() {
   return (
@@ -22,9 +23,11 @@ export default function App() {
               <Route
                 path="/*"
                 element={
-                  <div className="w-full h-screen overflow-hidden bg-[#09090b] text-zinc-100">
-                    <StudioApp />
-                  </div>
+                  <OpenStudioAuthGate>
+                    <div className="w-full h-screen overflow-hidden bg-[#09090b] text-zinc-100">
+                      <StudioApp />
+                    </div>
+                  </OpenStudioAuthGate>
                 }
               />
             </Routes>

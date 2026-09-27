@@ -12,6 +12,7 @@ import {
   getDocs
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { getSessionUser, setSessionCookie, clearSessionCookie, getAuthRedirectUrl } from '../lib/authSession';
 
 export interface AuthUser {
   id: string;
@@ -20,7 +21,8 @@ export interface AuthUser {
   role: UserRole;
   clientId?: string;
   avatar?: string;
-  authMethod?: 'google' | 'password';
+  githubHandle?: string;
+  authMethod?: 'google' | 'password' | 'github' | string;
 }
 
 interface AuthContextType {
@@ -44,6 +46,24 @@ const DEV_USER: AuthUser = {
   role: 'developer',
   authMethod: 'password',
 };
+
+export const ADMIN_DEVELOPER_EMAILS = [
+  'opendev-labs.office@gmail.com',
+  'opendev.office@gmail.com',
+  'iamyash.creator@gmail.com',
+  'yashramteke55555@gmail.com',
+  'opendev.help@gmail.com',
+  'opendev.support@gmail.com',
+];
+
+export function isDeveloperEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return (
+    ADMIN_DEVELOPER_EMAILS.includes(clean) ||
+    clean.endsWith('@opendev-labs.com')
+  );
+}
 
 const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
   {
@@ -262,14 +282,17 @@ const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(() => {
-    const saved = localStorage.getItem('opendev_auth_user');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed && parsed.id) return parsed;
-      } catch (e) {
-        console.error('Failed to parse saved user', e);
-      }
+    const session = getSessionUser();
+    if (session && session.id) {
+      return {
+        id: session.id,
+        name: session.name,
+        email: session.email,
+        role: (session.role as UserRole) || 'user',
+        avatar: session.avatar,
+        githubHandle: session.githubHandle,
+        authMethod: (session.authMethod as any) || 'google',
+      };
     }
     return null;
   });
@@ -383,8 +406,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         const cleanEmail = (firebaseUser.email || '').toLowerCase().trim();
-        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
         const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
+        const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
         setUser({
@@ -444,8 +467,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     googleAvatar = 'https://lh3.googleusercontent.com/a/default-user'
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
-    const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
     const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
+    const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
     const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;
@@ -548,6 +571,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    clearSessionCookie();
     if (auth) {
       try {
         await signOut(auth);
@@ -556,6 +580,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
     setUser(null);
+    window.location.replace(getAuthRedirectUrl(false));
   };
 
   return (

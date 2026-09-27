@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
@@ -24,7 +24,10 @@ import {
   Check,
   Sliders,
   Layers,
-  Sparkle
+  Sparkle,
+  ChevronDown,
+  ChevronUp,
+  Mail
 } from 'lucide-react';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
@@ -34,7 +37,13 @@ import { Live2DWavesCanvas } from '../components/ui/Live2DWavesCanvas';
 import { TypewriterHeading } from '../components/ui/TypewriterHeading';
 import { cn } from '../lib/utils';
 import catalogData from '../data/catalog.json';
-import { showcaseProjects } from '../data/showcaseProjects';
+import {
+  SupportedCurrency,
+  SUPPORTED_CURRENCIES,
+  convertFromINR,
+  formatCurrencyPrice
+} from '../lib/payment/currencies';
+import { getPublishedTemplates, PublishedTemplate } from '../lib/templateStorageService';
 
 const templatePhrases = [
   "Curated Web Starters & Vercel Systems",
@@ -66,12 +75,9 @@ export function parsePrice(priceStr: string): number {
   return parseInt(clean, 10) || 0;
 }
 
-export function formatPrice(val: number, currency: 'USD' | 'INR' = 'USD'): string {
-  if (currency === 'USD') {
-    const usdVal = Math.round(val / 80);
-    return `$${usdVal.toLocaleString('en-US')}`;
-  }
-  return `₹${val.toLocaleString('en-IN')}`;
+export function formatPrice(val: number, currency: SupportedCurrency = 'USD'): string {
+  const converted = convertFromINR(val, currency);
+  return formatCurrencyPrice(converted, currency);
 }
 
 export interface PricingCalculation {
@@ -94,7 +100,7 @@ export function calculateTemplatePricing(
   monthlyRetainerStr: string,
   hasDomain: boolean,
   hasDatabase: boolean,
-  currency: 'USD' | 'INR' = 'USD'
+  currency: SupportedCurrency = 'USD'
 ): PricingCalculation {
   const baseOneTime = parsePrice(oneTimePriceStr);
   const baseRetainer = parsePrice(monthlyRetainerStr);
@@ -151,39 +157,114 @@ export const TemplatesPage: React.FC = () => {
   const [previewingTemplate, setPreviewingTemplate] = useState<WebsiteTemplate | null>(null);
   const [deviceFrame, setDeviceFrame] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [bookingTemplate, setBookingTemplate] = useState<WebsiteTemplate | null>(null);
-  const [projectCategory, setProjectCategory] = useState<'all' | 'production' | 'experimental'>('all');
-
   // Configurator Toggles & Currency (Global Defaults)
-  const [currency, setCurrency] = useState<'USD' | 'INR'>('USD');
+  const [currency, setCurrency] = useState<SupportedCurrency>('USD');
   const [globalHasDomain, setGlobalHasDomain] = useState<boolean>(true);
   const [globalHasDatabase, setGlobalHasDatabase] = useState<boolean>(true);
 
   // Modal Specific Configurator State
   const [modalHasDomain, setModalHasDomain] = useState<boolean>(true);
   const [modalHasDatabase, setModalHasDatabase] = useState<boolean>(true);
+  const [isUseCaseOpen, setIsUseCaseOpen] = useState<boolean>(true);
+  const [isPricingOptionsOpen, setIsPricingOptionsOpen] = useState<boolean>(true);
 
-  const filteredShowcaseProjects = projectCategory === 'all'
-    ? showcaseProjects
-    : showcaseProjects.filter(p => p.category === projectCategory);
+  const [openstudioTemplates, setOpenstudioTemplates] = useState<PublishedTemplate[]>(() => getPublishedTemplates());
 
-  const categories = [
-    'All',
-    'Vercel & Next.js',
-    'Beauty & Lifestyle',
-    'Food & Hospitality',
-    'E-Commerce',
-    'Agency & Business',
-    'Portfolio & Creative'
+  React.useEffect(() => {
+    const handleUpdate = () => {
+      setOpenstudioTemplates(getPublishedTemplates());
+    };
+    window.addEventListener('openstudio-template-published', handleUpdate);
+    window.addEventListener('openstudio-template-deleted', handleUpdate);
+    window.addEventListener('storage', handleUpdate);
+    return () => {
+      window.removeEventListener('openstudio-template-published', handleUpdate);
+      window.removeEventListener('openstudio-template-deleted', handleUpdate);
+      window.removeEventListener('storage', handleUpdate);
+    };
+  }, []);
+
+  const combinedTemplates: WebsiteTemplate[] = React.useMemo(() => {
+    const osFormatted = openstudioTemplates.map(t => ({
+      id: t.id,
+      name: t.name,
+      tagline: t.tagline,
+      category: t.category,
+      oneTimePrice: '₹0 (Free / Open)',
+      monthlyRetainer: '₹0 / mo',
+      previewUrl: t.previewUrl,
+      description: t.description,
+      features: t.features,
+      isFeatured: true,
+      badge: 'OpenStudio AI',
+      platform: 'openstudio',
+    } as unknown as WebsiteTemplate));
+
+    return [...osFormatted, ...websiteTemplates];
+  }, [openstudioTemplates]);
+
+  const useCases = [
+    { id: 'All', label: 'All Templates' },
+    { id: 'OpenStudio AI', label: '✨ Built in OpenStudio' },
+    { id: 'AI & Machine Learning', label: 'AI' },
+    { id: 'Vercel & Next.js', label: 'Vercel & Next.js' },
+    { id: 'E-Commerce', label: 'E-Commerce' },
+    { id: 'Food & Hospitality', label: 'Food & Hospitality' },
+    { id: 'Beauty & Lifestyle', label: 'Beauty & Lifestyle' },
+    { id: 'Portfolio & Creative', label: 'Portfolio' },
+    { id: 'Agency & Business', label: 'Agency & Business' }
   ];
 
-  const filteredTemplates = websiteTemplates.filter((template) => {
-    const matchesCategory = selectedCategory === 'All' || template.category === selectedCategory;
+  const filteredTemplates = combinedTemplates.filter((template) => {
+    const matchesCategory =
+      selectedCategory === 'All' ||
+      (selectedCategory === 'OpenStudio AI'
+        ? template.badge === 'OpenStudio AI' || (template as any).platform === 'openstudio'
+        : template.category === selectedCategory);
     const matchesSearch =
+      searchQuery.trim() === '' ||
       template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       template.tagline.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      template.description.toLowerCase().includes(searchQuery.toLowerCase());
+      template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      template.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (template.features && template.features.some(f => f.toLowerCase().includes(searchQuery.toLowerCase())));
     return matchesCategory && matchesSearch;
   });
+
+  const sidebarRef = React.useRef<HTMLElement>(null);
+  const [sidebarStickyTop, setSidebarStickyTop] = useState<number>(80);
+  const [fullFooterOpen, setFullFooterOpen] = useState<boolean>(false);
+
+  // Dynamic sticky calculation:
+  // When scrolling down, the left sidebar moves with the page until the Turnkey Starter
+  // packaging card reaches directly above the sticky bottom footer bar (height 56px + 16px padding).
+  // At that exact position, the left sidebar stops itself, leaving the footer right below it,
+  // while the right-hand template preview cards scroll continuously behind the footer.
+  React.useEffect(() => {
+    const updateStickyTop = () => {
+      if (!sidebarRef.current) return;
+      const sidebarHeight = sidebarRef.current.offsetHeight;
+      const windowHeight = window.innerHeight;
+      const FOOTER_BAR_HEIGHT = 56;
+      const targetTop = Math.min(80, windowHeight - sidebarHeight - FOOTER_BAR_HEIGHT - 16);
+      setSidebarStickyTop(targetTop);
+    };
+
+    updateStickyTop();
+    window.addEventListener('resize', updateStickyTop);
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateStickyTop();
+    });
+    if (sidebarRef.current) {
+      resizeObserver.observe(sidebarRef.current);
+    }
+
+    return () => {
+      window.removeEventListener('resize', updateStickyTop);
+      resizeObserver.disconnect();
+    };
+  }, [isUseCaseOpen, isPricingOptionsOpen]);
 
   const openBookingModal = (template: WebsiteTemplate) => {
     setModalHasDomain(globalHasDomain);
@@ -192,522 +273,455 @@ export const TemplatesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white transition-colors duration-200">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans selection:bg-blue-500 selection:text-white flex flex-col transition-colors duration-200 relative">
       
       {/* 1. Shared Top Header Navbar */}
       <Navbar />
 
-      {/* 2. Hero Section */}
-      <section className="relative min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-center items-center pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
-        <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-80 z-0" waveCount={5} verticalBaseStart={0.35} />
-
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center my-auto w-full">
-          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <span className="hero-pill-badge mb-4 sm:mb-6">
-              <Sparkles className="size-3.5 text-blue-500" /> Production-Ready Web Starters & Vercel Architectures
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl mx-auto leading-[1.06] text-zinc-900 dark:text-white h-[210px] sm:h-[250px] lg:h-[270px] flex items-center justify-center text-center overflow-hidden"
-          >
-            <TypewriterHeading phrases={templatePhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-6 sm:mt-8 text-base sm:text-xl lg:text-2xl text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed font-medium"
-          >
-            All systems listed are baseline architectural starters. OpenDev-Labs fully <span className="font-extrabold text-blue-600 dark:text-blue-400">revamps, white-labels, and custom tailors</span> every design, logo, content, and integration for your brand.
-          </motion.p>
-
-          {/* Value Props Pills */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm font-semibold text-zinc-700 dark:text-zinc-300"
-          >
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-emerald-500" />
-              <span>Full Custom White-Labeling</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-emerald-500" />
-              <span>Full Source Code Ownership</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-emerald-500" />
-              <span>Zero-Downtime Hostinger / Vercel Cloud</span>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* 2.5 Prominent White-Label & Tailoring Notice Banner */}
-      <section className="bg-gradient-to-r from-blue-900/20 via-indigo-900/20 to-purple-900/20 border-b border-blue-500/20 py-4 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <div className="flex items-center gap-3">
-            <div className="size-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center shrink-0">
-              <Wrench className="size-5 text-blue-500" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-extrabold text-zinc-900 dark:text-white uppercase tracking-wider flex items-center justify-center sm:justify-start gap-2">
-                <span>100% White-Labeled & Custom Tailored</span>
-                <span className="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-400 text-[10px] font-bold">REVAMP INCLUDED</span>
-              </h4>
-              <p className="text-xs text-zinc-600 dark:text-zinc-400 font-medium mt-0.5">
-                These are foundational starters. We revamp the layout, color palette, logo, images, database, and content to fit your exact business goals.
-              </p>
-            </div>
-          </div>
-          <div className="shrink-0">
-            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-white dark:bg-zinc-900 px-3.5 py-1.5 rounded-full border border-blue-500/30 shadow-xs inline-flex items-center gap-1.5">
-              <Zap className="size-3.5" /> Rapid 48-Hour Turnaround
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Global Dynamic Pricing Configurator Bar */}
-      <section className="py-6 px-4 sm:px-6 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60">
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
+      {/* 2. Main Marketplace Split Layout: Left Fixed Sidebar + Right Independent Scrollable Content */}
+      <div className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-20 lg:pt-20 pb-16 lg:pb-16 flex flex-col lg:flex-row items-start gap-8 lg:gap-10 lg:overflow-hidden relative z-10">
+        
+        {/* Left Sidebar: Filter Templates & Packaging (Locked in View, NEVER leaves the screen) */}
+        <aside
+          ref={sidebarRef}
+          className="w-full lg:w-64 shrink-0 lg:h-[calc(100vh-9rem)] lg:overflow-y-auto no-scrollbar space-y-6 flex flex-col justify-between self-start"
+        >
           
-          {/* Configurator Toggles */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white dark:bg-zinc-950 p-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex-1">
-            <div className="flex items-center gap-2 font-extrabold text-xs text-zinc-900 dark:text-white uppercase tracking-wider shrink-0 pr-2 border-r border-zinc-200 dark:border-zinc-800">
-              <Sliders className="size-4 text-blue-500" />
-              <span>Pricing Options:</span>
-            </div>
-
-            {/* Domain Toggle */}
-            <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <Globe className="size-3.5 text-blue-400" /> Custom Domain:
-              </span>
-              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <button
-                  onClick={() => setGlobalHasDomain(true)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                    globalHasDomain
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                  )}
-                >
-                  Included
-                </button>
-                <button
-                  onClick={() => setGlobalHasDomain(false)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1",
-                    !globalHasDomain
-                      ? "bg-amber-600 text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                  )}
-                >
-                  No Domain <span className="text-[10px] opacity-90">(-40%)</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Database Toggle */}
-            <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto sm:ml-4">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <Database className="size-3.5 text-emerald-400" /> Managed Database:
-              </span>
-              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <button
-                  onClick={() => setGlobalHasDatabase(true)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                    globalHasDatabase
-                      ? "bg-emerald-600 text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                  )}
-                >
-                  Included
-                </button>
-                <button
-                  onClick={() => setGlobalHasDatabase(false)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1",
-                    !globalHasDatabase
-                      ? "bg-amber-600 text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
-                  )}
-                >
-                  No Database <span className="text-[10px] opacity-90">(-30%)</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Currency Switcher */}
-            <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto sm:ml-4 border-t sm:border-t-0 sm:border-l border-zinc-200 dark:border-zinc-800 pt-3 sm:pt-0 sm:pl-4">
-              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
-                Currency:
-              </span>
-              <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold">
-                <button
-                  type="button"
-                  onClick={() => setCurrency('USD')}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                    currency === 'USD'
-                      ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                  )}
-                >
-                  USD ($)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setCurrency('INR')}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer",
-                    currency === 'INR'
-                      ? "bg-white dark:bg-zinc-800 text-black dark:text-white shadow-xs"
-                      : "text-zinc-500 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-                  )}
-                >
-                  INR (₹)
-                </button>
-              </div>
-            </div>
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 font-mono">
+              Filter Templates
+            </h2>
+            {(selectedCategory !== 'All' || searchQuery) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setSearchQuery('');
+                }}
+                className="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors cursor-pointer"
+              >
+                Reset All
+              </button>
+            )}
           </div>
 
-          {/* Configuration Discount Badge */}
-          <div className="flex items-center gap-3 bg-blue-500/10 dark:bg-blue-500/10 border border-blue-500/30 p-4 rounded-2xl shrink-0">
-            <Percent className="size-5 text-blue-500 shrink-0" />
-            <div className="text-xs font-medium">
-              {!globalHasDomain && !globalHasDatabase ? (
-                <div>
-                  <span className="font-extrabold text-amber-500 dark:amber-400 block text-sm">50% OFF One-Time & 20% OFF Retainer</span>
-                  <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">Free Hosting on GitHub Pages / Vercel Subdomain</span>
-                </div>
-              ) : !globalHasDomain ? (
-                <div>
-                  <span className="font-extrabold text-amber-500 dark:amber-400 block text-sm">40% OFF One-Time Build</span>
-                  <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">Client uses own domain or Vercel subdomain</span>
-                </div>
-              ) : !globalHasDatabase ? (
-                <div>
-                  <span className="font-extrabold text-amber-500 dark:amber-400 block text-sm">30% OFF One-Time Build</span>
-                  <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">Static site without custom database setup</span>
-                </div>
+          {/* Collapsible Section: Use Case */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setIsUseCaseOpen(!isUseCaseOpen)}
+              className="w-full flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+            >
+              <span>Use Case</span>
+              {isUseCaseOpen ? (
+                <ChevronUp className="size-3.5 text-zinc-400 dark:text-zinc-500" />
               ) : (
+                <ChevronDown className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+              )}
+            </button>
+
+            {isUseCaseOpen && (
+              <div className="space-y-1 pl-0.5">
+                {useCases.map((uc) => {
+                  const isSelected = selectedCategory === uc.id;
+                  const count = uc.id === 'All'
+                    ? combinedTemplates.length
+                    : uc.id === 'OpenStudio AI'
+                    ? combinedTemplates.filter(t => t.badge === 'OpenStudio AI' || (t as any).platform === 'openstudio').length
+                    : combinedTemplates.filter(t => t.category === uc.id).length;
+
+                  return (
+                    <button
+                      key={uc.id}
+                      type="button"
+                      onClick={() => setSelectedCategory(isSelected ? 'All' : uc.id)}
+                      className={cn(
+                        "w-full flex items-center justify-between py-2 px-2.5 rounded-lg text-xs font-medium transition-all group text-left cursor-pointer",
+                        isSelected
+                          ? "bg-blue-50 dark:bg-zinc-800/80 text-blue-700 dark:text-white font-semibold shadow-xs border border-blue-200/60 dark:border-zinc-700/60"
+                          : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100/70 dark:hover:bg-zinc-900/50"
+                      )}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className={cn(
+                          "size-4 rounded-md border transition-colors flex items-center justify-center shrink-0",
+                          isSelected
+                            ? "bg-blue-600 dark:bg-white border-blue-600 dark:border-white text-white dark:text-black"
+                            : "border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 group-hover:border-zinc-400"
+                        )}>
+                          {isSelected && <Check className="size-3 stroke-[3]" />}
+                        </div>
+                        <span className="truncate">{uc.label}</span>
+                      </div>
+                      <span className="text-[11px] text-zinc-400 dark:text-zinc-500 font-mono ml-2">
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible Section: Architecture & Pricing */}
+          <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
+            <button
+              type="button"
+              onClick={() => setIsPricingOptionsOpen(!isPricingOptionsOpen)}
+              className="w-full flex items-center justify-between text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors cursor-pointer"
+            >
+              <span>Pricing & Packaging</span>
+              {isPricingOptionsOpen ? (
+                <ChevronUp className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+              ) : (
+                <ChevronDown className="size-3.5 text-zinc-400 dark:text-zinc-500" />
+              )}
+            </button>
+
+            {isPricingOptionsOpen && (
+              <div className="space-y-4">
+                {/* Domain Switch */}
                 <div>
-                  <span className="font-extrabold text-emerald-600 dark:text-emerald-400 block text-sm">Full Premium Turnkey Package</span>
-                  <span className="text-zinc-600 dark:text-zinc-400 text-[11px]">Includes Custom Domain + Managed Database</span>
+                  <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1.5 flex items-center gap-1.5">
+                    <Globe className="size-3.5 text-blue-500" /> Custom Domain
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setGlobalHasDomain(true)}
+                      className={cn(
+                        "py-1.5 rounded-lg transition-all cursor-pointer text-center",
+                        globalHasDomain ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs font-bold" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                      )}
+                    >
+                      Included
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGlobalHasDomain(false)}
+                      className={cn(
+                        "py-1.5 rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-1",
+                        !globalHasDomain ? "bg-amber-500 dark:bg-amber-600 text-white shadow-xs font-bold" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                      )}
+                    >
+                      <span>No Domain</span>
+                      <span className="text-[9px] opacity-90">(-40%)</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Database Switch */}
+                <div>
+                  <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1.5 flex items-center gap-1.5">
+                    <Database className="size-3.5 text-emerald-500" /> Managed Database
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[11px] font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setGlobalHasDatabase(true)}
+                      className={cn(
+                        "py-1.5 rounded-lg transition-all cursor-pointer text-center",
+                        globalHasDatabase ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs font-bold" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                      )}
+                    >
+                      Included
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGlobalHasDatabase(false)}
+                      className={cn(
+                        "py-1.5 rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-1",
+                        !globalHasDatabase ? "bg-amber-500 dark:bg-amber-600 text-white shadow-xs font-bold" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                      )}
+                    >
+                      <span>No DB</span>
+                      <span className="text-[9px] opacity-90">(-30%)</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Multi-Currency Selector */}
+                <div>
+                  <span className="text-[11px] font-bold text-zinc-600 dark:text-zinc-400 block mb-1.5 flex items-center gap-1.5">
+                    <Globe className="size-3.5 text-blue-500" /> Currency
+                  </span>
+                  <div className="grid grid-cols-4 gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-xl border border-zinc-200 dark:border-zinc-800 text-xs font-bold mb-2">
+                    {(['USD', 'INR', 'EUR', 'GBP'] as SupportedCurrency[]).map((cCode) => (
+                      <button
+                        key={cCode}
+                        type="button"
+                        onClick={() => setCurrency(cCode)}
+                        className={cn(
+                          "py-1 rounded-lg transition-all cursor-pointer text-center text-xs font-bold",
+                          currency === cCode ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
+                        )}
+                      >
+                        {cCode}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="relative">
+                    <select
+                      value={currency}
+                      onChange={(e) => setCurrency(e.target.value as SupportedCurrency)}
+                      aria-label="Select Payment Currency"
+                      className="w-full appearance-none bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white font-bold text-xs pl-3 pr-8 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 cursor-pointer hover:border-zinc-300 dark:hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-xs"
+                    >
+                      {SUPPORTED_CURRENCIES.map((c) => (
+                        <option key={c.code} value={c.code} className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white font-medium">
+                          {c.flag} {c.code} ({c.symbol.trim()}) - {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="size-3.5 text-zinc-400 dark:text-zinc-500 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
+                {/* Package Status Banner */}
+                <div className={cn(
+                  "p-3 rounded-xl border text-[11px] font-medium leading-relaxed transition-all",
+                  globalHasDomain && globalHasDatabase
+                    ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300"
+                    : "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-500/30 text-amber-800 dark:text-amber-300"
+                )}>
+                  <div className="flex items-center gap-1.5 font-bold mb-1">
+                    <Percent className="size-3.5" />
+                    <span>
+                      {globalHasDomain && globalHasDatabase
+                        ? "Full Turnkey Starter"
+                        : !globalHasDomain && !globalHasDatabase
+                        ? "50% OFF Build & 20% OFF Retainer"
+                        : !globalHasDomain
+                        ? "40% OFF Build (No Domain)"
+                        : "30% OFF Build (No Database)"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-zinc-500 dark:text-zinc-400 block">
+                    100% white-label revamp included. 48-hr deployment turnaround.
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </aside>
+
+        {/* Right Main Column: Templates Grid (Independent Scroll Container) */}
+        <main className="flex-1 w-full min-w-0 lg:h-[calc(100vh-9rem)] lg:overflow-y-auto pr-1 pb-28 relative">
+          
+          {/* Header & Search Bar (inside the right scrolling column) */}
+          <div className="relative pt-1 pb-6 overflow-hidden">
+            <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-40 z-0" waveCount={3} verticalBaseStart={0.25} />
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="relative z-10"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-200/80 dark:border-blue-800/60 shadow-xs">
+                  <Sparkles className="size-3.5" />
+                  Verified Turnkey Solutions
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-zinc-900 dark:text-white">
+                Find your Template
+              </h1>
+              <p className="mt-2 text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 max-w-2xl font-normal leading-relaxed">
+                Jumpstart your app development process with pre-built solutions from OpenDev-Labs and our community.
+              </p>
+
+              {/* Full-width Search Bar */}
+              <div className="mt-4 relative w-full">
+                <Search className="size-4.5 text-zinc-400 dark:text-zinc-500 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search templates..."
+                  className="w-full h-11 pl-12 pr-12 text-sm rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/80 dark:bg-zinc-900/90 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all shadow-xs"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-colors cursor-pointer"
+                    aria-label="Clear Search"
+                  >
+                    <X className="size-4" />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Subheader bar above grid */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-3 border-b border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-zinc-700 dark:text-zinc-300">
+                {filteredTemplates.length} {filteredTemplates.length === 1 ? 'Template' : 'Templates'}
+              </span>
+              {selectedCategory !== 'All' && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-xs font-semibold text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700">
+                  {selectedCategory}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedCategory('All')}
+                    className="hover:text-red-500 ml-0.5 cursor-pointer"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </span>
               )}
             </div>
+
+            <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 dark:text-zinc-400">
+              <Zap className="size-3.5 text-blue-500" />
+              <span>Rapid 48-Hour Turnaround</span>
+            </div>
           </div>
 
-        </div>
-      </section>
+          {/* Cards Grid (HeroUI PRO Clean Aesthetic) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {filteredTemplates.map((template) => {
+              const pricing = calculateTemplatePricing(
+                template.oneTimePrice,
+                template.monthlyRetainer,
+                globalHasDomain,
+                globalHasDatabase,
+                currency
+              );
 
-      {/* 3.5 Search & Category Filter Bar */}
-      <section className="py-4 px-4 sm:px-6 border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={cn(
-                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
-                  selectedCategory === cat
-                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-md"
-                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50"
-                )}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+              return (
+                <motion.div
+                  key={template.id}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden shadow-xs hover:shadow-xl hover:-translate-y-0.5"
+                >
+                  {/* Top: Title & Description */}
+                  <div className="p-5 pb-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="text-base font-bold text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                        {template.name}
+                      </h3>
+                      {template.badge && (
+                        <span className="px-2 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-[10px] font-bold border border-zinc-200 dark:border-zinc-700 shrink-0">
+                          {template.badge}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 mt-1.5 leading-relaxed min-h-[34px]">
+                      {template.description || template.tagline}
+                    </p>
+                  </div>
 
-          {/* Search Box */}
-          <div className="relative w-full md:w-72">
-            <Search className="size-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search website starters..."
-              className="w-full h-10 pl-9 pr-4 text-xs rounded-full border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-        </div>
-      </section>
-
-      {/* 4. Templates Cards Grid */}
-      <section className="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto w-full flex-1">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {filteredTemplates.map((template) => {
-            const pricing = calculateTemplatePricing(
-              template.oneTimePrice,
-              template.monthlyRetainer,
-              globalHasDomain,
-              globalHasDatabase,
-              currency
-            );
-
-            return (
-              <motion.div
-                key={template.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
-                className="hero-glass-card hover:border-zinc-300 dark:hover:border-zinc-700/80 shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group relative overflow-hidden"
-              >
-                <div>
-                  {/* Live Scaled Desktop Miniature Preview */}
-                  <div className="relative border-b border-zinc-200 dark:border-zinc-800">
+                  {/* Middle: Clean Preview Mockup Window */}
+                  <div className="relative border-y border-zinc-100 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950">
                     <MiniDesktopPreview
                       url={template.previewUrl}
                       title={`${template.name} Live Preview`}
                     />
 
-                    {/* Overlay Badge */}
-                    <div className="absolute top-4 left-4 z-20 flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 rounded-full bg-zinc-950/80 backdrop-blur-md text-amber-400 text-[11px] font-bold border border-amber-500/30 flex items-center gap-1.5 shadow-lg">
-                        <Tag className="size-3" /> {template.badge || template.category}
-                      </span>
-
-                      {pricing.isDiscounted && (
-                        <span className="px-3 py-1 rounded-full bg-emerald-950/90 backdrop-blur-md text-emerald-400 text-[11px] font-extrabold border border-emerald-500/40 flex items-center gap-1 shadow-lg">
-                          <Percent className="size-3" /> {pricing.discountPercentage}% OFF
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Live Hover Overlay Button */}
-                    <div className="absolute inset-0 bg-zinc-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 z-30 backdrop-blur-[2px]">
+                    {/* Live Hover Overlay */}
+                    <div className="absolute inset-0 bg-zinc-900/40 dark:bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-30 backdrop-blur-xs">
                       <button
+                        type="button"
                         onClick={() => setPreviewingTemplate(template)}
-                        className="px-5 py-2.5 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-extrabold text-xs flex items-center gap-2 border border-zinc-300 dark:border-zinc-700 shadow-xl hover:scale-105 transition-all cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-[11px] flex items-center gap-1.5 shadow-md hover:scale-105 transition-all cursor-pointer"
                       >
-                        <Maximize2 className="size-4 text-blue-600" /> Interactive Full Preview
+                        <Maximize2 className="size-3.5" /> Preview
                       </button>
                       <a
                         href={template.previewUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="px-5 py-2.5 rounded-full bg-black dark:bg-white text-white dark:text-black font-extrabold text-xs flex items-center gap-2 shadow-xl hover:scale-105 transition-all cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-extrabold text-[11px] flex items-center gap-1.5 border border-zinc-200 dark:border-zinc-700 shadow-md hover:scale-105 transition-all cursor-pointer"
                       >
-                        <ExternalLink className="size-4" /> Open Direct Page
+                        <ExternalLink className="size-3.5" /> Open
                       </a>
                     </div>
                   </div>
 
-                  {/* Card Content & Features */}
-                  <div className="p-6">
-                    {/* Pricing Banner */}
-                    <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-zinc-100 dark:border-zinc-800">
+                  {/* Bottom: Pricing & CTA */}
+                  <div className="p-5 pt-3.5">
+                    <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-zinc-100 dark:border-zinc-800">
                       <div>
-                        <h3 className="text-2xl font-black text-zinc-900 dark:text-white flex items-center gap-2">
-                          {template.name}
-                        </h3>
-                        <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                          {template.tagline}
-                        </p>
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-zinc-500 block">
+                          One-Time Build
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          {pricing.isDiscounted && (
+                            <span className="text-xs text-zinc-400 dark:text-zinc-500 line-through font-mono">
+                              {pricing.baseOneTimeFormatted}
+                            </span>
+                          )}
+                          <span className="text-base font-black text-zinc-900 dark:text-white font-mono">
+                            {pricing.finalOneTimeFormatted}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="text-right">
-                        {pricing.isDiscounted ? (
-                          <div>
-                            <div className="text-xs text-zinc-400 line-through font-mono">
-                              {pricing.baseOneTimeFormatted}
-                            </div>
-                            <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">
-                              {pricing.finalOneTimeFormatted}
-                            </div>
-                            <div className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 font-mono">
-                              + {pricing.finalRetainerFormatted} retainer
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="text-xl font-extrabold text-zinc-900 dark:text-white font-mono">
-                              {pricing.finalOneTimeFormatted}
-                            </div>
-                            <div className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
-                              + {pricing.finalRetainerFormatted} retainer
-                            </div>
-                          </div>
-                        )}
+                        <span className="text-[10px] uppercase font-bold text-zinc-400 dark:text-zinc-500 block">
+                          Monthly Retainer
+                        </span>
+                        <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+                          {pricing.finalRetainerFormatted}
+                        </span>
                       </div>
                     </div>
 
-                    <p className="text-xs text-zinc-600 dark:text-zinc-400 leading-relaxed">
-                      {template.description}
-                    </p>
-
-                    {/* Configuration Active Summary Badge */}
-                    <div className="mt-4 p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900/90 border border-zinc-200 dark:border-zinc-800/80 flex items-center justify-between text-[11px] font-bold">
-                      <span className="text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
-                        <Sliders className="size-3 text-blue-500" /> Active Config:
-                      </span>
-                      <span className={cn(
-                        "font-mono px-2 py-0.5 rounded-md",
-                        pricing.isDiscounted ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20" : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                      )}>
-                        {pricing.label}
-                      </span>
-                    </div>
-
-                    {/* Highlights Bullet Points */}
-                    <div className="mt-5 space-y-2">
-                      <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 font-mono">
-                        Key Interactive Features
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-                        {template.features.map((feat, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-xs text-zinc-700 dark:text-zinc-300 font-medium">
-                            <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-                            <span className="truncate">{feat}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
+                    {(template as any).platform === 'openstudio' ? (
+                      <button
+                        type="button"
+                        onClick={() => navigate('/openstudio')}
+                        className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#00f2fe] to-cyan-500 hover:from-cyan-400 hover:to-cyan-500 text-black font-extrabold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md hover:scale-[1.02] active:scale-98"
+                      >
+                        <span>🚀 Open in OpenStudio</span>
+                        <ArrowRight className="size-3.5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => openBookingModal(template)}
+                        className="w-full py-2.5 rounded-xl bg-zinc-900 dark:bg-white hover:bg-zinc-800 dark:hover:bg-zinc-100 text-white dark:text-zinc-900 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs hover:shadow-md active:scale-98"
+                      >
+                        <span>Deploy / Request Setup</span>
+                        <ArrowRight className="size-3.5" />
+                      </button>
+                    )}
                   </div>
-                </div>
+                </motion.div>
+              );
+            })}
+          </div>
 
-                {/* Bottom Actions Footer */}
-                <div className="p-6 pt-0 flex flex-col sm:flex-row items-center gap-3">
-                  <button
-                    onClick={() => setPreviewingTemplate(template)}
-                    className="w-full sm:flex-1 py-3 px-5 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer"
-                  >
-                    <Maximize2 className="size-4 text-blue-500" /> Full Screen Preview
-                  </button>
-                  <button
-                    onClick={() => openBookingModal(template)}
-                    className="w-full sm:flex-1 py-3 px-5 rounded-full bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-                  >
-                    Get This Website ({pricing.finalOneTimeFormatted}) <ArrowRight className="size-4" />
-                  </button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 4.5 Deployed Systems & Experimental Labs Showcase Section */}
-      <section className="py-16 sm:py-20 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/30 transition-colors">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          
-          {/* Professional Header & Subtitle */}
-          <div className="text-center max-w-3xl mx-auto mb-10">
-            <span className="inline-block px-3.5 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-widest mb-3 border border-blue-500/20 font-sans">
-              DEPLOYED SYSTEMS & EXPERIMENTAL LABS
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-zinc-900 dark:text-white">
-              Featured Projects & Live Production Builds
-            </h2>
-            <p className="mt-4 text-zinc-600 dark:text-zinc-400 text-xs sm:text-sm font-medium leading-relaxed max-w-2xl mx-auto">
-              Explore high-performance web applications, interactive web terminal IDEs, neural AI engines, and experimental software systems engineered by OpenDev-Labs.
-            </p>
-
-            {/* Interactive Category Filter Pills */}
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-8">
+          {filteredTemplates.length === 0 && (
+            <div className="p-16 text-center rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 my-8">
+              <Search className="size-8 text-zinc-400 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-zinc-900 dark:text-white">No templates found</h3>
+              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 max-w-sm mx-auto">
+                No templates matched your search for "{searchQuery}". Try searching for something else or reset your filters.
+              </p>
               <button
-                onClick={() => setProjectCategory('all')}
-                className={cn(
-                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
-                  projectCategory === 'all'
-                    ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-md"
-                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-700"
-                )}
+                type="button"
+                onClick={() => {
+                  setSelectedCategory('All');
+                  setSearchQuery('');
+                }}
+                className="mt-4 px-4 py-2 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold hover:bg-zinc-800 dark:hover:bg-zinc-100 transition-all cursor-pointer"
               >
-                All Projects ({showcaseProjects.length})
-              </button>
-              <button
-                onClick={() => setProjectCategory('production')}
-                className={cn(
-                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
-                  projectCategory === 'production'
-                    ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-blue-500/50"
-                )}
-              >
-                Production Builds ({showcaseProjects.filter(p => p.category === 'production').length})
-              </button>
-              <button
-                onClick={() => setProjectCategory('experimental')}
-                className={cn(
-                  "px-4 py-2 rounded-full text-xs font-bold transition-all border cursor-pointer",
-                  projectCategory === 'experimental'
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
-                    : "bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-800 hover:border-emerald-500/50"
-                )}
-              >
-                Experimental Labs ({showcaseProjects.filter(p => p.category === 'experimental').length})
+                Clear Filters
               </button>
             </div>
-          </div>
+          )}
 
-          {/* Live Desktop Miniature Screen Preview Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mt-10">
-            {filteredShowcaseProjects.map((project) => (
-              <a
-                key={project.id}
-                href={project.url}
-                target="_blank"
-                rel="noreferrer"
-                className="hero-glass-card hover:border-blue-500/50 group flex flex-col justify-between transition-all duration-300 hover:shadow-2xl overflow-hidden"
-              >
-                <div>
-                  <div className="relative border-b border-zinc-200 dark:border-zinc-800">
-                    <MiniDesktopPreview
-                      url={project.url}
-                      title={project.name}
-                    />
-
-                    <div className="absolute top-3 left-3 z-20">
-                      <span className={cn(
-                        "px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider backdrop-blur-md border shadow-md",
-                        project.category === 'production'
-                          ? "bg-blue-950/80 text-blue-400 border-blue-500/30"
-                          : "bg-emerald-950/80 text-emerald-400 border-emerald-500/30"
-                      )}>
-                        {project.categoryLabel}
-                      </span>
-                    </div>
-
-                    <div className="absolute inset-0 bg-zinc-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-30 backdrop-blur-[2px]">
-                      <span className="px-4 py-2 rounded-full bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white font-extrabold text-xs flex items-center gap-2 shadow-xl">
-                        Open Project <ExternalLink className="size-3.5" />
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="p-5">
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-blue-500 transition-colors flex items-center justify-between">
-                      <span>{project.name}</span>
-                      <ExternalLink className="size-4 text-zinc-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </h3>
-                    <p className="text-xs font-mono text-zinc-500 dark:text-zinc-400 mt-1">
-                      {project.displayUrl}
-                    </p>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-
-        </div>
-      </section>
+        </main>
+      </div>
 
       {/* 5. Interactive Full Screen Preview Modal */}
       <AnimatePresence>
@@ -716,26 +730,26 @@ export const TemplatesPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col"
+            className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xl flex flex-col"
           >
             {/* Modal Top Control Bar */}
-            <div className="h-16 border-b border-zinc-800 px-4 sm:px-6 flex items-center justify-between bg-zinc-950">
+            <div className="h-16 border-b border-zinc-200 dark:border-zinc-800 px-4 sm:px-6 flex items-center justify-between bg-white dark:bg-zinc-950">
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold uppercase tracking-wider border border-blue-500/20">
+                <span className="px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-800/60">
                   {previewingTemplate.category}
                 </span>
-                <h3 className="text-base font-extrabold text-white hidden sm:block">
+                <h3 className="text-base font-extrabold text-zinc-900 dark:text-white hidden sm:block">
                   {previewingTemplate.name}
                 </h3>
               </div>
 
               {/* Viewport Device Frame Switcher */}
-              <div className="flex items-center gap-1 bg-zinc-900 p-1 rounded-full border border-zinc-800">
+              <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-full border border-zinc-200 dark:border-zinc-800">
                 <button
                   onClick={() => setDeviceFrame('desktop')}
                   className={cn(
                     "p-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer",
-                    deviceFrame === 'desktop' ? "bg-black dark:bg-white text-white dark:text-black shadow-xs" : "text-zinc-400 hover:text-white"
+                    deviceFrame === 'desktop' ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                   )}
                   title="Desktop View"
                 >
@@ -746,7 +760,7 @@ export const TemplatesPage: React.FC = () => {
                   onClick={() => setDeviceFrame('tablet')}
                   className={cn(
                     "p-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer",
-                    deviceFrame === 'tablet' ? "bg-black dark:bg-white text-white dark:text-black shadow-xs" : "text-zinc-400 hover:text-white"
+                    deviceFrame === 'tablet' ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                   )}
                   title="Tablet View"
                 >
@@ -757,7 +771,7 @@ export const TemplatesPage: React.FC = () => {
                   onClick={() => setDeviceFrame('mobile')}
                   className={cn(
                     "p-2 rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer",
-                    deviceFrame === 'mobile' ? "bg-black dark:bg-white text-white dark:text-black shadow-xs" : "text-zinc-400 hover:text-white"
+                    deviceFrame === 'mobile' ? "bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs" : "text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white"
                   )}
                   title="Mobile View"
                 >
@@ -772,13 +786,13 @@ export const TemplatesPage: React.FC = () => {
                   href={previewingTemplate.previewUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 border border-zinc-700"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-xs font-bold text-zinc-800 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700"
                 >
                   Open Direct Tab <ExternalLink className="size-3.5" />
                 </a>
                 <button
                   onClick={() => setPreviewingTemplate(null)}
-                  className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-white transition-colors cursor-pointer"
+                  className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-700 dark:text-white transition-colors cursor-pointer"
                   aria-label="Close Preview"
                 >
                   <X className="size-5" />
@@ -787,13 +801,13 @@ export const TemplatesPage: React.FC = () => {
             </div>
 
             {/* Iframe Viewport Container */}
-            <div className="flex-1 bg-zinc-900/80 p-4 flex items-center justify-center overflow-hidden">
+            <div className="flex-1 bg-zinc-100 dark:bg-zinc-900/80 p-4 flex items-center justify-center overflow-hidden">
               <div
                 className={cn(
-                  "h-full transition-all duration-300 overflow-hidden bg-white shadow-2xl relative border border-zinc-800",
+                  "h-full transition-all duration-300 overflow-hidden bg-white shadow-2xl relative border border-zinc-200 dark:border-zinc-800",
                   deviceFrame === 'desktop' && "w-full rounded-none",
-                  deviceFrame === 'tablet' && "w-[768px] max-w-full rounded-2xl border-8 border-zinc-800",
-                  deviceFrame === 'mobile' && "w-[395px] max-w-full rounded-3xl border-8 border-zinc-800"
+                  deviceFrame === 'tablet' && "w-[768px] max-w-full rounded-2xl border-8 border-zinc-300 dark:border-zinc-800",
+                  deviceFrame === 'mobile' && "w-[395px] max-w-full rounded-3xl border-8 border-zinc-300 dark:border-zinc-800"
                 )}
               >
                 <iframe
@@ -997,8 +1011,97 @@ export const TemplatesPage: React.FC = () => {
         })()}
       </AnimatePresence>
 
-      {/* 7. Shared Footer */}
-      <Footer />
+      {/* 6.5 Faded Invisible Bottom Zone above Footer (strictly over the preview cards) */}
+      <div className="fixed bottom-14 left-0 right-0 pointer-events-none z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex">
+          {/* Spacer matching left sidebar width + gap so left sidebar is completely un-faded */}
+          <div className="hidden lg:block w-64 shrink-0 lg:mr-10" />
+
+          {/* Fade overlay strictly covering the right preview column */}
+          <div className="flex-1 w-full h-28 bg-gradient-to-t from-white via-white/85 to-transparent dark:from-zinc-950 dark:via-zinc-950/85 dark:to-transparent" />
+        </div>
+      </div>
+
+      {/* 7. Sticky Bottom Footer Bar with Frosted Glass Backdrop & Expandable Full Directory */}
+      <footer className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-zinc-200/90 dark:border-zinc-800/90 transition-all duration-300 shadow-[0_-8px_30px_-5px_rgba(0,0,0,0.08)]">
+        {/* Expandable Full Directory Drawer */}
+        <AnimatePresence>
+          {fullFooterOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="overflow-hidden border-b border-zinc-200 dark:border-zinc-800 max-h-[60vh] overflow-y-auto bg-white/95 dark:bg-zinc-950/95"
+            >
+              <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+                <Footer />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Docked Footer Bar */}
+        <div className="max-w-7xl mx-auto h-14 px-4 sm:px-6 flex items-center justify-between text-xs font-medium">
+          {/* Left: Brand Identity, Status & Copyright */}
+          <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-2 group">
+              <img
+                src="/logo-icon.webp"
+                alt="OpenDev-Labs"
+                className="h-6 w-auto object-contain transition-transform group-hover:scale-105"
+                onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+              />
+              <span className="font-extrabold text-sm tracking-tight text-zinc-900 dark:text-white">
+                opendev<span className="text-blue-600 dark:text-blue-400">-labs</span>
+              </span>
+            </Link>
+            <span className="hidden md:inline text-zinc-300 dark:text-zinc-700">•</span>
+            <span className="hidden md:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[11px] font-bold border border-emerald-500/20">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              100% Uptime
+            </span>
+            <span className="hidden lg:inline text-zinc-400 dark:text-zinc-500 text-[11px]">
+              © 2026 OpenDev-Labs LLC
+            </span>
+          </div>
+
+          {/* Right: Quick Links & Directory Drawer Toggle */}
+          <div className="flex items-center gap-3 sm:gap-6 text-zinc-600 dark:text-zinc-400 text-[11px] font-semibold">
+            <Link to="/solutions" className="hover:text-blue-600 dark:hover:text-white transition-colors hidden sm:inline">
+              Solutions
+            </Link>
+            <Link to="/pricing" className="hover:text-blue-600 dark:hover:text-white transition-colors hidden sm:inline">
+              Pricing
+            </Link>
+            <Link to="/ai" className="hover:text-blue-600 dark:hover:text-white transition-colors hidden md:inline">
+              AI Studio
+            </Link>
+            <a
+              href="mailto:opendev.office@gmail.com"
+              className="hover:text-blue-600 dark:hover:text-white transition-colors flex items-center gap-1"
+            >
+              <Mail className="size-3.5 text-blue-500" />
+              <span className="hidden sm:inline">opendev.office@gmail.com</span>
+              <span className="sm:hidden">Contact</span>
+            </a>
+
+            {/* Toggle Full Footer Directory */}
+            <button
+              type="button"
+              onClick={() => setFullFooterOpen(!fullFooterOpen)}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white text-[11px] font-bold border border-zinc-200 dark:border-zinc-700 transition-colors cursor-pointer"
+            >
+              <span>{fullFooterOpen ? "Hide Directory" : "Directory"}</span>
+              {fullFooterOpen ? (
+                <ChevronDown className="size-3" />
+              ) : (
+                <ChevronUp className="size-3" />
+              )}
+            </button>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

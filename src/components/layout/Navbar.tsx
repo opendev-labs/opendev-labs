@@ -29,6 +29,7 @@ export const Navbar: React.FC = () => {
   const { openSupport } = useAISupport();
 
   const navItems = [
+    { label: 'AI', path: '/ai' },
     { label: 'Templates', path: '/templates' },
     { label: 'Solutions', path: '/solutions' },
     { label: 'Pricing', path: '/pricing' },
@@ -104,6 +105,17 @@ export const Navbar: React.FC = () => {
           <div className="hidden sm:flex items-center gap-2">
             {isAuthenticated && user ? (
               <div className="flex items-center gap-2">
+                {user.role === 'developer' && (
+                  <Button
+                    size="sm"
+                    onClick={() => navigate('/admin')}
+                    className="text-xs font-extrabold h-9 px-3.5 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white hover:opacity-95 rounded-full shadow-md transition-transform hover:scale-105 flex items-center gap-1.5"
+                    title="OpenDev-Labs Admin Command Center"
+                  >
+                    <ShieldCheck className="size-3.5" />
+                    <span>Admin Panel</span>
+                  </Button>
+                )}
                 <Button
                   size="sm"
                   onClick={() => navigate(user.role === 'developer' ? '/dashboard' : '/client/portal')}
@@ -216,6 +228,18 @@ export const Navbar: React.FC = () => {
           <div className="pt-4 space-y-3">
             {isAuthenticated && user ? (
               <>
+                {user.role === 'developer' && (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate('/admin');
+                    }}
+                    className="w-full h-12 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white font-extrabold text-sm uppercase tracking-widest rounded-xl shadow-md flex items-center justify-center gap-2 transition-transform active:scale-95"
+                  >
+                    <ShieldCheck className="size-4" />
+                    <span>Admin Command Center</span>
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

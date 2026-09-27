@@ -1,5 +1,23 @@
 [
   {
+    "id": "openstudio-agent",
+    "name": "OpenStudio AI Agent Studio",
+    "tagline": "Autonomous Full-Stack AI App Builder & Agent Workspace",
+    "category": "AI & Machine Learning",
+    "oneTimePrice": "₹30,000",
+    "monthlyRetainer": "₹4,000/mo",
+    "previewUrl": "https://openstudio.opendev-labs.com",
+    "isFeatured": true,
+    "badge": "AI Developer Agent",
+    "description": "Fork your own personal full-stack AI builder agent. Includes automated code generation, live sandbox preview, and Gemini multi-model orchestration.",
+    "features": [
+      "Gemini & Claude Multi-Agent LLM Orchestration",
+      "Instant Live Code Sandbox & Hot Reload",
+      "Firebase Database & Secure Auth Architecture"
+    ],
+    "repository": "https://github.com/opendev-labs/openstudio"
+  },
+  {
     "id": "vercel-commerce",
     "name": "Vercel Next.js Commerce",
     "tagline": "Billion-Dollar Headless Retail Storefront Standard",

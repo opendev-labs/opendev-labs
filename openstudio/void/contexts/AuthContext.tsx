@@ -402,14 +402,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [token, fetchRepositories]);
 
   const logout = useCallback(async () => {
-    await lama.auth.logout();
-    setUser(null);
-    setToken(null);
-    setProfile(null);
-    setAvatarUrl(null);
-    setBannerUrl(null);
-    localStorage.removeItem('opendev_gh_token');
-    // safeNavigate('/login');
+    try {
+      const { clearSessionCookie, getAuthRedirectUrl } = await import('../../lib/authSession');
+      clearSessionCookie();
+      await lama.auth.logout();
+      setUser(null);
+      setToken(null);
+      setProfile(null);
+      setAvatarUrl(null);
+      setBannerUrl(null);
+      localStorage.removeItem('opendev_gh_token');
+      window.location.replace(getAuthRedirectUrl());
+    } catch {
+      window.location.href = 'https://www.opendev-labs.com/auth';
+    }
   }, []);
 
   // Legacy manual login (e.g. for email/demo)

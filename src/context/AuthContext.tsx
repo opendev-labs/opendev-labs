@@ -12,6 +12,7 @@ import {
   getDocs
 } from 'firebase/firestore';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { setSessionCookie, clearSessionCookie, getSessionUser } from '../lib/authSession';
 
 export interface AuthUser {
   id: string;
@@ -46,6 +47,24 @@ const DEV_USER: AuthUser = {
   role: 'developer',
   authMethod: 'password',
 };
+
+export const ADMIN_DEVELOPER_EMAILS = [
+  'opendev-labs.office@gmail.com',
+  'opendev.office@gmail.com',
+  'iamyash.creator@gmail.com',
+  'yashramteke55555@gmail.com',
+  'opendev.help@gmail.com',
+  'opendev.support@gmail.com',
+];
+
+export function isDeveloperEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.toLowerCase().trim();
+  return (
+    ADMIN_DEVELOPER_EMAILS.includes(clean) ||
+    clean.endsWith('@opendev-labs.com')
+  );
+}
 
 const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
   {
@@ -399,8 +418,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const emailToUse = freshUser.email || (savedUser?.id === freshUser.uid ? savedUser.email : '') || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : '');
         const cleanEmail = (emailToUse || '').toLowerCase().trim();
-        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
-        const existingRegistered = cleanEmail ? registeredUsers.find(u => u.email.toLowerCase() === cleanEmail) : undefined;
+        const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer' || savedUser?.role === 'developer';
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
         let avatarUrl = freshUser.photoURL || undefined;
@@ -458,12 +476,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribeAuth();
   }, [registeredUsers]);
 
-  // Sync current user to localStorage for instant local hydration
+  // Sync current user to localStorage and cross-subdomain cookie for sovereign sync
   useEffect(() => {
     if (user) {
-      localStorage.setItem('opendev_auth_user', JSON.stringify(user));
+      setSessionCookie(user);
     } else {
-      localStorage.removeItem('opendev_auth_user');
+      clearSessionCookie();
     }
   }, [user]);
 
@@ -493,8 +511,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     authMethod = 'google'
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
-    const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com';
     const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
+    const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
     const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;
@@ -597,6 +615,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = async () => {
+    clearSessionCookie();
     if (auth) {
       try {
         await signOut(auth);

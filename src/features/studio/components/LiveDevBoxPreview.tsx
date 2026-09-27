@@ -39,12 +39,30 @@ function SandpackTarsWatcher({ onFixError }: { onFixError?: (prompt: string) => 
   useEffect(() => {
     const unsubscribe = listen((msg: any) => {
       if (msg.type === 'action' && msg.action === 'show-error') {
-        setErrorMsg(msg.message || 'Error occurred in preview runtime');
+        const text = msg.message || '';
+        const isIgnored = 
+          text.includes('favicon') || 
+          text.includes('DevTools') || 
+          text.includes('tailwindcss') ||
+          text.includes('ResizeObserver');
+        if (text && !isIgnored) {
+          setErrorMsg(text);
+        }
       } else if (msg.type === 'console' && msg.log && Array.isArray(msg.log)) {
         const errorLog = msg.log.find((l: any) => l.method === 'error');
         if (errorLog && errorLog.data) {
           const text = errorLog.data.map((d: any) => (typeof d === 'string' ? d : JSON.stringify(d))).join(' ');
-          if (text && !text.includes('Download the React DevTools')) {
+          const isIgnored = 
+            text.includes('Download the React DevTools') ||
+            text.includes('cdn.tailwindcss.com') ||
+            text.includes('favicon.ico') ||
+            text.includes('ResizeObserver') ||
+            text.includes('Warning:') ||
+            text.includes('hydration') ||
+            text.includes('source map');
+
+          // Only alert for actual fatal errors (SyntaxError, ReferenceError, TypeError, Cannot find module, Failed to resolve)
+          if (text && !isIgnored && (text.includes('SyntaxError') || text.includes('ReferenceError') || text.includes('TypeError') || text.includes('Cannot find module') || text.includes('Failed to resolve'))) {
             setErrorMsg(text);
           }
         }
@@ -110,29 +128,102 @@ function extractPackageName(rawImport: string): string | null {
   return parts[0];
 }
 
+// Preloaded dependencies available out of the box in the preview sandbox
+export const PRELOADED_SANDPACK_DEPENDENCIES: Record<string, string> = {
+  // Core UI & Icons & Styling
+  'lucide-react': '^1.16.0',
+  'clsx': '^2.1.1',
+  'tailwind-merge': '^2.3.0',
+  'class-variance-authority': '^0.7.0',
+  '@iconify/react': '^5.0.0',
+
+  // Animation, Physics & Confetti
+  'framer-motion': '^11.2.10',
+  'canvas-confetti': '^1.9.3',
+  '@types/canvas-confetti': '^1.9.0',
+  'gsap': '^3.12.5',
+
+  // Charts & Data Visualization
+  'recharts': '^2.12.7',
+  'chart.js': '^4.4.3',
+  'react-chartjs-2': '^5.2.0',
+
+  // Radix UI Component Primitives (Full modern UI kit / shadcn compatible)
+  '@radix-ui/react-slot': '^1.0.2',
+  '@radix-ui/react-dialog': '^1.0.5',
+  '@radix-ui/react-dropdown-menu': '^2.0.6',
+  '@radix-ui/react-tabs': '^1.0.4',
+  '@radix-ui/react-tooltip': '^1.0.7',
+  '@radix-ui/react-accordion': '^1.1.2',
+  '@radix-ui/react-popover': '^1.0.7',
+  '@radix-ui/react-avatar': '^1.0.4',
+  '@radix-ui/react-select': '^2.0.0',
+  '@radix-ui/react-switch': '^1.0.3',
+  '@radix-ui/react-slider': '^1.1.2',
+  '@radix-ui/react-progress': '^1.0.3',
+  '@radix-ui/react-checkbox': '^1.0.4',
+  '@radix-ui/react-scroll-area': '^1.0.5',
+  '@radix-ui/react-separator': '^1.0.3',
+  '@radix-ui/react-alert-dialog': '^1.0.5',
+
+  // Notifications & Utilities
+  'sonner': '^1.5.0',
+  'date-fns': '^3.6.0',
+  'lodash': '^4.17.21',
+  '@types/lodash': '^4.14.202',
+  'zustand': '^4.5.2',
+  'react-dropzone': '^14.2.3',
+  'react-intersection-observer': '^9.10.3',
+  'cmdk': '^1.0.0',
+  'axios': '^1.7.2',
+  'qrcode.react': '^3.1.0',
+
+  // 3D & Creative Canvas
+  'three': '^0.165.0',
+  '@types/three': '^0.165.0',
+  '@react-three/fiber': '^8.16.8',
+  '@react-three/drei': '^9.106.0',
+};
+
 function detectDependencies(files: FileNode[]): Record<string, string> {
   const deps: Record<string, string> = {
-    'lucide-react': 'latest',
-    'framer-motion': 'latest',
-    'clsx': 'latest',
-    'tailwind-merge': 'latest',
-    '@iconify/react': 'latest',
+    ...PRELOADED_SANDPACK_DEPENDENCIES,
   };
 
-  const importRegex = /(?:import\s+(?:[\w\s{},*]+\s+from\s+)?['"]([^'"./][^'"]+)['"]|require\s*\(\s*['"]([^'"./][^'"]+)['"]\s*\))/g;
+  // Inspect package.json if present in files
+  for (const file of files) {
+    if (file.path.endsWith('package.json') && file.content) {
+      try {
+        const pkgJson = JSON.parse(file.content);
+        if (pkgJson.dependencies && typeof pkgJson.dependencies === 'object') {
+          for (const [k, v] of Object.entries(pkgJson.dependencies)) {
+            if (!BUILT_IN_MODULES.has(k) && !EXCLUDED_PACKAGES.has(k)) {
+              deps[k] = (v as string) || 'latest';
+            }
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  const importRegex = /(?:import\s+(?:[\w\s{},*]+\s+from\s+)?['"]([^'"./][^'"]+)['"]|require\s*\(\s*['"]([^'"./][^'"]+)['"]\s*\)|from\s+['"]([^'"./][^'"]+)['"])/g;
 
   for (const file of files) {
     if (!file.content) continue;
-    if (!/\.(tsx?|jsx?|vue|svelte|mjs|cjs)$/.test(file.path)) continue;
+    if (!/\.(tsx?|jsx?|vue|svelte|mjs|cjs|html)$/.test(file.path)) continue;
 
     let match: RegExpExecArray | null;
     while ((match = importRegex.exec(file.content)) !== null) {
-      const rawPkg = match[1] || match[2];
+      const rawPkg = match[1] || match[2] || match[3];
       const pkg = extractPackageName(rawPkg);
       if (!pkg) continue;
 
       if (!BUILT_IN_MODULES.has(pkg) && !EXCLUDED_PACKAGES.has(pkg)) {
-        deps[pkg] = 'latest';
+        if (!deps[pkg]) {
+          deps[pkg] = 'latest';
+        }
       }
     }
   }
@@ -140,13 +231,26 @@ function detectDependencies(files: FileNode[]): Record<string, string> {
   return deps;
 }
 
-function convertFiles(files: FileNode[]): Record<string, string> {
+function convertFiles(files: FileNode[], deps?: Record<string, string>): Record<string, string> {
   const sandpackFiles: Record<string, string> = {};
 
   for (const file of files) {
     const path = file.path.startsWith('/') ? file.path : `/${file.path}`;
     if (path.endsWith('.keep')) continue;
     sandpackFiles[path] = file.content || '';
+  }
+
+  // Pre-seed standard cn utility so any component using "@/lib/utils" or "./lib/utils" works out of the box
+  if (!sandpackFiles['/src/lib/utils.ts'] && !sandpackFiles['/lib/utils.ts']) {
+    const utilsCode = `import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+`;
+    sandpackFiles['/src/lib/utils.ts'] = utilsCode;
+    sandpackFiles['/lib/utils.ts'] = utilsCode;
   }
 
   // Ensure dark mode index.css exists if not present
@@ -271,6 +375,10 @@ const LinkedinIcon = Linkedin;`,
         }
       }
 
+      // Normalize any @/ alias to /src/
+      code = code.replace(/from\s+['"]@\//g, "from '/src/");
+      code = code.replace(/import\s+['"]@\//g, "import '/src/");
+
       sandpackFiles[path] = code;
     }
   }
@@ -373,6 +481,44 @@ if (container) {
 
   sandpackFiles['/src/index.tsx'] = entryCode;
   sandpackFiles['/src/main.tsx'] = entryCode;
+  sandpackFiles['/index.tsx'] = entryCode;
+
+  // Cross-map App.tsx & index.css so any import path finds them seamlessly
+  if (sandpackFiles['/src/App.tsx'] && !sandpackFiles['/App.tsx']) {
+    sandpackFiles['/App.tsx'] = sandpackFiles['/src/App.tsx'];
+  } else if (sandpackFiles['/App.tsx'] && !sandpackFiles['/src/App.tsx']) {
+    sandpackFiles['/src/App.tsx'] = sandpackFiles['/App.tsx'];
+  }
+
+  if (sandpackFiles['/src/index.css'] && !sandpackFiles['/index.css']) {
+    sandpackFiles['/index.css'] = sandpackFiles['/src/index.css'];
+  } else if (sandpackFiles['/index.css'] && !sandpackFiles['/src/index.css']) {
+    sandpackFiles['/src/index.css'] = sandpackFiles['/index.css'];
+  }
+
+  // Sync package.json dependencies with preloaded and dynamically detected deps
+  if (deps && Object.keys(deps).length > 0) {
+    let pkgJson: any = {
+      name: 'openstudio-app',
+      main: '/src/main.tsx',
+      dependencies: { ...deps }
+    };
+    if (sandpackFiles['/package.json']) {
+      try {
+        const existing = JSON.parse(sandpackFiles['/package.json']);
+        pkgJson = {
+          ...existing,
+          dependencies: {
+            ...deps,
+            ...(existing.dependencies || {})
+          }
+        };
+      } catch {
+        // fallback
+      }
+    }
+    sandpackFiles['/package.json'] = JSON.stringify(pkgJson, null, 2);
+  }
 
   return sandpackFiles;
 }
@@ -414,7 +560,7 @@ export function LiveDevBoxPreview({ files, onFixError }: LiveDevBoxPreviewProps)
   };
 
   const deps = useMemo(() => detectDependencies(files), [files]);
-  const sandpackFiles = useMemo(() => convertFiles(files), [files]);
+  const sandpackFiles = useMemo(() => convertFiles(files, deps), [files, deps]);
   const isVanilla = useMemo(() => {
     const hasValidApp = Object.keys(sandpackFiles).some(p => {
       if (!/^\/?(src\/)?App\.(tsx|jsx)$/.test(p)) return false;
