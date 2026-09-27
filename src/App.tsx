@@ -47,107 +47,159 @@ const ClientsManagerWrapper: React.FC = () => {
 };
 
 export function App() {
+  // Check if current hostname is the OpenStudio subdomain
+  const isSubdomainOpenStudio = typeof window !== 'undefined' && (
+    window.location.hostname.startsWith('openstudio.') ||
+    window.location.hostname.includes('openstudio') ||
+    window.location.port === '5174'
+  );
+
   return (
     <ThemeProvider>
       <AuthProvider>
         <ClientProvider>
           <BrowserRouter>
             <AISupportProvider>
-              <Routes>
-                {/* Public Pages */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/ai" element={<AIPage />} />
-                <Route path="/open-studio" element={<OpenStudioPage />} />
-                <Route path="/openstudio" element={<OpenStudioLandingPage />} />
-                <Route path="/openstudio/pricing" element={<OpenStudioPricingPage />} />
-                <Route path="/open-studio/pricing" element={<Navigate to="/openstudio/pricing" replace />} />
-                <Route path="/studio" element={<OpenStudioPage />} />
-                <Route path="/templates" element={<TemplatesPage />} />
-                <Route path="/solutions" element={<SolutionsPage />} />
-                <Route path="/pricing" element={<PricingStandalonePage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/notifications" element={<Navigate to="/client/notifications" replace />} />
+              {isSubdomainOpenStudio ? (
+                /* ── 🚀 OPENSTUDIO SUBDOMAIN ROUTING (openstudio.opendev-labs.com) ── */
+                <Routes>
+                  {/* Root directly loads OpenStudio AI workspace */}
+                  <Route path="/" element={<OpenStudioPage />} />
+                  <Route path="/studio" element={<OpenStudioPage />} />
+                  <Route path="/open-studio" element={<OpenStudioPage />} />
+                  <Route path="/openstudio" element={<OpenStudioPage />} />
+                  
+                  {/* Dedicated OpenStudio pricing and templates */}
+                  <Route path="/pricing" element={<OpenStudioPricingPage />} />
+                  <Route path="/openstudio/pricing" element={<OpenStudioPricingPage />} />
+                  <Route path="/open-studio/pricing" element={<OpenStudioPricingPage />} />
+                  <Route path="/templates" element={<TemplatesPage />} />
+                  <Route path="/solutions" element={<SolutionsPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
 
-                {/* 🛡️ CENTRAL ADMIN CONTROL CENTER & CRM — Full OpenDev-Labs & Subdomain Control */}
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminControlCenter />
-                    </ProtectedAdminRoute>
-                  }
-                />
-                <Route
-                  path="/admin/*"
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminControlCenter />
-                    </ProtectedAdminRoute>
-                  }
-                />
-                <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
-                <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
+                  {/* Quick access to Central Admin from subdomain */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
+                  <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
 
-                {/* 🔐 SECRET ADMIN GATE */}
-                <Route path="/xk9-admin-gate" element={<AdminGatePage />} />
-                <Route
-                  path="/xk9-admin-control"
-                  element={
-                    <ProtectedAdminRoute>
-                      <AdminControlCenter />
-                    </ProtectedAdminRoute>
-                  }
-                />
-                <Route path="/xk9-admin-control/*" element={
-                    <ProtectedAdminRoute>
-                      <AdminControlCenter />
-                    </ProtectedAdminRoute>
-                  }
-                />
+                  {/* Fallback back to OpenStudio workspace */}
+                  <Route path="*" element={<OpenStudioPage />} />
+                </Routes>
+              ) : (
+                /* ── 🌐 MAIN DOMAIN ROUTING (opendev-labs.com) ── */
+                <Routes>
+                  {/* Public Pages */}
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/ai" element={<AIPage />} />
+                  <Route path="/open-studio" element={<OpenStudioPage />} />
+                  <Route path="/openstudio" element={<OpenStudioLandingPage />} />
+                  <Route path="/openstudio/pricing" element={<OpenStudioPricingPage />} />
+                  <Route path="/open-studio/pricing" element={<Navigate to="/openstudio/pricing" replace />} />
+                  <Route path="/studio" element={<OpenStudioPage />} />
+                  <Route path="/templates" element={<TemplatesPage />} />
+                  <Route path="/solutions" element={<SolutionsPage />} />
+                  <Route path="/pricing" element={<PricingStandalonePage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/notifications" element={<Navigate to="/client/notifications" replace />} />
 
-                {/* Developer Admin Dashboard */}
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute allowedRoles={['developer']}>
-                      <DashboardLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<DevDashboardWrapper />} />
-                  <Route path="clients" element={<ClientsManagerWrapper />} />
-                  <Route path="requests" element={<ClientRequestsPage />} />
-                  <Route path="reminders" element={<PaymentReminders />} />
-                  <Route path="invoices" element={<InvoicesPage />} />
-                  <Route path="notifications" element={<NotificationHistoryPage />} />
-                  <Route path="settings" element={<ProfileSettings />} />
-                </Route>
+                  {/* 🛡️ CENTRAL ADMIN CONTROL CENTER & CRM — Full OpenDev-Labs & Subdomain Control */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
+                  <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
+                  <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
 
-                {/* Client Portal View */}
-                <Route
-                  path="/client"
-                  element={
-                    <ProtectedRoute allowedRoles={['client', 'developer', 'user']}>
-                      <DashboardLayout />
-                    </ProtectedRoute>
-                  }
-                >
-                  <Route index element={<Navigate to="/client/portal" replace />} />
-                  <Route path="portal" element={<ClientPortal />} />
-                  <Route path="payments" element={<ClientPaymentsPage />} />
-                  <Route path="invoices" element={<InvoicesPage />} />
-                  <Route path="support" element={<ClientSupportPage />} />
-                  <Route path="milestones" element={<ClientMilestonesPage />} />
-                  <Route path="credentials" element={<ClientCredentialsPage />} />
-                  <Route path="profile" element={<UserProfilePage />} />
-                  <Route path="convert" element={<ClientConversionPage />} />
-                  <Route path="security" element={<UserSecurityPage />} />
-                  <Route path="notifications" element={<NotificationHistoryPage />} />
-                </Route>
+                  {/* 🔐 SECRET ADMIN GATE */}
+                  <Route path="/xk9-admin-gate" element={<AdminGatePage />} />
+                  <Route
+                    path="/xk9-admin-control"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
+                  <Route
+                    path="/xk9-admin-control/*"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
+                  {/* Developer Admin Dashboard */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute allowedRoles={['developer']}>
+                        <DashboardLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<DevDashboardWrapper />} />
+                    <Route path="clients" element={<ClientsManagerWrapper />} />
+                    <Route path="requests" element={<ClientRequestsPage />} />
+                    <Route path="reminders" element={<PaymentReminders />} />
+                    <Route path="invoices" element={<InvoicesPage />} />
+                    <Route path="notifications" element={<NotificationHistoryPage />} />
+                    <Route path="settings" element={<ProfileSettings />} />
+                  </Route>
+
+                  {/* Client Portal View */}
+                  <Route
+                    path="/client"
+                    element={
+                      <ProtectedRoute allowedRoles={['client', 'developer', 'user']}>
+                        <DashboardLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/client/portal" replace />} />
+                    <Route path="portal" element={<ClientPortal />} />
+                    <Route path="payments" element={<ClientPaymentsPage />} />
+                    <Route path="invoices" element={<InvoicesPage />} />
+                    <Route path="support" element={<ClientSupportPage />} />
+                    <Route path="milestones" element={<ClientMilestonesPage />} />
+                    <Route path="credentials" element={<ClientCredentialsPage />} />
+                    <Route path="profile" element={<UserProfilePage />} />
+                    <Route path="convert" element={<ClientConversionPage />} />
+                    <Route path="security" element={<UserSecurityPage />} />
+                    <Route path="notifications" element={<NotificationHistoryPage />} />
+                  </Route>
+
+                  {/* Fallback */}
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              )}
             </AISupportProvider>
           </BrowserRouter>
         </ClientProvider>
