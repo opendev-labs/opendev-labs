@@ -287,17 +287,7 @@ export function Sidebar({
           <span>Templates & Showcase</span>
         </button>
 
-        {user?.role === 'developer' && (
-          <a
-            href={getAdminPanelUrl()}
-            className="w-full flex items-center gap-2.5 rounded-xl border border-red-500/30 bg-red-950/20 px-3 py-2 text-xs font-semibold text-red-400 hover:text-white hover:bg-red-900/40 hover:border-red-500/50 shadow-sm transition-all cursor-pointer"
-            title="OpenDev-Labs Central Admin Command Center"
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-red-400" />
-            <span>Admin Control Center</span>
-            <ExternalLink className="w-3 h-3 ml-auto opacity-70" />
-          </a>
-        )}
+
       </div>
 
       {/* CHAT LIST & FAVORITES */}
@@ -430,16 +420,7 @@ export function Sidebar({
                 <span>Settings</span>
               </button>
 
-              {user?.role === 'developer' && (
-                <a
-                  href={getAdminPanelUrl()}
-                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-red-400 hover:bg-red-950/40 hover:text-red-300 transition-colors text-left cursor-pointer"
-                >
-                  <ShieldCheck className="size-4 text-red-400" />
-                  <span>Admin Control Center</span>
-                  <ExternalLink className="size-3 ml-auto opacity-60" />
-                </a>
-              )}
+
 
               <button
                 onClick={() => {
