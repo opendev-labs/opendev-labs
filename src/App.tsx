@@ -29,11 +29,7 @@ import { ClientConversionPage } from './pages/ClientConversionPage';
 import { UserSecurityPage } from './pages/UserSecurityPage';
 import { ClientRequestsPage } from './pages/ClientRequestsPage';
 import { NotificationHistoryPage } from './pages/NotificationHistoryPage';
-import { AdminGatePage } from './pages/AdminGatePage';
-import { AdminControlCenter } from './pages/AdminControlCenter';
-
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
 
 // Wrapper helper to pass outlet context props to page components
 const DevDashboardWrapper: React.FC = () => {
@@ -77,26 +73,6 @@ export function App() {
                   <Route path="/solutions" element={<SolutionsPage />} />
                   <Route path="/auth" element={<AuthPage />} />
 
-                  {/* Quick access to Central Admin from subdomain */}
-                  <Route
-                    path="/admin"
-                    element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
-                    }
-                  />
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
-                    }
-                  />
-                  <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
-                  <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
-
                   {/* Fallback back to OpenStudio workspace */}
                   <Route path="*" element={<OpenStudioPage />} />
                 </Routes>
@@ -117,46 +93,27 @@ export function App() {
                   <Route path="/auth" element={<AuthPage />} />
                   <Route path="/notifications" element={<Navigate to="/client/notifications" replace />} />
 
-                  {/* 🛡️ CENTRAL ADMIN CONTROL CENTER & CRM — Full OpenDev-Labs & Subdomain Control */}
+                  {/* 🛡️ DEVELOPER ADMIN PANEL & CRM at /admin */}
                   <Route
                     path="/admin"
                     element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
+                      <ProtectedRoute allowedRoles={['developer']}>
+                        <DashboardLayout />
+                      </ProtectedRoute>
                     }
-                  />
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
-                    }
-                  />
+                  >
+                    <Route index element={<DevDashboardWrapper />} />
+                    <Route path="clients" element={<ClientsManagerWrapper />} />
+                    <Route path="requests" element={<ClientRequestsPage />} />
+                    <Route path="reminders" element={<PaymentReminders />} />
+                    <Route path="invoices" element={<InvoicesPage />} />
+                    <Route path="notifications" element={<NotificationHistoryPage />} />
+                    <Route path="settings" element={<ProfileSettings />} />
+                  </Route>
                   <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
                   <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
 
-                  {/* 🔐 SECRET ADMIN GATE */}
-                  <Route path="/xk9-admin-gate" element={<AdminGatePage />} />
-                  <Route
-                    path="/xk9-admin-control"
-                    element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
-                    }
-                  />
-                  <Route
-                    path="/xk9-admin-control/*"
-                    element={
-                      <ProtectedAdminRoute>
-                        <AdminControlCenter />
-                      </ProtectedAdminRoute>
-                    }
-                  />
-
-                  {/* Developer Admin Dashboard */}
+                  {/* Developer Admin Dashboard (/dashboard alias) */}
                   <Route
                     path="/dashboard"
                     element={
