@@ -49,7 +49,9 @@ export function isAdminAuthenticated(): boolean {
         'opendev.help@gmail.com',
         'opendev.support@gmail.com',
       ];
-      if (u?.role === 'developer' || devEmails.includes((u?.email || '').toLowerCase())) {
+      const cleanEmail = (u?.email || '').toLowerCase().trim();
+      const isDev = devEmails.includes(cleanEmail) || cleanEmail.endsWith('@opendev-labs.com');
+      if (u?.role === 'developer' && isDev) {
         return true;
       }
     }

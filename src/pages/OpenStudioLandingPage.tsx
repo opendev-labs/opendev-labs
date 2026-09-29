@@ -86,11 +86,12 @@ const OpenStudioLandingPage: React.FC = () => {
       {/* ── 1. Header Navigation ── */}
       <Navbar />
 
-      {/* ── 2. Hero Section ── */}
-      <section className="min-h-[calc(100vh-4rem)] flex flex-col justify-between items-center pt-20 pb-8 sm:pt-24 sm:pb-12 border-b border-zinc-800/80 bg-black hero-spotlight relative overflow-hidden">
-        {/* Hero Background Image - 4K Microsoft Surface Ribbon */}
+      {/* ── 2. Hero Section (True full-screen 100dvh viewport height with full-bleed background image) ── */}
+      {/* ── 2. Hero Section (True full-screen 100dvh viewport height with full-bleed background image & visible animated strip) ── */}
+      <section className="h-screen h-[100dvh] max-h-screen overflow-hidden w-full flex flex-col justify-between items-center pt-20 pb-2 sm:pt-22 sm:pb-3 border-b border-zinc-800/80 bg-black hero-spotlight relative transition-colors">
+        {/* Hero Background Image - 4K Microsoft Surface Ribbon (Full Screen) */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none z-0 opacity-85"
+          className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat pointer-events-none z-0 opacity-85"
           style={{ backgroundImage: "url('/microsoft-surface-3840x2160-26627.png')" }}
         />
         {/* Pitch Black Gradient Vignette for seamless contrast */}
@@ -102,14 +103,14 @@ const OpenStudioLandingPage: React.FC = () => {
 
         <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-20 z-0" particleCount={25} />
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 w-full flex flex-col justify-between items-center flex-1 h-full">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 w-full flex flex-col justify-between items-center flex-1 h-full overflow-hidden">
           {/* Top Pill Beacon */}
-          <div className="my-auto pt-4 sm:pt-6 w-full flex flex-col items-center">
+          <div className="my-auto pt-1 sm:pt-2 w-full flex flex-col items-center">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6"
+              className="flex flex-wrap items-center justify-center gap-2 mb-2 sm:mb-3"
             >
               <span className="hero-pill-badge bg-black/80 border-zinc-700/80 text-zinc-100 backdrop-blur-md shadow-2xl">
                 <span className="size-2 rounded-full bg-cyan-400 animate-pulse" />
@@ -122,7 +123,7 @@ const OpenStudioLandingPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.06] h-[190px] sm:h-[230px] lg:h-[260px] flex items-center justify-center text-center overflow-hidden drop-shadow-lg"
+              className="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.08] h-[105px] sm:h-[135px] lg:h-[155px] flex items-center justify-center text-center overflow-hidden drop-shadow-lg"
             >
               <TypewriterHeading phrases={studioPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
             </motion.h1>
@@ -132,12 +133,12 @@ const OpenStudioLandingPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.15 }}
-              className="text-base sm:text-xl text-zinc-200 max-w-2xl mx-auto leading-relaxed mb-8 drop-shadow-sm font-medium"
+              className="text-xs sm:text-sm lg:text-base text-zinc-200 max-w-2xl mx-auto leading-relaxed mb-4 drop-shadow-sm font-medium"
             >
               Your autonomous AI co-pilot for building web applications — with live side-by-side Sandpack execution, multi-file code editing, and one-click GitHub deployments. Includes 6 free prompts everyday!
             </motion.p>
 
-            {/* Action Buttons (Pricing button removed) */}
+            {/* Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -146,21 +147,21 @@ const OpenStudioLandingPage: React.FC = () => {
             >
               <button
                 onClick={handleLaunchStudio}
-                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full bg-white text-black font-extrabold text-base hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto h-11 sm:h-12 px-8 rounded-full bg-white text-black font-extrabold text-sm sm:text-base hover:bg-zinc-200 transition-all shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
               >
                 Launch OpenStudio <ArrowRight className="size-4" />
               </button>
               {user ? (
                 <button
                   onClick={() => navigate('/dashboard')}
-                  className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full border border-white/20 bg-zinc-900/90 backdrop-blur-md text-white font-extrabold text-base hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
+                  className="w-full sm:w-auto h-11 sm:h-12 px-8 rounded-full border border-white/20 bg-zinc-900/90 backdrop-blur-md text-white font-extrabold text-sm sm:text-base hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
                 >
                   My Dashboard
                 </button>
               ) : (
                 <button
                   onClick={() => navigate('/auth?redirect=/openstudio')}
-                  className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full border border-white/20 bg-zinc-900/90 backdrop-blur-md text-white font-extrabold text-base hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
+                  className="w-full sm:w-auto h-11 sm:h-12 px-8 rounded-full border border-white/20 bg-zinc-900/90 backdrop-blur-md text-white font-extrabold text-sm sm:text-base hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
                 >
                   Sign In
                 </button>
@@ -168,8 +169,8 @@ const OpenStudioLandingPage: React.FC = () => {
             </motion.div>
           </div>
 
-          {/* Bottom Framework Marquee */}
-          <div className="w-full mt-auto pt-6 pb-2 sm:pb-4 flex flex-col items-center">
+          {/* Bottom Framework Marquee visible right on screen with hero */}
+          <div className="w-full mt-auto pt-1 pb-1 sm:pb-2 flex flex-col items-center">
             <FrameworkMarquee />
           </div>
         </div>

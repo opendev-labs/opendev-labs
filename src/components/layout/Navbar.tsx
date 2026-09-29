@@ -108,13 +108,27 @@ export const Navbar: React.FC = () => {
 
                 <Button
                   size="sm"
-                  onClick={() => navigate(user.role === 'developer' ? '/dashboard' : '/client/portal')}
+                  onClick={() =>
+                    navigate(
+                      user.role === 'developer'
+                        ? '/dashboard'
+                        : user.role === 'client'
+                        ? '/client/portal'
+                        : '/client/profile'
+                    )
+                  }
                   className="text-xs font-extrabold h-9 px-4 bg-black dark:bg-white text-white dark:text-black hover:bg-zinc-800 dark:hover:bg-zinc-200 rounded-full shadow-md transition-transform hover:scale-105 flex items-center gap-2"
                 >
                   {user.avatar ? (
                     <img src={user.avatar} alt={user.name} className="size-4 rounded-full object-cover" />
                   ) : null}
-                  <span>My {user.role === 'developer' ? 'Studio' : 'Portal'}</span>
+                  <span>
+                    {user.role === 'developer'
+                      ? 'My Studio'
+                      : user.role === 'client'
+                      ? 'My Portal'
+                      : 'My Profile'}
+                  </span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -222,11 +236,21 @@ export const Navbar: React.FC = () => {
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
-                    navigate(user.role === 'developer' ? '/dashboard' : '/client/portal');
+                    navigate(
+                      user.role === 'developer'
+                        ? '/dashboard'
+                        : user.role === 'client'
+                        ? '/client/portal'
+                        : '/client/profile'
+                    );
                   }}
                   className="w-full h-12 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-extrabold text-sm uppercase tracking-widest rounded-xl shadow-md flex items-center justify-center transition-transform active:scale-95"
                 >
-                  My {user.role === 'developer' ? 'Studio Dashboard' : 'Client Portal'}
+                  {user.role === 'developer'
+                    ? 'My Studio Dashboard'
+                    : user.role === 'client'
+                    ? 'My Client Portal'
+                    : 'My Profile & Dashboard'}
                 </button>
                 <button
                   onClick={() => {

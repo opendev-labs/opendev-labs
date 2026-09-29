@@ -84,30 +84,34 @@ export const Header: React.FC<HeaderProps> = ({ onOpenCommand, onOpenAddClient, 
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-400 font-medium hidden sm:flex">
-          <span>{user?.role === 'developer' ? 'Developer' : 'Client'}</span>
+          <span>{user?.role === 'developer' ? 'Developer' : user?.role === 'client' ? 'Client' : 'User'}</span>
           <ChevronRight className="size-3 text-zinc-400 dark:text-zinc-600" />
-          <span className="text-zinc-900 dark:text-white font-bold">Dashboard</span>
+          <span className="text-zinc-900 dark:text-white font-bold">
+            {user?.role === 'developer' ? 'Admin Center' : user?.role === 'client' ? 'Portal' : 'Profile & Dashboard'}
+          </span>
         </div>
 
-        {/* Live Ticker Badges */}
-        <div className="hidden md:flex items-center gap-2">
-          <div className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
-            <span className="text-zinc-500 dark:text-zinc-400 font-semibold">MRR</span>
-            <span className="text-zinc-900 dark:text-white font-bold">₹{totalMRR.toLocaleString()}</span>
-            <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">▲ +15%</span>
-          </div>
-
-          <div className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
-            <span className="text-zinc-500 dark:text-zinc-400 font-semibold">RETAINERS</span>
-            <span className="text-zinc-900 dark:text-white font-bold">{activeRetainers.length} Active</span>
-          </div>
-
-          {overdueClients.length > 0 && (
-            <div className="px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-[11px] font-mono text-red-700 dark:text-red-300 flex items-center gap-1.5">
-              <span className="font-bold">OVERDUE ({overdueClients.length})</span>
+        {/* Live Ticker Badges (Developer Only) */}
+        {user?.role === 'developer' && (
+          <div className="hidden md:flex items-center gap-2">
+            <div className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+              <span className="text-zinc-500 dark:text-zinc-400 font-semibold">MRR</span>
+              <span className="text-zinc-900 dark:text-white font-bold">₹{totalMRR.toLocaleString()}</span>
+              <span className="text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">▲ +15%</span>
             </div>
-          )}
-        </div>
+
+            <div className="px-2.5 py-1 rounded-md bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+              <span className="text-zinc-500 dark:text-zinc-400 font-semibold">RETAINERS</span>
+              <span className="text-zinc-900 dark:text-white font-bold">{activeRetainers.length} Active</span>
+            </div>
+
+            {overdueClients.length > 0 && (
+              <div className="px-2.5 py-1 rounded-md bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-[11px] font-mono text-red-700 dark:text-red-300 flex items-center gap-1.5">
+                <span className="font-bold">OVERDUE ({overdueClients.length})</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Right Actions */}

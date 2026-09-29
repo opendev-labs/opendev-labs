@@ -75,21 +75,21 @@ export const FrameworkMarquee: React.FC = () => {
   const row2Items = [...row2, ...row2];
 
   return (
-    <div className="w-full pt-6 pb-2 relative z-10 overflow-hidden">
-      <div className="text-center mb-4">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-sans">
+    <div className="w-full pt-1 sm:pt-2 pb-1 relative z-10 overflow-hidden">
+      <div className="text-center mb-1.5 sm:mb-2">
+        <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-widest text-zinc-400 dark:text-zinc-500 font-sans">
           POWERED BY ENTERPRISE FRAMEWORKS & CLOUD INFRASTRUCTURE (55+ OFFICIAL TECH STACKS)
         </span>
       </div>
 
       {/* Marquee Container with edge fade overlay & HERO UI CAPSULE SHAPED GLASS BORDERS */}
-      <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] flex flex-col gap-3">
+      <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)] flex flex-col gap-2">
         {/* Row 1: Moving Left */}
-        <div className="flex w-max animate-marquee space-x-3 py-1">
+        <div className="flex w-max animate-marquee space-x-2.5 py-0.5">
           {row1Items.map((item, index) => (
             <div
               key={`r1-${item.name}-${index}`}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-md text-zinc-800 dark:text-zinc-200 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:scale-105 transition-all cursor-pointer group shrink-0"
+              className="inline-flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-full bg-white/80 dark:bg-zinc-900/80 border border-zinc-200/80 dark:border-zinc-800/80 backdrop-blur-md text-zinc-800 dark:text-zinc-200 shadow-xs hover:border-zinc-400 dark:hover:border-zinc-600 hover:scale-105 transition-all cursor-pointer group shrink-0"
               title={`${item.name} (${item.category})`}
             >
               <img

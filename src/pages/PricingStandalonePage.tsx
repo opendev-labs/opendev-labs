@@ -27,8 +27,10 @@ export const PricingStandalonePage: React.FC = () => {
       {/* Top Navbar with Top-Right Dark Mode Toggle */}
       <Navbar />
 
-      {/* Hero Header - Screen-fit height with typing animated heading */}
-      <section className="relative min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-center items-center pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
+      {/* Hero Header - True full-screen 100dvh height with background image */}
+      <section className="relative min-h-screen min-h-[100dvh] w-full flex flex-col justify-center items-center pt-24 pb-12 sm:pt-28 sm:pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800 hero-spotlight">
+        {/* Full-Screen Folded Paper Background */}
+        <div className="absolute inset-0 w-full h-full bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
         <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-50 z-0" waveCount={4} verticalBaseStart={0.35} />
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center my-auto w-full">

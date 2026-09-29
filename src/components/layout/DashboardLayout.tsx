@@ -31,7 +31,7 @@ export const DashboardLayout: React.FC = () => {
     } else if (user?.role === 'client' && (location.pathname === '/client' || location.pathname === '/client/' || location.pathname.startsWith('/dashboard'))) {
       navigate('/client/portal', { replace: true });
     } else if (user?.role === 'developer' && (location.pathname === '/client' || location.pathname === '/client/')) {
-      navigate('/dashboard', { replace: true });
+      navigate('/client/profile', { replace: true });
     }
   }, [user, isAuthenticated, location.pathname, navigate]);
 

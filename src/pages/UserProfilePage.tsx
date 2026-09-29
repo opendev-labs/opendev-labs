@@ -224,12 +224,10 @@ export const UserProfilePage: React.FC = () => {
     navigate('/auth');
   };
 
-  const isLeadDev = user?.role === 'developer';
-  const userName = user?.name || (user?.email ? user.email.split('@')[0] : 'Community Member');
-  const userEmail = user?.email || 'user@opendev-labs.com';
-  const userPhone = user?.phoneNumber || (isLeadDev ? '+91 81695 68582' : 'Not linked');
-  const userAvatar = user?.avatar || `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(userName)}`;
-  const userInitials = userName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || 'U';
+  const userName = user?.name || (user?.email ? user.email.split('@')[0] : 'Yash Ramteke');
+  const userEmail = user?.email || 'yashramteke55555@gmail.com';
+  const userPhone = '+91 81695 68582';
+  const userAvatar = user?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80';
 
   return (
     <div className="p-2 sm:p-4 lg:p-6 w-full max-w-7xl mx-auto space-y-6 text-zinc-900 dark:text-zinc-100 font-sans">
@@ -371,14 +369,14 @@ export const UserProfilePage: React.FC = () => {
               {/* Item 1: Work / Role */}
               <div className="flex items-start gap-4">
                 <div className="size-11 rounded-full bg-blue-500 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
-                  {userInitials}
+                  YR
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">
-                    {user?.role === 'developer' ? 'Lead Architect' : user?.role === 'client' ? 'Client Partner' : 'Community Member'} at <span className="text-blue-600 dark:text-blue-400 font-bold">OpenDev-Labs</span>
+                    Registered Client Partner at <span className="text-blue-600 dark:text-blue-400 font-bold">OpenDev-Labs</span>
                   </span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
-                    {user?.role === 'developer' ? 'Core Architecture & Engineering' : 'Web Client Gateway & Cloud Solutions'}
+                    Past: Web Client Gateway & Custom Software Solutions
                   </span>
                 </div>
               </div>
@@ -421,10 +419,10 @@ export const UserProfilePage: React.FC = () => {
                 </div>
                 <div className="space-y-0.5">
                   <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">
-                    {isLeadDev ? 'Lives in Mumbai, India' : 'Verified Community Member'}
+                    Lives in <span className="text-zinc-900 dark:text-white font-bold">Mumbai, India</span>
                   </span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
-                    OpenDev Global Network
+                    Originally from Maharashtra, India
                   </span>
                 </div>
               </div>
@@ -440,8 +438,8 @@ export const UserProfilePage: React.FC = () => {
                   <UserCheck className="size-5" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block capitalize">
-                    {user?.authMethod === 'github' ? 'GitHub OAuth 2.0' : user?.authMethod === 'password' ? 'Email Auth' : 'Google OAuth 2.0'} <span className="text-emerald-600 dark:text-emerald-400 font-bold">Encrypted & Verified</span>
+                  <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 block">
+                    Google OAuth 2.0 <span className="text-emerald-600 dark:text-emerald-400 font-bold">Encrypted & Verified</span>
                   </span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
                     Active Session • OpenDev-Labs Sovereign Gateway
@@ -459,7 +457,7 @@ export const UserProfilePage: React.FC = () => {
                     {userPhone}
                   </span>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
-                    {isLeadDev ? 'Official Direct Phone Support' : 'Member Contact Information'}
+                    WhatsApp & Official Direct Phone Support
                   </span>
                 </div>
               </div>
@@ -470,9 +468,14 @@ export const UserProfilePage: React.FC = () => {
                   <Globe className="size-5 text-purple-500" />
                 </div>
                 <div className="space-y-0.5">
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400 block truncate">
+                  <a
+                    href="https://www.opendev-labs.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline block"
+                  >
                     {userEmail}
-                  </span>
+                  </a>
                   <span className="text-xs text-zinc-500 dark:text-zinc-400 block font-medium">
                     https://www.opendev-labs.com
                   </span>

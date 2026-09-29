@@ -362,7 +362,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const cleanEmail = (data.email || '').toLowerCase().trim();
-        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com' || data.role === 'developer';
+        const isDev = isDeveloperEmail(cleanEmail);
 
         return {
           id: d.id,
@@ -370,7 +370,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: data.email || '',
           avatar: data.avatar || data.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
           joinedAt: joinedFormatted,
-          role: (data.role as UserRole) || (isDev ? 'developer' : 'user'),
+          role: isDev ? 'developer' : (data.role === 'client' ? 'client' : 'user'),
           clientId: data.clientId,
           online: isOnline,
           team: data.team || (isDev ? 'OpenDev Studio Executive' : 'Google Auth Member'),
@@ -407,7 +407,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (firebaseUser) {
         const cleanEmail = (firebaseUser.email || '').toLowerCase().trim();
         const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
-        const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
+        const isDev = isDeveloperEmail(cleanEmail);
         const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
         setUser({
@@ -468,7 +468,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
     const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
-    const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
+    const isDev = isDeveloperEmail(cleanEmail);
     const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;

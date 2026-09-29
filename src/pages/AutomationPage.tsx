@@ -116,8 +116,10 @@ log "[SUCCESS] Script completed with exit code 0."`);
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-blue-500 selection:text-white transition-colors duration-200">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-20 overflow-hidden border-b border-zinc-200 dark:border-zinc-800">
+      {/* Hero Section - True full-screen 100dvh height with background image */}
+      <section className="relative min-h-screen min-h-[100dvh] w-full flex flex-col justify-center items-center pt-24 pb-16 overflow-hidden border-b border-zinc-200 dark:border-zinc-800 hero-spotlight">
+        {/* Full-Screen Folded Paper Background */}
+        <div className="absolute inset-0 w-full h-full bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
         <Live2DWavesCanvas className="absolute inset-0 pointer-events-none opacity-80 z-0" waveCount={5} verticalBaseStart={0.35} />
         
         <div className="max-w-6xl mx-auto px-4 sm:px-6 relative z-10 text-center">

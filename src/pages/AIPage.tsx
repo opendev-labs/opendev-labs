@@ -110,10 +110,10 @@ export const AIPage: React.FC = () => {
       {/* ── 1. Header Navigation ── */}
       <Navbar />
 
-      {/* ── 2. Hero Section ── */}
-      <section className="min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-between items-center pt-20 pb-8 sm:pt-24 sm:pb-12 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 hero-spotlight relative overflow-hidden transition-colors">
-        {/* Subtle Folded Paper Background */}
-        <div className="absolute inset-0 bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
+      {/* ── 2. Hero Section (True full-screen 100dvh viewport height with full-bleed background image) ── */}
+      <section className="min-h-screen min-h-[100dvh] w-full flex flex-col justify-between items-center pt-24 pb-8 sm:pt-28 sm:pb-12 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 hero-spotlight relative overflow-hidden transition-colors">
+        {/* Subtle Folded Paper Background (Full Screen) */}
+        <div className="absolute inset-0 w-full h-full bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
 
         {/* Ambient Glows */}
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500/10 dark:bg-blue-400/10 blur-3xl pointer-events-none z-0" />
@@ -156,26 +156,7 @@ export const AIPage: React.FC = () => {
               Explore our lineup of autonomous AI builders, self-healing developer agents, and sovereign enterprise orchestration engines.
             </motion.p>
 
-            {/* Action Buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
-            >
-              <button
-                onClick={() => navigate('/openstudio')}
-                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full bg-black dark:bg-white text-white dark:text-black font-extrabold text-base hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
-              >
-                Launch OpenStudio Builder <ArrowRight className="size-4" />
-              </button>
-              <button
-                onClick={() => navigate('/openstudio/pricing')}
-                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md text-zinc-900 dark:text-white font-extrabold text-base hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
-              >
-                OpenStudio Pricing (₹222/mo)
-              </button>
-            </motion.div>
+
           </div>
         </div>
       </section>

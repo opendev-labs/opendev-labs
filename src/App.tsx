@@ -30,6 +30,8 @@ import { UserSecurityPage } from './pages/UserSecurityPage';
 import { ClientRequestsPage } from './pages/ClientRequestsPage';
 import { NotificationHistoryPage } from './pages/NotificationHistoryPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { ProtectedAdminRoute } from './components/ProtectedAdminRoute';
+import { AdminControlCenter } from './pages/AdminControlCenter';
 
 // Wrapper helper to pass outlet context props to page components
 const DevDashboardWrapper: React.FC = () => {
@@ -91,25 +93,26 @@ export function App() {
                   <Route path="/solutions" element={<SolutionsPage />} />
                   <Route path="/pricing" element={<PricingStandalonePage />} />
                   <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/profile" element={<Navigate to="/client/profile" replace />} />
                   <Route path="/notifications" element={<Navigate to="/client/notifications" replace />} />
 
-                  {/* 🛡️ DEVELOPER ADMIN PANEL & CRM at /admin */}
+                  {/* 🛡️ CENTRAL ADMIN CONTROL CENTER & CRM — Full OpenDev-Labs & Subdomain Control */}
                   <Route
                     path="/admin"
                     element={
-                      <ProtectedRoute allowedRoles={['developer']}>
-                        <DashboardLayout />
-                      </ProtectedRoute>
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
                     }
-                  >
-                    <Route index element={<DevDashboardWrapper />} />
-                    <Route path="clients" element={<ClientsManagerWrapper />} />
-                    <Route path="requests" element={<ClientRequestsPage />} />
-                    <Route path="reminders" element={<PaymentReminders />} />
-                    <Route path="invoices" element={<InvoicesPage />} />
-                    <Route path="notifications" element={<NotificationHistoryPage />} />
-                    <Route path="settings" element={<ProfileSettings />} />
-                  </Route>
+                  />
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <ProtectedAdminRoute>
+                        <AdminControlCenter />
+                      </ProtectedAdminRoute>
+                    }
+                  />
                   <Route path="/admin-panel" element={<Navigate to="/admin" replace />} />
                   <Route path="/admin-control" element={<Navigate to="/admin" replace />} />
 
@@ -131,7 +134,7 @@ export function App() {
                     <Route path="settings" element={<ProfileSettings />} />
                   </Route>
 
-                  {/* Client Portal View */}
+                  {/* Client Portal & User Profile View */}
                   <Route
                     path="/client"
                     element={
@@ -140,14 +143,14 @@ export function App() {
                       </ProtectedRoute>
                     }
                   >
-                    <Route index element={<Navigate to="/client/portal" replace />} />
+                    <Route index element={<Navigate to="/client/profile" replace />} />
+                    <Route path="profile" element={<UserProfilePage />} />
                     <Route path="portal" element={<ClientPortal />} />
                     <Route path="payments" element={<ClientPaymentsPage />} />
                     <Route path="invoices" element={<InvoicesPage />} />
                     <Route path="support" element={<ClientSupportPage />} />
                     <Route path="milestones" element={<ClientMilestonesPage />} />
                     <Route path="credentials" element={<ClientCredentialsPage />} />
-                    <Route path="profile" element={<UserProfilePage />} />
                     <Route path="convert" element={<ClientConversionPage />} />
                     <Route path="security" element={<UserSecurityPage />} />
                     <Route path="notifications" element={<NotificationHistoryPage />} />

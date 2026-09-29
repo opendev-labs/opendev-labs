@@ -73,9 +73,9 @@ const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
     email: 'iamyash.creator@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80',
     joinedAt: '2026-01-31',
-    role: 'developer',
+    role: 'user',
     online: true,
-    team: 'OpenDev Studio Executive',
+    team: 'Community Member',
     authMethod: 'google',
     ipAddress: '103.15.244.12',
     location: 'Mumbai, IN',
@@ -88,9 +88,9 @@ const DEFAULT_REGISTERED_USERS: RegisteredUser[] = [
     email: 'yashramteke55555@gmail.com',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
     joinedAt: '2026-01-30',
-    role: 'developer',
+    role: 'user',
     online: true,
-    team: 'Core Architecture',
+    team: 'Community Member',
     authMethod: 'google',
     ipAddress: '103.15.244.18',
     location: 'Mumbai, IN',
@@ -363,7 +363,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         const cleanEmail = (data.email || '').toLowerCase().trim();
-        const isDev = cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com' || data.role === 'developer';
+        const isDev = (cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com') && data.role === 'developer';
 
         return {
           id: d.id,
@@ -371,10 +371,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: data.email || '',
           avatar: data.avatar || data.photoURL || 'https://lh3.googleusercontent.com/a/default-user',
           joinedAt: joinedFormatted,
-          role: (data.role as UserRole) || (isDev ? 'developer' : 'user'),
+          role: isDev ? 'developer' : (data.role === 'client' ? 'client' : 'user'),
           clientId: data.clientId,
           online: isOnline,
-          team: data.team || (isDev ? 'OpenDev Studio Executive' : 'Google Auth Member'),
+          team: data.team || (isDev ? 'OpenDev Studio Executive' : 'Community Member'),
           authMethod: data.authMethod || 'google',
           ipAddress: data.ipAddress || '103.15.244.18',
           location: data.location || 'Mumbai, IN',
@@ -423,8 +423,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const emailToUse = freshUser.email || (savedUser?.email) || (freshUser.phoneNumber ? `${freshUser.phoneNumber.replace(/[^0-9]/g, '')}@phone.opendev-labs.com` : '');
         const cleanEmail = (emailToUse || '').toLowerCase().trim();
         const existingRegistered = registeredUsers.find(u => (cleanEmail && u.email.toLowerCase() === cleanEmail) || u.id === freshUser.uid);
-        const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer' || savedUser?.role === 'developer';
-        const role: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
+        // STRICT RULE: Regular Google / OAuth users are ALWAYS standard users or clients.
+        // Developer role is ONLY preserved if explicitly logged in via Admin mode with developer credentials
+        const isDevExplicit = savedUser?.role === 'developer' && (cleanEmail === 'opendev-labs.office@gmail.com' || cleanEmail === 'opendev.office@gmail.com');
+        const role: UserRole = isDevExplicit ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
 
         let avatarUrl = freshUser.photoURL || undefined;
         if (!avatarUrl && freshUser.providerData?.length) {
@@ -517,8 +519,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ) => {
     const cleanEmail = googleEmail.toLowerCase().trim();
     const existingRegistered = registeredUsers.find(u => u.email.toLowerCase() === cleanEmail);
-    const isDev = isDeveloperEmail(cleanEmail) || existingRegistered?.role === 'developer';
-    const userRole: UserRole = isDev ? 'developer' : (existingRegistered?.role === 'client' ? 'client' : 'user');
+    // Standard Google users always receive 'user' role (or 'client' if converted)
+    const userRole: UserRole = existingRegistered?.role === 'client' ? 'client' : 'user';
 
     const userId = existingRegistered?.id || `user-g-${Date.now()}`;
     const nameToUse = googleName || (googleEmail.includes('@') ? googleEmail.split('@')[0] : 'User');

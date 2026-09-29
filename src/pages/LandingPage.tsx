@@ -57,10 +57,10 @@ export const LandingPage: React.FC = () => {
       {/* 1. Header Navigation (Shared Navbar with top-right Dark Mode Toggle) */}
       <Navbar />
 
-      {/* 2. Hero Section (Fits 100dvh screen cleanly - Text top-centered, CTA buttons pinned to bottom of viewport) */}
-      <section className="min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex flex-col justify-between items-center pt-16 pb-4 sm:pt-20 sm:pb-6 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 hero-spotlight relative overflow-hidden transition-colors">
-        {/* Hero Background Image (Folded Paper) */}
-        <div className="absolute inset-0 bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
+      {/* 2. Hero Section (True full-screen 100dvh viewport height with full-bleed background image & visible animated strip) */}
+      <section className="h-screen h-[100dvh] max-h-screen overflow-hidden w-full flex flex-col justify-between items-center pt-20 pb-2 sm:pt-22 sm:pb-3 border-b border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 hero-spotlight relative transition-colors">
+        {/* Hero Background Image (Folded Paper - Full Screen) */}
+        <div className="absolute inset-0 w-full h-full bg-[url('/folded-paper-bg.png')] bg-cover bg-center bg-no-repeat opacity-40 dark:opacity-30 pointer-events-none z-0" />
 
         {/* Subtle corner ambient accents matching wave color palette */}
         <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-blue-500/5 dark:bg-blue-400/10 blur-3xl pointer-events-none z-0" />
@@ -68,15 +68,15 @@ export const LandingPage: React.FC = () => {
 
         <Live2DCanvas className="absolute inset-0 pointer-events-none opacity-30 dark:opacity-20 z-0" particleCount={30} />
         
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 w-full flex flex-col justify-between items-center flex-1 h-full">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center relative z-10 w-full flex flex-col justify-between items-center flex-1 h-full overflow-hidden">
           
           {/* Top & Middle Section: Badge + Dynamic Typewriter Heading + Action Buttons */}
-          <div className="my-auto pt-2 sm:pt-4 w-full flex flex-col items-center">
+          <div className="my-auto pt-1 sm:pt-2 w-full flex flex-col items-center">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="flex flex-wrap items-center justify-center gap-2 mb-4 sm:mb-6"
+              className="flex flex-wrap items-center justify-center gap-2 mb-2 sm:mb-3"
             >
               <span className="hero-pill-badge">
                 <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -88,49 +88,37 @@ export const LandingPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="mt-2 sm:mt-4 text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.06] h-[210px] sm:h-[250px] lg:h-[270px] flex items-center justify-center text-center overflow-hidden"
+              className="mt-1 sm:mt-2 text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-zinc-900 dark:text-white max-w-5xl mx-auto leading-[1.08] h-[105px] sm:h-[135px] lg:h-[155px] flex items-center justify-center text-center overflow-hidden"
             >
               <TypewriterHeading phrases={landingPhrases} pauseDuration={3500} typingSpeed={40} deletingSpeed={20} />
             </motion.h1>
 
-            {/* Action Buttons (Immediately below typewriter heading) */}
+            {/* Action Buttons */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mt-4"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto mt-3 sm:mt-4"
             >
               <button
                 onClick={() => navigate('/solutions')}
-                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full bg-black dark:bg-white text-white dark:text-black font-extrabold text-base hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto h-11 sm:h-12 px-8 rounded-full bg-black dark:bg-white text-white dark:text-black font-extrabold text-sm sm:text-base hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-all shadow-xl hover:scale-105 flex items-center justify-center gap-2 cursor-pointer"
               >
                 Explore Solutions <ArrowRight className="size-4" />
               </button>
               <button
                 onClick={() => navigate('/pricing')}
-                className="w-full sm:w-auto h-12 sm:h-13 px-8 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md text-zinc-900 dark:text-white font-extrabold text-base hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
+                className="w-full sm:w-auto h-11 sm:h-12 px-8 rounded-full border border-zinc-300 dark:border-zinc-700 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md text-zinc-900 dark:text-white font-extrabold text-sm sm:text-base hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all shadow-sm cursor-pointer hover:scale-105"
               >
                 Explore Plans & Pricing
               </button>
             </motion.div>
           </div>
 
-          {/* Bottom Section: 2-Row Framework Marquee + Subtitle Paragraph below Marquee */}
-          <div className="w-full mt-auto pt-2 pb-2 sm:pb-4 flex flex-col items-center">
+          {/* Bottom Section: Framework Marquee visible right on screen with hero */}
+          <div className="w-full mt-auto pt-1 pb-1 sm:pb-2 flex flex-col items-center">
             {/* Frameworks & Tech Stack Animated Moving Marquee */}
             <FrameworkMarquee />
-
-            {/* Subtitle paragraph (Moved below 2-row icon animation) */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-3 text-xs sm:text-sm lg:text-base text-zinc-600 dark:text-zinc-300 max-w-3xl mx-auto leading-relaxed font-medium"
-            >
-              Flexible development models tailored to your business: choose a{' '}
-              <span className="text-zinc-900 dark:text-white font-extrabold">One-Time Handover Build</span> or a{' '}
-              <span className="text-zinc-900 dark:text-white font-extrabold">Monthly Retainer starting at ₹3,000–₹4,000/mo</span> for continuous maintenance and daily backups.
-            </motion.p>
           </div>
         </div>
       </section>

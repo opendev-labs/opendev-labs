@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Users,
@@ -56,6 +56,7 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
   onCloseMobile,
 }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, registeredUsers, logout } = useAuth();
   const { clients, projectRequests } = useClients();
   const { theme, toggleTheme } = useTheme();
@@ -319,6 +320,18 @@ export const AppSidebar: React.FC<AppSidebarProps> = ({
                   </span>
                 </div>
               </div>
+
+              {/* Profile & Dashboard Option */}
+              <button
+                onClick={() => {
+                  setPopoverOpen(false);
+                  navigate('/client/profile');
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors text-left cursor-pointer"
+              >
+                <Users className="size-4 text-zinc-500" />
+                <span>My Profile & Dashboard</span>
+              </button>
 
               {/* Settings Option */}
               <button
